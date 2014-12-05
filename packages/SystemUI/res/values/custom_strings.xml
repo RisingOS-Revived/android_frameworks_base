@@ -153,4 +153,7 @@
     <!-- Now bar -->
     <string name="nowbar_no_media">No media playing</string>
     <string name="nowbar_unknown_title">Unknown title</string>
+
+    <!-- Notification counter -->
+    <string name="status_bar_notification_info_overflow" translatable="false">\u221E</string>
 </resources>
