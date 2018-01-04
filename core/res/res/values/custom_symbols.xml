@@ -202,4 +202,7 @@
     <java-symbol type="dimen" name="status_bar_padding_start" />
     <java-symbol type="dimen" name="status_bar_padding_end" />
     <java-symbol type="dimen" name="status_bar_padding_top" />
+
+    <!-- Whether the device supports Smart Pixels -->
+    <java-symbol type="bool" name="config_supportSmartPixels" />
 </resources>
