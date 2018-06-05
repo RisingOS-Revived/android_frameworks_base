@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <resources>
+    <!-- App error dialog -->
+    <java-symbol type="id" name="aerr_copy" />
+    <java-symbol type="string" name="url_copy_success" />
+    <java-symbol type="string" name="url_copy_failed" />
 
 </resources>
