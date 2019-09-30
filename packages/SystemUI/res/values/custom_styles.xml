@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <resources>
-
+    <!-- Tri-state UI -->
+    <style name="qs_theme" parent="Theme.SystemUI.QuickSettings">
+        <item name="android:windowIsFloating">true</item>
+    </style>
 </resources>
