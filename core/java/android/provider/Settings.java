@@ -13827,6 +13827,12 @@ public final class Settings {
         public static final String CLIPBOARD_AUTO_CLEAR_TIMEOUT = "clipboard_auto_clear_timeout";
 
         /**
+         * Inverse navigation bar layout
+         * @hide
+         */
+        public static final String NAVBAR_INVERSE_LAYOUT = "navbar_inverse_layout";
+
+        /**
          * Which navigation bar layout to use
          * 0 = Normal (Default)
          * 1 = Compact
