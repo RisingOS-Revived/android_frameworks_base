@@ -505,31 +505,30 @@
         <item name="containerStyle">@style/AuthNonBioCredentialPinPasswordContainerStyle</item>
     </style>
 
-    <style name="Theme.SystemUI.QuickSettings" parent="@*android:style/Theme.DeviceDefault">
+    <style name="Theme.SystemUI.QuickSettings" parent="@*android:style/Theme.DeviceDefault.SystemUI">
         <item name="isQsTheme">true</item>
         <item name="lightIconTheme">@style/QSIconTheme</item>
         <item name="darkIconTheme">@style/QSIconTheme</item>
-        <item name="android:colorError">@*android:color/error_color_material_dark</item>
+        <item name="android:colorError">@*android:color/error_color_material_light</item>
         <item name="android:windowIsFloating">true</item>
         <item name="android:homeAsUpIndicator">@drawable/ic_arrow_back</item>
 
         <item name="surfaceBright">?androidprv:attr/materialColorSurfaceBright</item>
         <item name="android:colorBackground">?attr/surfaceBright</item>
-        <item name="scHigh">?androidprv:attr/materialColorSurfaceContainerHigh</item>
+        <item name="scHigh">?androidprv:attr/colorSurface</item>
         <item name="primary">?androidprv:attr/materialColorPrimary</item>
         <item name="tertiary">?androidprv:attr/materialColorTertiary</item>
         <item name="onSurface">?androidprv:attr/materialColorOnSurface</item>
         <item name="onSurfaceVariant">?androidprv:attr/materialColorOnSurfaceVariant</item>
         <item name="outline">?androidprv:attr/materialColorOutline</item>
-
-        <item name="shadeActive">?androidprv:attr/customColorShadeActive</item>
-        <item name="onShadeActive">?androidprv:attr/customColorOnShadeActive</item>
-        <item name="onShadeActiveVariant">?androidprv:attr/customColorOnShadeActiveVariant</item>
-        <item name="shadeInactive">?androidprv:attr/customColorShadeInactive</item>
-        <item name="onShadeInactive">?androidprv:attr/customColorOnShadeInactive</item>
-        <item name="onShadeInactiveVariant">?androidprv:attr/customColorOnShadeInactiveVariant</item>
-        <item name="shadeDisabled">?androidprv:attr/customColorShadeDisabled</item>
-        <item name="underSurface">?androidprv:attr/customColorUnderSurface</item>
+        <item name="shadeActive">@color/material_dynamic_primary30</item>
+        <item name="onShadeActive">@color/material_dynamic_primary100</item>
+        <item name="onShadeActiveVariant">@color/material_dynamic_primary80</item>
+        <item name="shadeInactive">@color/material_dynamic_neutral80</item>
+        <item name="onShadeInactive">@color/material_dynamic_neutral20</item>
+        <item name="onShadeInactiveVariant">@color/material_dynamic_neutral_variant30</item>
+        <item name="shadeDisabled">@color/shade_disabled</item>
+        <item name="underSurface">@color/material_dynamic_neutral90</item>
         <item name="android:itemTextAppearance">@style/Control.MenuItem</item>
     </style>
 
@@ -799,7 +798,7 @@
 
     <style name="QSCustomizeToolbar" parent="@*android:style/Widget.DeviceDefault.Toolbar">
         <item name="android:textColor">?attr/onSurface</item>
-        <item name="android:elevation">10dp</item>
+        <item name="android:elevation">0dp</item>
     </style>
 
     <!-- Media controls always have light background -->
