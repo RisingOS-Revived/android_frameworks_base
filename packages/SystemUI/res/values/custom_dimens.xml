@@ -177,4 +177,8 @@
     <dimen name="chip_corner_radius">28dp</dimen>
     <dimen name="status_bar_clock_chip_tb_padding">0dp</dimen>
     <dimen name="status_bar_clock_chip_lr_padding">8dp</dimen>
+
+    <!-- Udfps fingerprint animation -->
+    <dimen name="udfps_animation_size">280dp</dimen>
+    <dimen name="udfps_animation_offset">0dp</dimen>
 </resources>
