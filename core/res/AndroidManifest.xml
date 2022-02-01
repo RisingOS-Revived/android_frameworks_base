@@ -873,6 +873,10 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <protected-broadcast android:name="com.android.server.policy.ASSISTANT_STATE_CHANGED" />
 
+    <!-- App lock -->
+    <protected-broadcast android:name="com.android.server.app.AppLockManagerService.APP_LOCK_TIMEOUT" />
+    <protected-broadcast android:name="android.app.action.UNLOCK_APP" />
+
     <!-- ====================================================================== -->
     <!--                          RUNTIME PERMISSIONS                           -->
     <!-- ====================================================================== -->
@@ -9032,6 +9036,11 @@
     <permission android:name="android.permission.ACCESS_TEXT_CLASSIFIER_BY_TYPE"
         android:protectionLevel="signature|role|privileged"
         android:featureFlag="android.permission.flags.text_classifier_choice_api_enabled"/>
+
+    <!-- Allows an application to manage app lock
+         @hide -->
+    <permission android:name="android.permission.MANAGE_APP_LOCK"
+                android:protectionLevel="signature|privileged" />
 
     <!-- Attribution for Geofencing service. -->
     <attribution android:tag="GeofencingService" android:label="@string/geofencing_service"/>
