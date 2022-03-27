@@ -98,4 +98,16 @@
     <dimen name="nowbar_height">72dp</dimen>
     <dimen name="nowbar_width">260dp</dimen>
     <dimen name="nowbar_margin_bottom">18dp</dimen>
+
+    <!-- QQS Brightness slider -->
+    <dimen name="qqs_top_brightness_margin_top">4dp</dimen>
+    <dimen name="qqs_top_brightness_margin_bottom">8dp</dimen>
+    <dimen name="qqs_bottom_brightness_margin_top">8dp</dimen>
+    <dimen name="qqs_bottom_brightness_margin_bottom">4dp</dimen>
+
+    <!-- QS Brightness slider -->
+    <dimen name="qs_top_brightness_margin_top">4dp</dimen>
+    <dimen name="qs_top_brightness_margin_bottom">8dp</dimen>
+    <dimen name="qs_bottom_brightness_margin_top">8dp</dimen>
+    <dimen name="qs_bottom_brightness_margin_bottom">4dp</dimen>
 </resources>
