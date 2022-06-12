@@ -7506,6 +7506,12 @@ public final class Settings {
         public static final String EDGE_LIGHT_CUSTOM_COLOR = "edge_light_custom_color";
 
         /**
+         * Whether to enable small size landcape notifications or not
+         * @hide
+         */
+        public static final String SMALL_LANDSCAPE_NOTIFICATION = "small_landscape_notification";
+
+        /**
          * Keys we no longer back up under the current schema, but want to continue to
          * process when restoring historical backup datasets.
          *
