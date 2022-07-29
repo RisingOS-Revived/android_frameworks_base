@@ -5,6 +5,10 @@
 -->
 <resources>
 
+    <!-- Lyric -->	
+    <dimen name="lyric_icon_margin_end">4dp</dimen>
+    <dimen name="lyric_padding_end">4dp</dimen>
+
     <!-- Island notification -->
     <dimen name="island_icon_size">48dp</dimen>
     <dimen name="island_side_margin">12dp</dimen>

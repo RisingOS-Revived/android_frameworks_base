@@ -226,6 +226,7 @@ public class Dependency {
         mProviders.put(NavigationBarController.class, mNavigationBarController::get);
         mProviders.put(StatusBarStateController.class, mStatusBarStateController::get);
         mProviders.put(NotificationMediaManager.class, mNotificationMediaManager::get);
+        mProviders.put(NotificationListener.class, mNotificationListener::get);
         mProviders.put(SysUiState.class, mSysUiStateFlagsContainer::get);
         mProviders.put(CommandQueue.class, mCommandQueue::get);
         mProviders.put(UiEventLogger.class, mUiEventLogger::get);
