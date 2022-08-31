@@ -71,6 +71,7 @@ class QuickQSPanelControllerTest : SysuiTestCase() {
     @Mock private lateinit var longPressEffectProvider: Provider<QSLongPressEffect>
     @Mock private lateinit var mediaCarouselInteractor: MediaCarouselInteractor
     @Mock private lateinit var configurationController: ConfigurationController
+    @Mock private lateinit var quickQsBrightnessController: QuickQSBrightnessController
 
     private val usingMediaPlayer: Boolean
         get() = false
@@ -108,6 +109,7 @@ class QuickQSPanelControllerTest : SysuiTestCase() {
                 longPressEffectProvider,
                 mediaCarouselInteractor,
                 configurationController,
+                quickQsBrightnessController
             )
 
         controller.init()
@@ -195,6 +197,10 @@ class QuickQSPanelControllerTest : SysuiTestCase() {
         configCaptor.allValues.forEach { it.onConfigChanged(Configuration.EMPTY) }
 
         verify(mediaHost).expansion = MediaHostState.EXPANDED
+    }
+
+    fun testBrightnessVisibilityRefreshedWhenConfigurationChanged() {
+        verify(quickQsBrightnessController).refreshVisibility(anyBoolean())
     }
 
     class TestQuickQSPanelController(
