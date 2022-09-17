@@ -4,6 +4,9 @@
     <!-- Maximum vertical offset of statusbar for burn-in protection -->
     <dimen name="status_bar_offset_max_y">4dp</dimen>
 
+    <!-- The height of the WiFi toggle layout in Internet panel -->
+    <dimen name="internet_dialog_wifi_toggle_height">56dp</dimen>
+
     <!-- Tri-state UI -->
     <dimen name="tri_state_down_dialog_position">850.0px</dimen>
     <dimen name="tri_state_down_dialog_position_l">650.0px</dimen>
