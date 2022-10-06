@@ -41,6 +41,9 @@ cc_defaults {
         "-Wthread-safety",
         "-O3",
     ],
+    lto: {
+        thin: true,
+    },
 }
 
 cc_library_shared {
