@@ -40,6 +40,9 @@ cc_defaults {
         "-Wunreachable-code",
         "-Wthread-safety",
     ],
+    lto: {
+        thin: true,
+    },
 }
 
 cc_library_shared {
