@@ -371,7 +371,7 @@ final class SettingsState {
         }
 
         mHistoricalOperations =
-                Build.IS_DEBUGGABLE ? new ArrayList<>(HISTORICAL_OPERATION_COUNT) : null;
+                Build.IS_ENG ? new ArrayList<>(HISTORICAL_OPERATION_COUNT) : null;
 
         mNamespaceDefaults = new HashMap<>();
         mAconfigDefaultFlags = new HashMap<>();

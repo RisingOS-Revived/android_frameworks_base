@@ -1513,7 +1513,7 @@ public final class SystemServer implements Dumpable {
 
         if (!Flags.recoverabilityDetection()) {
             // For debugging RescueParty
-            if (Build.IS_DEBUGGABLE
+            if (Build.IS_ENG
                     && SystemProperties.getBoolean("debug.crash_system", false)) {
                 throw new RuntimeException();
             }
@@ -1740,7 +1740,7 @@ public final class SystemServer implements Dumpable {
             mSystemServiceManager.startService(PinnerService.class);
             t.traceEnd();
 
-            if (Build.IS_DEBUGGABLE && ProfcollectForwardingService.enabled()) {
+            if (Build.IS_ENG && ProfcollectForwardingService.enabled()) {
                 t.traceBegin("ProfcollectForwardingService");
                 mSystemServiceManager.startService(ProfcollectForwardingService.class);
                 t.traceEnd();

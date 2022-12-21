@@ -122,7 +122,7 @@ import java.util.Objects;
  */
 public class TrustManagerService extends SystemService {
     private static final String TAG = "TrustManagerService";
-    static final boolean DEBUG = Build.IS_DEBUGGABLE && Log.isLoggable(TAG, Log.VERBOSE);
+    static final boolean DEBUG = Build.IS_ENG && Log.isLoggable(TAG, Log.VERBOSE);
 
     private static final Intent TRUST_AGENT_INTENT =
             new Intent(TrustAgentService.SERVICE_INTERFACE);
