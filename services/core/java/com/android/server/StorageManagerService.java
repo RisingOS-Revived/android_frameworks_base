@@ -2158,7 +2158,7 @@ class StorageManagerService extends IStorageManager.Stub
         } catch(RemoteException e) {
             Slog.e(TAG, "Failed to getPackagesForOps", e);
         }
-        Set<String> legacyStoragePackages = new ArraySet<>();
+        Set<String> legacyStoragePackages = new HashSet<>();
         if (pkgs != null) {
             for (AppOpsManager.PackageOps pkg : pkgs) {
                 for (AppOpsManager.OpEntry op : pkg.getOps()) {
@@ -2168,15 +2168,14 @@ class StorageManagerService extends IStorageManager.Stub
                 }
             }
         }
-        for (String packageName : legacyStoragePackages) {
+        for (ApplicationInfo ai : mPmInternal.getInstalledApplications(MATCH_DIRECT_BOOT_AWARE
+                        | MATCH_DIRECT_BOOT_UNAWARE | MATCH_UNINSTALLED_PACKAGES | MATCH_ANY_USER,
+                        userId, Process.myUid())) {
             try {
-                ApplicationInfo ai = mPmInternal.getApplicationInfo(packageName, 
-                        MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE | MATCH_UNINSTALLED_PACKAGES | MATCH_ANY_USER, 
-                        userId, Process.myUid());
                 boolean hasLegacy = legacyStoragePackages.contains(ai.packageName);
                 updateLegacyStorageApps(ai.packageName, ai.uid, hasLegacy);
             } catch (Exception e) {
-                Slog.e(TAG, "Error retrieving application info for package: " + packageName, e);
+                Slog.e(TAG, "Error retrieving application info for package: " + ai.packageName, e);
             }
         }
 
