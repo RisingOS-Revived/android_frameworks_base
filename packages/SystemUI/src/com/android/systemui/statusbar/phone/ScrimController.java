@@ -1005,6 +1005,9 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
 
     public void setCustomScrimAlpha(int value) {
         mCustomScrimAlpha = (float) value / 100f;
+        for (ScrimState state : ScrimState.values()) {
+            state.setCustomScrimAlpha(mCustomScrimAlpha);
+        }
         applyState();
     }
 
@@ -1298,7 +1301,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
                 (mState == ScrimState.PULSING || mState == ScrimState.AOD)
                 && mKeyguardOccluded;
         if (hideFlagShowWhenLockedActivities) {
-            mBehindAlpha = 1;
+            mBehindAlpha = mCustomScrimAlpha;
         }
         // Prevent notification scrim flicker when transitioning away from keyguard.
         if (mKeyguardStateController.isKeyguardGoingAway()) {
@@ -1413,14 +1416,11 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
         final int initialScrimTint = scrim instanceof ScrimView ? ((ScrimView) scrim).getTint() :
                 Color.TRANSPARENT;
         anim.addUpdateListener(animation -> {
-            final float startAlpha = (Float) scrim.getTag(TAG_START_ALPHA);
             final float animAmount = (float) animation.getAnimatedValue();
             final int finalScrimTint = getCurrentScrimTint(scrim);
             final float finalScrimAlpha = getCurrentScrimAlpha(scrim);
-            float alpha = MathUtils.lerp(startAlpha, finalScrimAlpha, animAmount);
-            alpha = MathUtils.constrain(alpha, 0f, 1f);
             int tint = ColorUtils.blendARGB(initialScrimTint, finalScrimTint, animAmount);
-            updateScrimColor(scrim, alpha, tint);
+            updateScrimColor(scrim, finalScrimAlpha, tint);
             dispatchScrimsVisible();
         });
         anim.setInterpolator(mInterpolator);
@@ -1592,7 +1592,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
     }
 
     private void blankDisplay() {
-        updateScrimColor(mScrimInFront, 1, Color.BLACK);
+        updateScrimColor(mScrimInFront, mCustomScrimAlpha, Color.BLACK);
 
         // Notify callback that the screen is completely black and we're
         // ready to change the display power mode
