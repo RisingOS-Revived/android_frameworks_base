@@ -1104,13 +1104,14 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
                 mBehindAlpha = behindAlpha;
                 if (mState == ScrimState.KEYGUARD && mTransitionToFullShadeProgress > 0.0f) {
                     mNotificationsAlpha = MathUtils
-                            .saturate(mTransitionToLockScreenFullShadeNotificationsProgress);
+                            .saturate(mTransitionToLockScreenFullShadeNotificationsProgress)
+                            * mCustomScrimAlpha;
                 } else if (mState == ScrimState.SHADE_LOCKED) {
                     // going from KEYGUARD to SHADE_LOCKED state
                     if (Flags.notificationShadeBlur()) {
                         mNotificationsAlpha = mState.getNotifAlpha() * getInterpolatedFraction();
                     } else {
-                        mNotificationsAlpha = getInterpolatedFraction();
+                        mNotificationsAlpha = getInterpolatedFraction() * mCustomScrimAlpha;
                     }
                 } else if (mState == ScrimState.GLANCEABLE_HUB
                         && mTransitionToFullShadeProgress == 0.0f) {
@@ -1120,7 +1121,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
                     // closes.
                     mNotificationsAlpha = 0;
                 } else {
-                    mNotificationsAlpha = Math.max(1.0f - getInterpolatedFraction(), mQsExpansion);
+                    mNotificationsAlpha = Math.max(1.0f - getInterpolatedFraction(), mQsExpansion) * mCustomScrimAlpha;
                 }
                 mNotificationsTint = mState.getNotifTint();
                 mBehindTint = behindTint;
@@ -1301,7 +1302,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
                 (mState == ScrimState.PULSING || mState == ScrimState.AOD)
                 && mKeyguardOccluded;
         if (hideFlagShowWhenLockedActivities) {
-            mBehindAlpha = mCustomScrimAlpha;
+            mBehindAlpha = 1;
         }
         // Prevent notification scrim flicker when transitioning away from keyguard.
         if (mKeyguardStateController.isKeyguardGoingAway()) {
@@ -1416,11 +1417,14 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
         final int initialScrimTint = scrim instanceof ScrimView ? ((ScrimView) scrim).getTint() :
                 Color.TRANSPARENT;
         anim.addUpdateListener(animation -> {
+            final float startAlpha = (Float) scrim.getTag(TAG_START_ALPHA);
             final float animAmount = (float) animation.getAnimatedValue();
             final int finalScrimTint = getCurrentScrimTint(scrim);
             final float finalScrimAlpha = getCurrentScrimAlpha(scrim);
+            float alpha = MathUtils.lerp(startAlpha, finalScrimAlpha, animAmount);
+            alpha = MathUtils.constrain(alpha, 0f, 1f);
             int tint = ColorUtils.blendARGB(initialScrimTint, finalScrimTint, animAmount);
-            updateScrimColor(scrim, finalScrimAlpha, tint);
+            updateScrimColor(scrim, alpha, tint);
             dispatchScrimsVisible();
         });
         anim.setInterpolator(mInterpolator);
@@ -1592,7 +1596,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
     }
 
     private void blankDisplay() {
-        updateScrimColor(mScrimInFront, mCustomScrimAlpha, Color.BLACK);
+        updateScrimColor(mScrimInFront, 1, Color.BLACK);
 
         // Notify callback that the screen is completely black and we're
         // ready to change the display power mode
