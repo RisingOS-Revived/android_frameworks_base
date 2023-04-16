@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <resources>
-
+    <!-- Sfps arrow color -->
+    <color name="sfps_chevron_fill">@color/material_dynamic_secondary20</color>
 </resources>
