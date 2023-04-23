@@ -24,6 +24,9 @@ import android.view.Window;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.core.graphics.Insets;
+
+import java.util.ArrayDeque;
+
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragment;
 import androidx.preference.PreferenceScreen;
