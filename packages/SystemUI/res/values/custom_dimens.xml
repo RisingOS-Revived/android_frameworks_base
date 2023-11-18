@@ -156,4 +156,8 @@
     <dimen name="qs_controls_page_indicator_margin">2dp</dimen>
     <dimen name="qs_controls_translucent_alpha">0.275</dimen>
     <dimen name="qs_slider_swipe_threshold_dp">40dp</dimen>
+
+    <!-- Island notification -->
+    <dimen name="island_icon_size">48dp</dimen>
+    <dimen name="island_side_margin">12dp</dimen>
 </resources>

@@ -245,9 +245,11 @@ public class HeadsUpAppearanceController extends ViewController<HeadsUpStatusBar
         if (newEntry != previousEntry) {
             if (newEntry == null) {
                 // No longer heads up
+                mShadeViewController.showIsland(false);
                 setPinnedStatus(PinnedStatus.NotPinned);
             } else if (previousEntry == null) {
                 // We now have a heads up when we didn't have one before
+                mShadeViewController.showIsland(true);
                 setPinnedStatus(newEntry.getPinnedStatus());
             }
 
