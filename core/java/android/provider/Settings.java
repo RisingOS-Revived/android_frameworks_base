@@ -7552,6 +7552,18 @@ public final class Settings {
         public static final String QS_BRIGHTNESS_SLIDER_SHAPE = "qs_brightness_slider_shape";
 
         /**
+         * Per-app refresh rate config
+         * @hide
+         */
+        public static final String REFRESH_RATE_CONFIG_CUSTOM = "refresh_rate_config_custom";
+
+        /**
+         * Force highest refresh rate in all apps
+         * @hide
+         */
+        public static final String EXTREME_REFRESH_RATE = "extreme_refresh_rate";
+
+        /**
          * Keys we no longer back up under the current schema, but want to continue to
          * process when restoring historical backup datasets.
          *
@@ -20046,6 +20058,12 @@ public final class Settings {
          * @hide
          */
         public static final String ONE_HANDED_KEYGUARD_SIDE = "one_handed_keyguard_side";
+
+        /**
+         * Whether refresh rate should be switched to 60Hz on power save mode.
+         * @hide
+         */
+        public static final String LOW_POWER_REFRESH_RATE = "low_power_rr_switch";
 
         /**
          * A list of uids that are allowed to use restricted networks.
