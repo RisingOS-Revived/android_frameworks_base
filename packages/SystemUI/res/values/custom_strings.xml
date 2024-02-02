@@ -168,4 +168,8 @@
 
     <!-- 5G toggle in Internet Dialog -->
     <string name="enable_fiveg">Enable 5G</string>
+
+    <!-- Island notification -->
+    <string name="now_playing_on">Now Playing on %1$s</string>
+    <string name="by_artist">%1$s by %2$s</string>
 </resources>
