@@ -334,7 +334,7 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
     private final NotificationShadeWindowController mNotificationShadeWindowController;
 
     private boolean mIsBackGestureArrowEnabled;
-    private boolean mIsEdgeHapticEnabled;
+    private int mEdgeHapticIntensity;
 
     private final NavigationEdgeBackPlugin.BackCallback mBackCallback =
             new NavigationEdgeBackPlugin.BackCallback() {
@@ -593,7 +593,7 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
         mIsButtonForcedVisible =
                 mGestureNavigationSettingsObserver.areNavigationButtonForcedVisible();
         mIsBackGestureArrowEnabled = mGestureNavigationSettingsObserver.getBackArrowGesture();
-        mIsEdgeHapticEnabled = mGestureNavigationSettingsObserver.getEdgeHapticEnabled();
+        mEdgeHapticIntensity = mGestureNavigationSettingsObserver.getEdgeHapticIntensity();
         // Update this before calling mButtonForcedVisibleCallback since NavigationBar will relayout
         // and query isHandlingGestures() as a part of the callback
         mIsBackGestureAllowed = !mIsButtonForcedVisible;
@@ -1239,7 +1239,7 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
             if (mAllowGesture) {
                 mEdgeBackPlugin.setIsLeftPanel(mIsOnLeftEdge);
                 mEdgeBackPlugin.setBackArrowVisibility(mIsBackGestureArrowEnabled);
-                mEdgeBackPlugin.setEdgeHapticEnabled(mIsEdgeHapticEnabled);
+                mEdgeBackPlugin.setEdgeHapticIntensity(mEdgeHapticIntensity);
                 mEdgeBackPlugin.onMotionEvent(ev);
                 dispatchToBackAnimation(ev);
             }
