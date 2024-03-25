@@ -155,11 +155,13 @@ public class NotificationMediaManager implements Dumpable, TunerService.Tunable 
             }
             mBackgroundExecutor.execute(() -> setMediaMetadata(metadata));
             if (mIslandEnabled && mIslandNowPlayingEnabled) {
+                notifUtils.cancelNowPlayingNotification();
                 if (mStatusBarStateController.getState() != KEYGUARD 
-                        && !mStatusBarStateController.isDozing()) {
+                        && !mStatusBarStateController.isDozing()
+                        && PlaybackState.STATE_PLAYING == getMediaControllerPlaybackState(mMediaController) 
+                        && mMediaMetadata != null) {
                     notifUtils.showNowPlayingNotification(metadata);
                 }
-                notifUtils.cancelNowPlayingNotification();
             }
             if (notificationMediaManagerBackgroundExecution()) {
                 mBackgroundExecutor.execute(() -> setMediaMetadata(metadata));
