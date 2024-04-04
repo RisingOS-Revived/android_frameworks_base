@@ -177,7 +177,7 @@ fun FooterActions(
             Modifier.animatedBackground(
                 { backgroundColor },
                 backgroundAlphaValue,
-                RoundedCornerShape(topStart = backgroundTopRadius, topEnd = backgroundTopRadius),
+                RoundedCornerShape(backgroundTopRadius),
             )
         }
 
