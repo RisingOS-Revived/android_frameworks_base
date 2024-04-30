@@ -10,4 +10,9 @@
 
     <!-- Notification counter -->
     <color name="notification_number_text_color">#ff000000</color>
+
+    <!-- Island notification -->
+    <color name="island_background_color">@android:color/system_neutral1_800</color>
+    <color name="island_title_color">@android:color/system_neutral1_10</color>
+    <color name="island_subtitle_color">@android:color/system_neutral1_100</color>
 </resources>
