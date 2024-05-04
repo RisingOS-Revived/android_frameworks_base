@@ -4828,7 +4828,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
                     mUseIslandNotification = TunerService.parseIntegerSwitch(newValue, false);
                     break;
                 case HEADS_UP_NOTIFICATIONS_ENABLED:
-                    mUseHeadsUp = TunerService.parseIntegerSwitch(newValue, false);
+                    mUseHeadsUp = TunerService.parseIntegerSwitch(newValue, true);
                     break;
                 default:
                     break;
