@@ -37,6 +37,7 @@ import static android.window.TransitionInfo.FLAG_IS_OCCLUDED;
 import static android.window.TransitionInfo.FLAG_IS_WALLPAPER;
 import static android.window.TransitionInfo.FLAG_NO_ANIMATION;
 import static android.window.TransitionInfo.FLAG_STARTING_WINDOW_TRANSFER_RECIPIENT;
+import static android.window.TransitionInfo.FLAG_IS_WALLPAPER;
 
 import static com.android.systemui.shared.Flags.returnAnimationFrameworkLongLived;
 import static com.android.window.flags.Flags.ensureWallpaperInTransitions;
@@ -591,7 +592,14 @@ public class Transitions implements RemoteCallable<Transitions>,
         final boolean isClosing = isClosingType(transitType);
         final int mode = change.getMode();
         // Put all the OPEN/SHOW on top
-        if (mode == TRANSIT_OPEN || mode == TRANSIT_TO_FRONT) {
+        if ((change.getFlags() & FLAG_IS_WALLPAPER) != 0) {
+            // Wallpaper is always at the bottom, opening wallpaper on top of closing one.
+            if (mode == TRANSIT_OPEN || mode == TRANSIT_TO_FRONT) {
+                return -zSplitLine + numChanges - i;
+            } else {
+                return -zSplitLine - i;
+            }
+        } else if (mode == TRANSIT_OPEN || mode == TRANSIT_TO_FRONT) {
             if (isOpening) {
                 // put on top
                 return zSplitLine + numChanges - i;
