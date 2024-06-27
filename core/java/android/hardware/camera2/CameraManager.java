@@ -776,10 +776,13 @@ public final class CameraManager {
         synchronized (mLock) {
             ICameraService cameraService = CameraManagerGlobal.get().getCameraService();
             if (cameraService == null) {
-                throw new CameraAccessException(CameraAccessException.CAMERA_DISCONNECTED,
-                        "Camera service is currently unavailable");
+                throw new CameraAccessException(CameraAccessException.CAMERA_DISCONNECTED, "Camera service is currently unavailable");
             }
             try {
+                // Validate cameraId
+                if (cameraId == null || cameraId.isEmpty()) {
+                    throw new IllegalArgumentException("Invalid cameraId: " + cameraId);
+                }
                 CameraMetadataNative info =
                         cameraService.getCameraCharacteristics(
                                 cameraId,
@@ -789,11 +792,14 @@ public final class CameraManager {
                                 getDevicePolicyFromContext(mContext));
                 characteristics = prepareCameraCharacteristics(cameraId, info, cameraService);
             } catch (ServiceSpecificException e) {
-                throw ExceptionUtils.throwAsPublicException(e);
+                if (e.errorCode == -2) { // No such file or directory
+                    throw new IllegalArgumentException("Unable to retrieve camera characteristics for unknown device " + cameraId + ": No such file or directory", e);
+                } else {
+                    throw ExceptionUtils.throwAsPublicException(e);
+                }
             } catch (RemoteException e) {
                 // Camera service died - act as if the camera was disconnected
-                throw new CameraAccessException(CameraAccessException.CAMERA_DISCONNECTED,
-                        "Camera service is currently unavailable", e);
+                throw new CameraAccessException(CameraAccessException.CAMERA_DISCONNECTED, "Camera service is currently unavailable", e);
             }
         }
         registerDeviceStateListener(characteristics);
