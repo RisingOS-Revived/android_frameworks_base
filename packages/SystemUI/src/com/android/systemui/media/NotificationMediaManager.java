@@ -37,6 +37,7 @@ import androidx.annotation.VisibleForTesting;
 import com.android.systemui.Dumpable;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.media.controls.domain.pipeline.MediaDataManager;
 import com.android.systemui.media.controls.shared.model.MediaData;
@@ -100,6 +101,8 @@ public class NotificationMediaManager implements Dumpable {
     private String mNowPlayingNotificationKey;
     private String mNowPlayingTrack;
 
+    private final SysuiColorExtractor mColorExtractor;
+
     @VisibleForTesting
     final MediaController.Callback mMediaListener = new MediaController.Callback() {
         @Override
@@ -142,6 +145,7 @@ public class NotificationMediaManager implements Dumpable {
             MediaDataManager mediaDataManager,
             DumpManager dumpManager,
             @Background Executor backgroundExecutor,
+            SysuiColorExtractor colorExtractor,
             @Main Handler handler
     ) {
         mContext = context;
@@ -152,6 +156,7 @@ public class NotificationMediaManager implements Dumpable {
         mNotifCollection = notifCollection;
         mBackgroundExecutor = backgroundExecutor;
         mHandler = handler;
+        mColorExtractor = colorExtractor;
 
         setupNotifPipeline();
 
@@ -286,6 +291,10 @@ public class NotificationMediaManager implements Dumpable {
             .orElse(null);
     }
 
+    public int getMediaBgColor() {
+        return mColorExtractor.getMediaBackgroundColor();
+    }
+
     public void addCallback(MediaListener callback) {
         mMediaListeners.add(callback);
         mBackgroundExecutor.execute(() -> updateMediaMetaData(callback));
@@ -296,9 +305,12 @@ public class NotificationMediaManager implements Dumpable {
         mHandler.post(() -> {
         callback.onPrimaryMetadataOrStateChanged(mMediaMetadata, playbackState);
         });
+        callback.setMediaNotificationColor(mColorExtractor.getMediaBackgroundColor());
     }
 
     public void removeCallback(MediaListener callback) {
+        mColorExtractor.setMediaBackgroundColor(0);
+        callback.setMediaNotificationColor(0);
         mMediaListeners.remove(callback);
     }
 
@@ -409,8 +421,10 @@ public class NotificationMediaManager implements Dumpable {
 
     private void updateMediaMetaData(List<MediaListener> callbacks) {
         @PlaybackState.State int state = getMediaControllerPlaybackState(mMediaController);
-        for (int i = 0; i < callbacks.size(); i++) {
-            callbacks.get(i).onPrimaryMetadataOrStateChanged(mMediaMetadata, state);
+        mHandler.post(() -> {
+            for (int i = 0; i < callbacks.size(); i++) {
+                callbacks.get(i).onPrimaryMetadataOrStateChanged(mMediaMetadata, state);
+                callbacks.get(i).setMediaNotificationColor(mColorExtractor.getMediaBackgroundColor());
             }
             MediaSessionManager.Companion.get().onPlaybackStateChanged(state);
         });
@@ -439,7 +453,7 @@ public class NotificationMediaManager implements Dumpable {
                 && state != PlaybackState.STATE_NONE;
     }
 
-    private boolean sameSessions(MediaController a, MediaController b) {
+    public boolean sameSessions(MediaController a, MediaController b) {
         if (a == b) {
             return true;
         }
@@ -449,7 +463,7 @@ public class NotificationMediaManager implements Dumpable {
         return a.controlsSameSession(b);
     }
 
-    private int getMediaControllerPlaybackState(MediaController controller) {
+    public int getMediaControllerPlaybackState(MediaController controller) {
         if (controller != null) {
             final PlaybackState playbackState = controller.getPlaybackState();
             if (playbackState != null) {
@@ -480,5 +494,7 @@ public class NotificationMediaManager implements Dumpable {
          */
         default void onPrimaryMetadataOrStateChanged(MediaMetadata metadata,
                 @PlaybackState.State int state) {}
+
+        default void setMediaNotificationColor(int color) {};
     }
 }
