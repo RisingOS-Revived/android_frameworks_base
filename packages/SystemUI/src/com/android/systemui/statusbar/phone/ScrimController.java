@@ -205,10 +205,6 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
     }
 
     /**
-     * Default alpha value for most scrims.
-     */
-    protected static final float KEYGUARD_SCRIM_ALPHA = 0.2f;
-    /**
      * Scrim opacity when the phone is about to wake-up.
      */
     public static final float WAKE_SENSOR_SCRIM_ALPHA = 0.6f;
@@ -257,7 +253,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
 
     private float mAdditionalScrimBehindAlphaKeyguard = 0f;
     // Combined scrim behind keyguard alpha of default scrim + additional scrim
-    private float mScrimBehindAlphaKeyguard = KEYGUARD_SCRIM_ALPHA;
+    private float mScrimBehindAlphaKeyguard = 0f;
 
     static final float TRANSPARENT_BOUNCER_SCRIM_ALPHA = 0.54f;
 
@@ -747,11 +743,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
      * This is used to apply additional keyguard dimming on top of the default scrim alpha value.
      */
     protected void applyCompositeAlphaOnScrimBehindKeyguard() {
-        int compositeAlpha = ColorUtils.compositeAlpha(
-                (int) (255 * mAdditionalScrimBehindAlphaKeyguard),
-                (int) (255 * KEYGUARD_SCRIM_ALPHA));
-        float keyguardScrimAlpha = (float) compositeAlpha / 255;
-        setScrimBehindValues(keyguardScrimAlpha);
+        setScrimBehindValues(mAdditionalScrimBehindAlphaKeyguard);
     }
 
     /**
@@ -1452,17 +1444,13 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
         if (mAnimatorListener != null) {
             anim.addListener(mAnimatorListener);
         }
-        final int initialScrimTint = scrim instanceof ScrimView ? ((ScrimView) scrim).getTint() :
-                Color.TRANSPARENT;
         anim.addUpdateListener(animation -> {
             final float startAlpha = (Float) scrim.getTag(TAG_START_ALPHA);
             final float animAmount = (float) animation.getAnimatedValue();
-            final int finalScrimTint = getCurrentScrimTint(scrim);
             final float finalScrimAlpha = getCurrentScrimAlpha(scrim);
             float alpha = MathUtils.lerp(startAlpha, finalScrimAlpha, animAmount);
             alpha = MathUtils.constrain(alpha, 0f, 1f);
-            int tint = ColorUtils.blendARGB(initialScrimTint, finalScrimTint, animAmount);
-            updateScrimColor(scrim, alpha, tint);
+            updateScrimColor(scrim, alpha, (mState == ScrimState.KEYGUARD ? Color.BLACK : Color.TRANSPARENT));
             dispatchScrimsVisible();
         });
         anim.setInterpolator(mInterpolator);
