@@ -111,8 +111,8 @@ public enum ScrimState {
             mNotifTint = previousState.mNotifTint;
             mNotifAlpha = previousState.mNotifAlpha;
 
-            mBehindTint = previousState.mBehindTint;
-            mBehindAlpha = previousState.mBehindAlpha;
+            mBehindTint = mBackgroundColor;
+            mBehindAlpha = 1f;
 
             mFrontTint = mBackgroundColor;
             mFrontAlpha = .66f;
