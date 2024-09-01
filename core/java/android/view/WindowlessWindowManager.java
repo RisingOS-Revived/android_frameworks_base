@@ -503,6 +503,10 @@ public class WindowlessWindowManager implements IWindowSession {
     }
 
     @Override
+    public void getPopUpViewTouchOffset(android.view.IWindow window, float[] offsets) {
+    }
+
+    @Override
     public android.os.IBinder performDrag(android.view.IWindow window, int flags,
             android.view.SurfaceControl surface, int touchSource, int touchDeviceId,
             int touchPointerId, float touchX, float touchY, float thumbCenterX, float thumbCenterY,
