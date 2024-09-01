@@ -318,11 +318,14 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
 
     protected TrustedOverlayHost mOverlayHost;
 
+    WindowContainerExt mWindowContainerExt;
+
     WindowContainer(WindowManagerService wms) {
         mWmService = wms;
         mTransitionController = mWmService.mAtmService.getTransitionController();
         mSyncTransaction = wms.mTransactionFactory.get();
         mSurfaceAnimator = new SurfaceAnimator(this, this::onAnimationFinished, wms);
+        mWindowContainerExt = new WindowContainerExt(this, mSurfaceFreezer);
     }
 
     /**
@@ -628,6 +631,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         if (mOverlayHost != null) {
             mOverlayHost.dispatchConfigurationChanged(getConfiguration());
         }
+        mWindowContainerExt.onConfigurationChanged();
     }
 
     void reparent(WindowContainer newParent, int position) {
@@ -1145,6 +1149,10 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         return mDisplayContent;
     }
 
+    TaskWindowSurfaceInfo getTaskWindowSurfaceInfo() {
+        return mWindowContainerExt.getTaskWindowSurfaceInfo();
+    }
+
     /** Returns the first node of type {@link DisplayArea} above or at this node. */
     @Nullable
     DisplayArea getDisplayArea() {
@@ -1605,7 +1613,8 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
                 // the task can be updated to portrait first so the configuration can be
                 // computed in a consistent environment.
                 && (inMultiWindowMode()
-                        || !handlesOrientationChangeFromDescendant(requestedOrientation))) {
+                        || !handlesOrientationChangeFromDescendant(requestedOrientation))
+                && !mWindowContainerExt.setOrientation(parent)) {
             // Resolve the requested orientation.
             onConfigurationChanged(parent.getConfiguration());
         }

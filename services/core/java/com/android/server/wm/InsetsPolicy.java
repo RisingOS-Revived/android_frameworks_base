@@ -259,24 +259,26 @@ class InsetsPolicy {
             state = originalState;
         }
         state = adjustVisibilityForIme(target, state, state == originalState);
-        state = mPolicy.replaceInsetsSourcesIfNeeded(state, state == originalState);
-        if (target != null
-            && target.mActivityRecord != null
-            && target.mActivityRecord.shouldForceLongScreen()) {
-            InsetsState fullscreenState = new InsetsState(state);
-            int[] cutoutSources = {
-                ID_DISPLAY_CUTOUT_LEFT,
-                ID_DISPLAY_CUTOUT_TOP,
-                ID_DISPLAY_CUTOUT_RIGHT,
-                ID_DISPLAY_CUTOUT_BOTTOM
-            };
-            for (int sourceId : cutoutSources) {
-                fullscreenState.removeSource(sourceId);
-            }
-            fullscreenState.setDisplayCutout(DisplayCutout.NO_CUTOUT);
-            state = fullscreenState;
-        }
-        return adjustInsetsForRoundedCorners(target.mToken, state, state == originalState);
+	state = mPolicy.replaceInsetsSourcesIfNeeded(state, state == originalState);
+	if (target != null
+	    && target.mActivityRecord != null
+	    && target.mActivityRecord.shouldForceLongScreen()) {
+	    InsetsState fullscreenState = new InsetsState(state);
+	    int[] cutoutSources = {
+	        ID_DISPLAY_CUTOUT_LEFT,
+	        ID_DISPLAY_CUTOUT_TOP,
+	        ID_DISPLAY_CUTOUT_RIGHT,
+	        ID_DISPLAY_CUTOUT_BOTTOM
+	    };
+	    for (int sourceId : cutoutSources) {
+	        fullscreenState.removeSource(sourceId);
+	    }
+	    fullscreenState.setDisplayCutout(DisplayCutout.NO_CUTOUT);
+	    state = fullscreenState;
+	}
+	state = adjustInsetsForRoundedCorners(target.mToken, state, state == originalState);
+	state = PopUpWindowController.getInstance().adjustInsetsForWindow(target, state);
+	return state;
     }
 
     InsetsState adjustInsetsForWindow(WindowState target, InsetsState originalState) {
@@ -675,8 +677,8 @@ class InsetsPolicy {
     }
 
     void updateSystemBars(WindowState win, boolean inSplitScreenMode,
-            boolean inNonFullscreenFreeformMode) {
-        mForcedShowingTypes = (inSplitScreenMode || inNonFullscreenFreeformMode)
+            boolean inNonFullscreenFreeformMode, boolean inPortPopUpView) {
+        mForcedShowingTypes = (inSplitScreenMode || inNonFullscreenFreeformMode || inPortPopUpView)
                 ? (Type.statusBars() | Type.navigationBars())
                 : forceShowingNavigationBars(win)
                         ? Type.navigationBars()

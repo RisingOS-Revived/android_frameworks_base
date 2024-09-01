@@ -1216,6 +1216,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         setDrawnStateEvaluated(false /*evaluated*/);
 
         getDisplayContent().reapplyMagnificationSpec();
+
+        PopUpWindowController.getInstance().onWindowAdd(newParent, this);
     }
 
     /** Returns the uid of the app that owns this window. */
@@ -1583,6 +1585,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return mSession.mUid;
     }
 
+    public IWindow getIWindow() {
+        return mClient;
+    }
+
     Task getTask() {
         return mActivityRecord != null ? mActivityRecord.getTask() : null;
     }
@@ -1869,7 +1875,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      *         case when the surface is on screen but not exiting.
      */
     boolean canAffectSystemUiFlags() {
-        if (isFullyTransparent()) {
+        if (isFullyTransparent() || getWindowConfiguration().isPopUpWindowMode()) {
             return false;
         }
         if (mActivityRecord == null) {
@@ -2206,6 +2212,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         super.removeImmediately();
 
         final DisplayContent dc = getDisplayContent();
+
+        PopUpWindowController.getInstance().onWindowRemove(this);
+
         if (isImeOverlayLayeringTarget()) {
             mWmService.dispatchImeTargetOverlayVisibilityChanged(mClient.asBinder(), mAttrs.type,
                     false /* visible */, true /* removed */, dc.getDisplayId());

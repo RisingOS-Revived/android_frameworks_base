@@ -322,6 +322,11 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
         Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
     }
 
+    @Override
+    public void getPopUpViewTouchOffset(IWindow window, float[] offsets) {
+        PopUpWindowController.getInstance().getPopUpViewTouchOffset(this, window, offsets);
+    }
+
     /* Drag/drop */
 
     @Override

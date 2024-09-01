@@ -212,6 +212,9 @@ import static com.android.server.wm.ActivityTaskManagerService.isPip2ExperimentE
 import static com.android.server.wm.IdentifierProto.HASH_CODE;
 import static com.android.server.wm.IdentifierProto.TITLE;
 import static com.android.server.wm.IdentifierProto.USER_ID;
+import static com.android.server.wm.PopUpAnimationController.ANIMATION_CROSS_OVER_EXIT_DURATION;
+import static com.android.server.wm.PopUpWindowController.MOVE_TO_BACK_NON_USER;
+import static com.android.server.wm.PopUpWindowController.PACKAGE_NAME_SYSTEM_TOOL;
 import static com.android.server.wm.StartingData.AFTER_TRANSACTION_COPY_TO_CLIENT;
 import static com.android.server.wm.StartingData.AFTER_TRANSACTION_IDLE;
 import static com.android.server.wm.StartingData.AFTER_TRANSACTION_REMOVE_DIRECTLY;
@@ -451,6 +454,8 @@ final class ActivityRecord extends WindowToken {
     final ComponentName mActivityComponent;
     // Input application handle used by the input dispatcher.
     private InputApplicationHandle mInputApplicationHandle;
+
+    final boolean isSystemTool;
 
     final int launchedFromPid; // always the pid who started the activity.
     final int launchedFromUid; // always the uid who started the activity.
@@ -1840,6 +1845,7 @@ final class ActivityRecord extends WindowToken {
         info = aInfo;
         mUserId = UserHandle.getUserId(info.applicationInfo.uid);
         packageName = info.applicationInfo.packageName;
+        isSystemTool = PACKAGE_NAME_SYSTEM_TOOL.equals(packageName);
         intent = _intent;
 
         // If the class name in the intent doesn't match that of the target, this is probably an
@@ -2392,6 +2398,10 @@ final class ActivityRecord extends WindowToken {
     private int getStartingWindowType(boolean newTask, boolean taskSwitch, boolean processRunning,
             boolean allowTaskSnapshot, boolean activityCreated, boolean activityAllDrawn,
             TaskSnapshot snapshot) {
+        if (isSystemTool) {
+            return processRunning ? STARTING_WINDOW_TYPE_NONE : STARTING_WINDOW_TYPE_SNAPSHOT;
+        }
+
         // A special case that a new activity is launching to an existing task which is moving to
         // front. If the launching activity is the one that started the task, it could be a
         // trampoline that will be always created and finished immediately. Then give a chance to
@@ -3091,6 +3101,15 @@ final class ActivityRecord extends WindowToken {
         return super.isFocusable() && (canReceiveKeys() || isAlwaysFocusable());
     }
 
+    boolean isFocusableOrPopUpView() {
+        return super.isFocusable() && (canReceiveKeys() || isAlwaysFocusable() || isPopUpView());
+    }
+
+    boolean isPopUpView() {
+        return getWindowConfiguration().isPopUpWindowMode() ||
+                (getRootTask() != null && getRootTask().getWindowConfiguration().isPopUpWindowMode());
+    }
+
     boolean canReceiveKeys() {
         return getWindowConfiguration().canReceiveKeys() && !mWaitForEnteringPinnedMode;
     }
@@ -3164,6 +3183,9 @@ final class ActivityRecord extends WindowToken {
 
     /** @return whether this activity is non-resizeable but is forced to be resizable. */
     boolean canForceResizeNonResizable(int windowingMode) {
+        if (getWindowConfiguration().isPopUpWindowMode()) {
+            return false;
+        }
         if (windowingMode == WINDOWING_MODE_PINNED && info.supportsPictureInPicture()) {
             return false;
         }
@@ -3590,7 +3612,7 @@ final class ActivityRecord extends WindowToken {
                     && !task.isClearingToReuseTask();
             final WindowContainer<?> trigger = endTask ? task : this;
             final Transition newTransition =
-                    mTransitionController.requestCloseTransitionIfNeeded(trigger);
+                    mTransitionController.requestCloseTransitionIfNeeded(trigger, endTask || getChildCount() == 0);
             final Transition transition = newTransition != null
                     ? newTransition : mTransitionController.getCollectingTransition();
             if (transition != null) {
@@ -3600,6 +3622,7 @@ final class ActivityRecord extends WindowToken {
             // the next focusable task should be focused.
             if (mayAdjustTop && task.topRunningActivity(true /* focusableOnly */)
                     == null) {
+                task.mWindowContainerExt.setFinishTopTask(true);
                 task.adjustFocusToNextFocusableTask("finish-top", false /* allowFocusSelf */,
                             shouldAdjustGlobalFocus);
             }
@@ -4273,7 +4296,8 @@ final class ActivityRecord extends WindowToken {
         // closing the task.
         final WindowContainer trigger = remove && task != null && task.getChildCount() == 1
                 ? task : this;
-        final Transition tr = mTransitionController.requestCloseTransitionIfNeeded(trigger);
+        final Transition tr = mTransitionController.requestCloseTransitionIfNeeded(trigger),
+                trigger != this || getChildCount() == 0);
         if (tr != null) {
             tr.collectClose(trigger);
         } else if (mTransitionController.isCollecting()) {
@@ -6067,7 +6091,7 @@ final class ActivityRecord extends WindowToken {
      */
     @VisibleForTesting
     boolean shouldPauseActivity(ActivityRecord activeActivity) {
-        return shouldMakeActive(activeActivity) && !isFocusable() && !isState(PAUSING, PAUSED)
+        return shouldMakeActive(activeActivity) && !isFocusableOrPopUpView() && !isState(PAUSING, PAUSED)
                 // We will only allow pausing if results is null, otherwise it will cause this
                 // activity to resume before getting result
                 && (results == null);
@@ -6090,7 +6114,7 @@ final class ActivityRecord extends WindowToken {
      * - should be focusable
      */
     private boolean shouldBeResumed(ActivityRecord activeActivity) {
-        return shouldMakeActive(activeActivity) && isFocusable()
+        return shouldMakeActive(activeActivity) && isFocusableOrPopUpView()
                 && getTaskFragment().getVisibility(activeActivity)
                         == TASK_FRAGMENT_VISIBILITY_VISIBLE
                 && canResumeByCompat();
@@ -8139,6 +8163,17 @@ final class ActivityRecord extends WindowToken {
         computeConfigByResolveHint(getResolvedOverrideConfiguration(), newParentConfig);
         aspectRatioPolicy.setLetterboxBoundsForFixedOrientationAndAspectRatio(
                 new Rect(resolvedBounds));
+
+        if (newParentConfiguration.windowConfiguration.isPopUpWindowMode() || isPopUpView()) {
+            if (mInSizeCompatModeForBounds) {
+                clearSizeCompatMode();
+            }
+            mCompatDisplayInsets = null;
+            mSizeCompatBounds = null;
+            mSizeCompatScale = 1.0f;
+            resolvedConfig.unset();
+            return;
+        }
     }
 
     @Override
@@ -8223,6 +8258,7 @@ final class ActivityRecord extends WindowToken {
                     // as a part of WindowOrganizerController#finishTransition().
                     // If not checked the activity might be collected for the wrong transition,
                     // such as a TRANSIT_OPEN transition requested right after TRANSIT_PIP.
+                    && !isPopUpView()
                     && !(mWaitForEnteringPinnedMode
                     && mTransitionController.inFinishingTransition(this))) {
                 mTransitionController.collect(this);
@@ -8457,6 +8493,8 @@ final class ActivityRecord extends WindowToken {
         }
         ProtoLog.v(WM_DEBUG_CONFIGURATION, "Ensuring correct "
                 + "configuration: %s", this);
+
+        PopUpWindowController.getInstance().ensureActivityConfiguration(this);
 
         final int newDisplayId = getDisplayId();
         final boolean displayChanged = mLastReportedDisplayId != newDisplayId;
