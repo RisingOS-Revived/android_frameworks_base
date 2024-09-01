@@ -19,6 +19,7 @@ package android.app;
 import static android.Manifest.permission.CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS;
 import static android.Manifest.permission.START_TASKS_FROM_RECENTS;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
+import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED_WINDOW_EXT;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.content.Intent.FLAG_ACTIVITY_MULTIPLE_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
@@ -1473,6 +1474,9 @@ public class ActivityOptions extends ComponentOptions {
      * @return {@code this} {@link ActivityOptions} instance
      */
     public ActivityOptions setLaunchBounds(@Nullable Rect screenSpacePixelRect) {
+        if (ActivityOptionsExt.hookLauncherSetLaunchBounds()) {
+            return this;
+        }
         mLaunchBounds = screenSpacePixelRect != null ? new Rect(screenSpacePixelRect) : null;
         return this;
     }
@@ -1861,6 +1865,10 @@ public class ActivityOptions extends ComponentOptions {
      */
     @TestApi
     public void setLaunchWindowingMode(@WindowConfiguration.WindowingMode int windowingMode) {
+        if (ActivityOptionsExt.hookLauncherSetFreeform(windowingMode)) {
+            mLaunchWindowingMode = WINDOWING_MODE_PINNED_WINDOW_EXT;
+            return;
+        }
         mLaunchWindowingMode = windowingMode;
     }
 

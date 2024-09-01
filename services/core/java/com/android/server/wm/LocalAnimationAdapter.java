@@ -83,6 +83,11 @@ class LocalAnimationAdapter implements AnimationAdapter {
     }
 
     @Override
+    public void setCornerRadius(float radius) {
+        mSpec.setCornerRadius(radius);
+    }
+
+    @Override
     public void dump(PrintWriter pw, String prefix) {
         mSpec.dump(pw, prefix);
     }
@@ -178,5 +183,7 @@ class LocalAnimationAdapter implements AnimationAdapter {
         default WindowAnimationSpec asWindowAnimationSpec() {
             return null;
         }
+
+        default void setCornerRadius(float radius) {}
     }
 }

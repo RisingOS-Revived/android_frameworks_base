@@ -114,4 +114,7 @@ public interface TaskStackChangeListener {
      * LockTaskController.
      */
     default void onLockTaskModeChanged(int mode) { }
+
+    /** @see ITaskStackListener#onTaskFocusChanged(int, boolean) */
+    default void onTaskFocusChanged(int taskId, boolean focused) { }
 }

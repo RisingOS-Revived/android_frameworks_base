@@ -623,11 +623,17 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
     public boolean inMultiWindowMode() {
         /*@WindowConfiguration.WindowingMode*/ int windowingMode =
                 mFullConfiguration.windowConfiguration.getWindowingMode();
-        return WindowConfiguration.inMultiWindowMode(windowingMode);
+        return WindowConfiguration.inMultiWindowMode(windowingMode)
+                || WindowConfiguration.isPopUpWindowMode(windowingMode);
     }
 
     public boolean inPinnedWindowingMode() {
         return mFullConfiguration.windowConfiguration.getWindowingMode() == WINDOWING_MODE_PINNED;
+    }
+
+    public boolean inPopUpWindowingMode() {
+        return WindowConfiguration.isPopUpWindowMode(
+                mFullConfiguration.windowConfiguration.getWindowingMode());
     }
 
     public boolean inFreeformWindowingMode() {
