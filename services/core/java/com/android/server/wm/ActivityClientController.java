@@ -59,6 +59,7 @@ import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLAS
 import static com.android.server.wm.ActivityTaskManagerService.RELAUNCH_REASON_NONE;
 import static com.android.server.wm.ActivityTaskManagerService.TAG_SWITCH;
 import static com.android.server.wm.ActivityTaskManagerService.enforceNotIsolatedCaller;
+import static com.android.server.wm.PopUpWindowController.MOVE_TO_BACK_NON_USER;
 import static com.android.window.flags.Flags.allowDisableActivityRecordInputSink;
 
 import android.Manifest;
@@ -370,6 +371,10 @@ class ActivityClientController extends IActivityClientController.Stub {
                 final int taskId = ActivityRecord.getTaskForActivityLocked(token, !nonRoot);
                 final Task task = mService.mRootWindowContainer.anyTaskForId(taskId);
                 if (task != null) {
+                    if (task.getWindowConfiguration().isPopUpWindowMode()) {
+                        PopUpWindowController.getInstance().moveActivityTaskToBack(task, MOVE_TO_BACK_NON_USER);
+                        return true;
+                    }
                     return ActivityRecord.getRootTask(token).moveTaskToBack(task);
                 }
             }

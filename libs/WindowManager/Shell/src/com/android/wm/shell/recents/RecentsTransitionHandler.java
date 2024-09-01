@@ -31,6 +31,7 @@ import static android.view.WindowManager.TRANSIT_SLEEP;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
 import static android.window.DesktopModeFlags.ENABLE_DESKTOP_RECENTS_TRANSITIONS_CORNERS_BUGFIX;
 import static android.window.TransitionInfo.FLAG_MOVED_TO_TOP;
+import static android.window.TransitionInfo.FLAG_EXIT_POP_UP_VIEW_DISPLAY_ROTATION;
 import static android.window.TransitionInfo.FLAG_TRANSLUCENT;
 
 import static com.android.wm.shell.recents.RecentsTransitionStateListener.TRANSITION_STATE_ANIMATING;
@@ -394,6 +395,7 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler,
         private boolean mKeyguardLocked = false;
         private boolean mWillFinishToHome = false;
         private Transitions.TransitionHandler mTakeoverHandler = null;
+        private boolean mHasExitPopUpViewDisplayRotate = false;
 
         /** The animation is idle, waiting for the user to choose a task to switch to. */
         private static final int STATE_NORMAL = 0;
@@ -1028,6 +1030,9 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler,
                         closingTasks.add(change);
                     }
                 } else if (change.getMode() == TRANSIT_CHANGE) {
+                    if (change.hasFlags(FLAG_EXIT_POP_UP_VIEW_DISPLAY_ROTATION)) {
+                        mHasExitPopUpViewDisplayRotate = true;
+                    }
                     // Finish recents animation if the display is changed, so the default
                     // transition handler can play the animation such as rotation effect.
                     if (change.hasFlags(TransitionInfo.FLAG_IS_DISPLAY)
@@ -1359,6 +1364,7 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler,
             boolean returningToApp = !toHome
                     && !mWillFinishToHome
                     && mPausingTasks != null
+                    && !mHasExitPopUpViewDisplayRotate
                     && mState == STATE_NORMAL;
             if (!Flags.enableRecentsBookendTransition()) {
                 // This is only necessary when the recents transition is finished using a finishWCT,

@@ -201,6 +201,11 @@ abstract class CrossActivityBackAnimation(
         // Offset start rectangle to align task bounds.
         backAnimRect.offsetTo(0, 0)
 
+        if (enteringTarget!!.windowConfiguration.isPopUpWindowMode() ||
+                enteringTarget!!.windowConfiguration.isPopUpWindowMode()) {
+            return
+        }
+
         preparePreCommitClosingRectMovement(backMotionEvent.swipeEdge)
         preparePreCommitEnteringRectMovement()
 

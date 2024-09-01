@@ -2509,6 +2509,15 @@ public class DisplayPolicy {
         // anyway, so just hang on in whatever state we're in until things settle down.
         WindowState winCandidate = mFocusedWindow != null ? mFocusedWindow
                 : mTopFullscreenOpaqueWindowState;
+        final int rotation = mDisplayContent.getRotation();
+        final boolean isPortrait = rotation == Surface.ROTATION_0 || rotation == Surface.ROTATION_180;
+        final boolean hasMiniWindow = TopActivityRecorder.getInstance().hasMiniWindow();
+        if (hasMiniWindow && !isPortrait) {
+            final WindowState dimWinState = PopUpWindowController.getInstance().getDimWinState();
+            if (dimWinState != null) {
+                winCandidate = dimWinState;
+            }
+        }
         if (winCandidate == null) {
             return;
         }
@@ -2536,7 +2545,7 @@ public class DisplayPolicy {
 
         final int displayId = getDisplayId();
         final int disableFlags = win.getDisableFlags();
-        final int opaqueAppearance = updateSystemBarsLw(win, disableFlags);
+        final int opaqueAppearance = updateSystemBarsLw(win, disableFlags, hasMiniWindow && isPortrait);
         if (!mRelaunchingSystemBarColorApps.isEmpty()) {
             // The appearance of system bars might change while relaunching apps. We don't report
             // the intermediate state to system UI. Otherwise, it might trigger redundant effects.
@@ -2648,7 +2657,7 @@ public class DisplayPolicy {
         return appearance;
     }
 
-    private int updateSystemBarsLw(WindowState win, int disableFlags) {
+    private int updateSystemBarsLw(WindowState win, int disableFlags, boolean inPortPopUpView) {
         final TaskDisplayArea defaultTaskDisplayArea = mDisplayContent.getDefaultTaskDisplayArea();
         final boolean adjacentTasksVisible =
                 defaultTaskDisplayArea.getRootTask(task -> task.isVisible()
@@ -2661,9 +2670,9 @@ public class DisplayPolicy {
         final boolean inNonFullscreenFreeformMode = freeformRootTaskVisible
                 && !topFreeformTask.getBounds().equals(mDisplayContent.getBounds());
 
-        getInsetsPolicy().updateSystemBars(win, adjacentTasksVisible,
-                DesktopModeFlags.ENABLE_FULLY_IMMERSIVE_IN_DESKTOP.isTrue()
-                        ? inNonFullscreenFreeformMode : freeformRootTaskVisible);
+	getInsetsPolicy().updateSystemBars(win, adjacentTasksVisible,
+        	DesktopModeFlags.ENABLE_FULLY_IMMERSIVE_IN_DESKTOP.isTrue()
+                	? inNonFullscreenFreeformMode : freeformRootTaskVisible, inPortPopUpView);
 
         final boolean topAppHidesStatusBar = topAppHidesSystemBar(Type.statusBars());
         if (getStatusBar() != null) {

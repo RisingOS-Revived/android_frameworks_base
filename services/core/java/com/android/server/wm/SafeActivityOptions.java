@@ -21,6 +21,7 @@ import static android.Manifest.permission.CONTROL_REMOTE_APP_TRANSITION_ANIMATIO
 import static android.Manifest.permission.MANAGE_ACTIVITY_TASKS;
 import static android.Manifest.permission.START_TASKS_FROM_RECENTS;
 import static android.Manifest.permission.STATUS_BAR_SERVICE;
+import static android.app.ActivityOptions.SourceInfo.TYPE_NOTIFICATION;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_ASSISTANT;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
@@ -39,6 +40,7 @@ import android.annotation.Nullable;
 import android.app.ActivityOptions;
 import android.app.AppGlobals;
 import android.app.PendingIntent;
+import android.app.WindowConfiguration;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
@@ -203,6 +205,33 @@ public class SafeActivityOptions {
      */
     ActivityOptions getOriginalOptions() {
         return mOriginalOptions;
+    }
+
+    void setLaunchWindowingMode(int mode) {
+        if (mOriginalOptions != null) {
+            mOriginalOptions.setLaunchWindowingMode(mode);
+        }
+    }
+
+    boolean isMiniWindowingMode() {
+        if (mOriginalOptions != null) {
+            return WindowConfiguration.isMiniExtWindowMode(mOriginalOptions.getLaunchWindowingMode());
+        }
+        return false;
+    }
+
+    boolean isPopUpWindowMode() {
+        if (mOriginalOptions != null) {
+            return WindowConfiguration.isPopUpWindowMode(mOriginalOptions.getLaunchWindowingMode());
+        }
+        return false;
+    }
+
+    boolean isFromNotification() {
+        if (mOriginalOptions != null && mOriginalOptions.getSourceInfo() != null) {
+            return mOriginalOptions.getSourceInfo().type == TYPE_NOTIFICATION;
+        }
+        return false;
     }
 
     /**

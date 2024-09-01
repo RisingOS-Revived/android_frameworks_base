@@ -100,7 +100,7 @@ public class WindowLayout {
         }
 
         // Compute bounds restricted by display cutout
-        final int cutoutMode = attrs.layoutInDisplayCutoutMode;
+        final int cutoutMode = WindowLayoutExt.computeCutoutMode(windowingMode, attrs.layoutInDisplayCutoutMode);
         final DisplayCutout cutout = state.getDisplayCutout();
         final Rect displayCutoutSafeExceptMaybeBars = mTempDisplayCutoutSafeExceptMaybeBarsRect;
         displayCutoutSafeExceptMaybeBars.set(displayCutoutSafe);
@@ -174,6 +174,9 @@ public class WindowLayout {
             outDisplayFrame.right = MAX_X;
             outDisplayFrame.bottom = MAX_Y;
         }
+
+        WindowLayoutExt.computeFrame(windowingMode, attrs,
+                outDisplayFrame, outParentFrame, windowBounds);
 
         final boolean hasCompatScale = compatScale != 1f;
         final int pw = outParentFrame.width();

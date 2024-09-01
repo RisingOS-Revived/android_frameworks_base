@@ -2017,6 +2017,10 @@ public final class Configuration implements Parcelable, Comparable<Configuration
             changed |= ActivityInfo.CONFIG_WINDOW_CONFIGURATION;
         }
 
+        if (ConfigurationExt.diffWindowConfiguration(delta, windowConfiguration, publicOnly)) {
+            changed |= ActivityInfo.CONFIG_WINDOW_CONFIGURATION;
+        }
+
         if ((compareUndefined || delta.fontWeightAdjustment != FONT_WEIGHT_ADJUSTMENT_UNDEFINED)
                 && fontWeightAdjustment != delta.fontWeightAdjustment) {
             changed |= ActivityInfo.CONFIG_FONT_WEIGHT_ADJUSTMENT;

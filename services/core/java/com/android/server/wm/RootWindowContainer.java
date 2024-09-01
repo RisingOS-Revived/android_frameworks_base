@@ -20,6 +20,7 @@ import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.KeyguardManager.ACTION_CONFIRM_DEVICE_CREDENTIAL_WITH_USER;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
+import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_INSTANCE;
@@ -3665,6 +3666,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                         && task.getParent() != targetRootTask) {
                     final int reparentMode = onTop
                             ? REPARENT_MOVE_ROOT_TASK_TO_FRONT : REPARENT_LEAVE_ROOT_TASK_IN_PLACE;
+                    PopUpWindowController.getInstance().anyTaskForId(targetRootTask, task);
                     task.reparent(targetRootTask, onTop, reparentMode, ANIMATE, DEFER_RESUME,
                             "anyTaskForId");
                 }

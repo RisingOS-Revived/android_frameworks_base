@@ -634,6 +634,12 @@ public interface WindowManager extends ViewManager {
     int TRANSIT_FLAG_AVOID_MOVE_TO_FRONT = (1 << 16); // 0x10000
 
     /**
+     * Transition flag: Indicates that task is moved to back.
+     * @hide
+     */
+    int TRANSIT_FLAG_MOVE_TASK_TO_BACK = (1 << 15); // 0x8000
+
+    /**
      * @hide
      */
     @IntDef(flag = true, prefix = { "TRANSIT_FLAG_" }, value = {
@@ -654,6 +660,7 @@ public interface WindowManager extends ViewManager {
             TRANSIT_FLAG_PHYSICAL_DISPLAY_SWITCH,
             TRANSIT_FLAG_AOD_APPEARING,
             TRANSIT_FLAG_AVOID_MOVE_TO_FRONT,
+            TRANSIT_FLAG_MOVE_TASK_TO_BACK,
     })
     @Retention(RetentionPolicy.SOURCE)
     @interface TransitionFlags {}
@@ -2670,6 +2677,11 @@ public interface WindowManager extends ViewManager {
          */
         public static final int TYPE_STATUS_BAR_ADDITIONAL = FIRST_SYSTEM_WINDOW + 41;
 
+        /** @hide */
+        public static final int TYPE_MINI_WINDOW_DIMMER = FIRST_SYSTEM_WINDOW + 101;
+        /** @hide */
+        public static final int TYPE_PINNED_WINDOW_DISMISS_HINT = FIRST_SYSTEM_WINDOW + 102;
+
         /**
          * End of types of system windows.
          */
@@ -2732,7 +2744,9 @@ public interface WindowManager extends ViewManager {
                 TYPE_APPLICATION_OVERLAY,
                 TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY,
                 TYPE_NOTIFICATION_SHADE,
-                TYPE_STATUS_BAR_ADDITIONAL
+                TYPE_STATUS_BAR_ADDITIONAL,
+                TYPE_MINI_WINDOW_DIMMER,
+                TYPE_PINNED_WINDOW_DISMISS_HINT
         })
         @Retention(RetentionPolicy.SOURCE)
         public @interface WindowType {}
