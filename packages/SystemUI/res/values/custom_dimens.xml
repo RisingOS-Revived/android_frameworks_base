@@ -73,4 +73,7 @@
 
     <!-- HD calling icon -->
     <dimen name="signal_icon_viewport_size">24dp</dimen>
+
+    <!-- Weather -->  
+    <dimen name="weather_image_max_size">24dp</dimen>
 </resources>
