@@ -172,4 +172,7 @@
     <!-- Island notification -->
     <string name="now_playing_on">Now Playing on %1$s</string>
     <string name="by_artist">%1$s by %2$s</string>
+
+    <!-- System Theme Re-evaluation Toast -->
+    <string name="reevaluating_system_theme">Re-evaluating system theme.. Please wait for a few seconds</string>
 </resources>
