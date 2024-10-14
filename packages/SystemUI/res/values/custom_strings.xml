@@ -133,6 +133,9 @@
     <string name="vpn_tethering_changed_off">VPN tethering turned off.</string>
     <string name="vpn_tethering_changed_on">VPN tethering turned on.</string>
 
+    <!-- Clock Weather -->
+    <string name="clock_ide_weather_data_unavailable">null</string>
+
     <!-- Weather -->
     <string name="weather_condition_clouds">Cloudy</string>
     <string name="weather_condition_rain">Rainy</string>
