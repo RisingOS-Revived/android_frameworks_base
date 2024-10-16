@@ -742,6 +742,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private Action mEdgeLongSwipeAction;
     private Action mShakeGestureAction;
 
+    private ThreeFingersSwipeListener mThreeFingersListener;
+    private boolean mThreeFingerListenerRegistered;
+
     // support for activating the lock screen while the screen is on
     private HashSet<Integer> mAllowLockscreenWhenOnDisplays = new HashSet<>();
     int mLockScreenTimeout;
@@ -1143,6 +1146,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     UserHandle.USER_ALL);
             resolver.registerContentObserver(LineageSettings.System.getUriFor(
                     LineageSettings.System.KEY_EDGE_LONG_SWIPE_ACTION), false, this,
+                    UserHandle.USER_ALL);
+            resolver.registerContentObserver(LineageSettings.System.getUriFor(
+                    LineageSettings.System.KEY_THREE_FINGERS_SWIPE_ACTION), false, this,
+                    UserHandle.USER_ALL);
+            resolver.registerContentObserver(LineageSettings.System.getUriFor(
+                    LineageSettings.System.KEY_THREE_FINGERS_LONG_PRESS_ACTION), false, this,
                     UserHandle.USER_ALL);
             resolver.registerContentObserver(LineageSettings.System.getUriFor(
                     LineageSettings.System.HOME_WAKE_SCREEN), false, this,
@@ -3520,6 +3529,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mShakeGestureAction = Action.fromSettings(resolver,
                 LineageSettings.System.KEY_SHAKE_GESTURE_ACTION,
                 Action.NOTHING);
+
+        if (mThreeFingersListener != null && !mThreeFingerListenerRegistered) {
+            mWindowManagerFuncs.registerPointerEventListener(mThreeFingersListener, DEFAULT_DISPLAY);
+            mThreeFingerListenerRegistered = true;
+        }
 
         mShortPressOnWindowBehavior = SHORT_PRESS_WINDOW_NOTHING;
         if (mPackageManager.hasSystemFeature(FEATURE_PICTURE_IN_PICTURE)) {
@@ -7661,6 +7675,37 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
         });
         mShakeGestures.onStart();
+        
+        mThreeFingersListener = new ThreeFingersSwipeListener(mContext, new ThreeFingersSwipeListener.Callbacks() {
+            @Override
+            public void onSwipeThreeFingers() {
+                Action threeFingersSwipeAction = Action.fromSettings(mContext.getContentResolver(),
+                        LineageSettings.System.KEY_THREE_FINGERS_SWIPE_ACTION,
+                        Action.NOTHING);
+                if (threeFingersSwipeAction == Action.NOTHING)
+                    return;
+                long now = SystemClock.uptimeMillis();
+                KeyEvent event = new KeyEvent(now, now, KeyEvent.ACTION_DOWN,
+                        KeyEvent.KEYCODE_SYSRQ, 0, 0, KeyCharacterMap.VIRTUAL_KEYBOARD, 0,
+                        KeyEvent.FLAG_FROM_SYSTEM, InputDevice.SOURCE_TOUCHSCREEN);
+                performKeyAction(threeFingersSwipeAction, event);
+                performHapticFeedback(HapticFeedbackConstants.LONG_PRESS, "Three Fingers Swipe");
+            }
+            @Override
+            public void onLongPressThreeFingers() {
+                Action threeFingersLongPressAction = Action.fromSettings(mContext.getContentResolver(),
+                        LineageSettings.System.KEY_THREE_FINGERS_LONG_PRESS_ACTION,
+                        Action.NOTHING);
+                if (threeFingersLongPressAction == Action.NOTHING)
+                    return;
+                long now = SystemClock.uptimeMillis();
+                KeyEvent event = new KeyEvent(now, now, KeyEvent.ACTION_DOWN,
+                        KeyEvent.KEYCODE_SYSRQ, 0, 0, KeyCharacterMap.VIRTUAL_KEYBOARD, 0,
+                        KeyEvent.FLAG_FROM_SYSTEM, InputDevice.SOURCE_TOUCHSCREEN);
+                performKeyAction(threeFingersLongPressAction, event);
+                performHapticFeedback(HapticFeedbackConstants.LONG_PRESS, "Three Fingers Long Press");
+            }
+        });
 
         mDockObserverInternal = LocalServices.getService(DockObserverInternal.class);
         if (mDockObserverInternal != null) {
