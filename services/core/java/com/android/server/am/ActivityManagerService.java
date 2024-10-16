@@ -19551,4 +19551,13 @@ public class ActivityManagerService extends IActivityManager.Stub
     public boolean shouldForceLongScreen(String packageName) {
         return mActivityTaskManager.shouldForceLongScreen(packageName);
     }
+
+    @Override
+    public boolean isThreeFingersSwipeActive() {
+        final boolean gestureActive = Settings.System.getInt(
+                mContext.getContentResolver(), "three_finger_gesture_active", 0) != 0;
+        synchronized (this) {
+            return gestureActive;
+        }
+    }
 }
