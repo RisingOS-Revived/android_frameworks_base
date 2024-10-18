@@ -489,6 +489,14 @@
                 <action android:name="com.android.systemui.screenshot.SHOW_ERROR" />
             </intent-filter>
         </receiver>
+        
+        <receiver android:name=".assistant.AssistantOverlayReceiver"
+            android:process=":aiassistant"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.android.server.policy.ASSISTANT_STATE_CHANGED" />
+            </intent-filter>
+        </receiver>
 
         <activity android:name=".screenshot.scroll.LongScreenshotActivity"
                   android:theme="@style/LongScreenshotActivity"
