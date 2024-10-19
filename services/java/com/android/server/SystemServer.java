@@ -129,6 +129,7 @@ import com.android.server.alarm.AlarmManagerService;
 import com.android.server.am.ActivityManagerService;
 import com.android.server.ambientcontext.AmbientContextManagerService;
 import com.android.server.android.CustomDeviceConfigService;
+import com.android.server.app.AppLockManagerService;
 import com.android.server.app.GameManagerService;
 import com.android.server.appbinding.AppBindingService;
 import com.android.server.appfunctions.AppFunctionManagerService;
@@ -473,9 +474,6 @@ public final class SystemServer implements Dumpable {
     private static final String RANGING_SERVICE_CLASS = "com.android.server.ranging.RangingService";
 
     private static final String TETHERING_CONNECTOR_CLASS = "android.net.ITetheringConnector";
-
-    private static final String APP_LOCK_SERVICE_CLASS =
-            "com.android.server.app.AppLockManagerService$Lifecycle";
 
     private static final String PERSISTENT_DATA_BLOCK_PROP = "ro.frp.pst";
 
@@ -2767,7 +2765,7 @@ public final class SystemServer implements Dumpable {
             t.traceEnd();
 
             t.traceBegin("AppLockManagerService");
-            mSystemServiceManager.startService(APP_LOCK_SERVICE_CLASS);
+            mSystemServiceManager.startService(AppLockManagerService.Lifecycle.class);
             t.traceEnd();
 
             if (!isWatch) {
