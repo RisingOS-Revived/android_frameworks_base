@@ -4319,6 +4319,10 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 if (intent == null) {
                     return;
                 }
+                final String action = intent.getAction();
+                if (action == null) {
+                    return;
+                }
                 Uri data = intent.getData();
                 if (data == null) {
                     return;
