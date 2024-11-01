@@ -496,10 +496,8 @@ public final class SQLiteDatabase extends SQLiteClosable {
         mConfigurationLocked.lookasideSlotCount = lookasideSlotCount;
 
         // Disable lookaside allocator on low-RAM devices
-        if (ActivityManager.isLowRamDeviceStatic()) {
-            mConfigurationLocked.lookasideSlotCount = 0;
-            mConfigurationLocked.lookasideSlotSize = 0;
-        }
+        mConfigurationLocked.lookasideSlotCount = 0;
+        mConfigurationLocked.lookasideSlotSize = 0;
         long effectiveTimeoutMs = Long.MAX_VALUE;
         // Never close idle connections for in-memory databases
         if (!mConfigurationLocked.isInMemoryDb()) {
