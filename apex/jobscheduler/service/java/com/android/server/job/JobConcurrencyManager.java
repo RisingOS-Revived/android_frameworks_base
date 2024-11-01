@@ -96,24 +96,7 @@ class JobConcurrencyManager {
 
     static final String CONFIG_KEY_PREFIX_CONCURRENCY = "concurrency_";
     private static final String KEY_CONCURRENCY_LIMIT = CONFIG_KEY_PREFIX_CONCURRENCY + "limit";
-    static final int DEFAULT_CONCURRENCY_LIMIT;
-
-    static {
-        if (ActivityManager.isLowRamDeviceStatic()) {
-            DEFAULT_CONCURRENCY_LIMIT = 8;
-        } else {
-            final long ramBytes = new MemInfoReader().getTotalSize();
-            if (ramBytes <= GIGABYTES.toBytes(6)) {
-                DEFAULT_CONCURRENCY_LIMIT = 16;
-            } else if (ramBytes <= GIGABYTES.toBytes(8)) {
-                DEFAULT_CONCURRENCY_LIMIT = 20;
-            } else if (ramBytes <= GIGABYTES.toBytes(12)) {
-                DEFAULT_CONCURRENCY_LIMIT = 32;
-            } else {
-                DEFAULT_CONCURRENCY_LIMIT = 40;
-            }
-        }
-    }
+    static final int DEFAULT_CONCURRENCY_LIMIT = 8;
 
     private static final String KEY_SCREEN_OFF_ADJUSTMENT_DELAY_MS =
             CONFIG_KEY_PREFIX_CONCURRENCY + "screen_off_adjustment_delay_ms";
