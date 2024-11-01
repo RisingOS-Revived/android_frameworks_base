@@ -178,8 +178,7 @@ public final class PackageUtils {
      *          device, otherwise a byte array of size {@link #HIGH_RAM_BUFFER_SIZE_BYTES}
      */
     public static @NonNull byte[] createLargeFileBuffer() {
-        int bufferSize = ActivityManager.isLowRamDeviceStatic()
-                ? LOW_RAM_BUFFER_SIZE_BYTES : HIGH_RAM_BUFFER_SIZE_BYTES;
+        int bufferSize = LOW_RAM_BUFFER_SIZE_BYTES;
         return new byte[bufferSize];
     }
 
