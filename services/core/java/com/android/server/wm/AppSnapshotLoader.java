@@ -103,7 +103,7 @@ class AppSnapshotLoader {
 
         if (isPreQLegacyProto) {
             // Android O or Android P
-            if (ActivityManager.isLowRamDeviceStatic() && !highResFileExists) {
+            if (!highResFileExists) {
                 // Android P w/ low_ram=true
                 preRLegacyScale = 0.6f;
                 // Force bitmapFile to always be *_reduced.jpg
@@ -114,14 +114,9 @@ class AppSnapshotLoader {
             }
         } else if (isPreRLegacySnapshot) {
             // If not pre-Q but is pre-R, then it must be Android Q
-            if (ActivityManager.isLowRamDeviceStatic()) {
-                preRLegacyScale = legacyScale;
-                // Force bitmapFile to always be *_reduced.jpg
-                forceLoadReducedJpeg = true;
-            } else {
-                preRLegacyScale =
-                        loadLowResolutionBitmap ? 0.5f * legacyScale : legacyScale;
-            }
+            preRLegacyScale = legacyScale;
+            // Force bitmapFile to always be *_reduced.jpg
+            forceLoadReducedJpeg = true;
         }
         return new PreRLegacySnapshotConfig(preRLegacyScale, forceLoadReducedJpeg);
     }
