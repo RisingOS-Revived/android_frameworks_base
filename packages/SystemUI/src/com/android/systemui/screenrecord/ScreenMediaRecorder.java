@@ -460,7 +460,7 @@ public class ScreenMediaRecorder extends MediaProjection.Callback {
      * Returns the required {@code Size} of the thumbnail.
      */
     private Size getRequiredThumbnailSize() {
-        boolean isLowRam = ActivityManager.isLowRamDeviceStatic();
+        boolean isLowRam = true;
         int thumbnailIconHeight = mContext.getResources().getDimensionPixelSize(isLowRam
                 ? R.dimen.notification_big_picture_max_height_low_ram
                 : R.dimen.notification_big_picture_max_height);

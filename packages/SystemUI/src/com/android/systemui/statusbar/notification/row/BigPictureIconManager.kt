@@ -208,7 +208,7 @@ constructor(
     }
 
     private fun isLowRam(): Boolean {
-        return ActivityManager.isLowRamDeviceStatic()
+        return true
     }
 
     private fun getMaxWidth() =

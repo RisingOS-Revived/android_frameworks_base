@@ -544,7 +544,7 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
             // We downscale the loaded drawable to reasonable size to protect against applications
             // using too much memory. The size can be tweaked in config.xml. Drawables that are
             // already sized properly won't be touched.
-            boolean isLowRamDevice = ActivityManager.isLowRamDeviceStatic();
+            boolean isLowRamDevice = true;
             Resources res = sysuiContext.getResources();
             int maxIconSize = res.getDimensionPixelSize(isLowRamDevice
                     ? com.android.internal.R.dimen.notification_small_icon_size_low_ram
