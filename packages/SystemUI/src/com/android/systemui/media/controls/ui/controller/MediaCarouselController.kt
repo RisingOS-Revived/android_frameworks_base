@@ -405,6 +405,7 @@ constructor(
             }
         }
         listenForLockscreenSettingChanges(applicationScope)
+        listenForPeekDisplayExpansionChanges(applicationScope)
 
         // Notifies all active players about animation scale changes.
         bgExecutor.execute {
@@ -567,6 +568,21 @@ constructor(
                 }
         }
     }
+    
+    @VisibleForTesting
+    internal fun listenForPeekDisplayExpansionChanges(scope: CoroutineScope): Job {
+        return scope.launch {
+            systemSettings
+                .observerFlow(UserHandle.USER_ALL, "peek_display_expanded")
+                .onStart { emit(Unit) }
+                .map { getMediaLockScreenSetting() }
+                .distinctUntilChanged()
+                .collectLatest {
+                    allowMediaPlayerOnLockScreen = it
+                    updateHostVisibility()
+                }
+        }
+    }
 
     @VisibleForTesting
     internal fun listenForAnyStateToDozingTransition(scope: CoroutineScope): Job {
@@ -698,6 +714,12 @@ constructor(
                 true,
                 UserHandle.USER_CURRENT,
             )
+            val isPeekDisplayExpanded = systemSettings.getBoolForUser(
+                "peek_display_expanded",
+                false,
+                UserHandle.USER_CURRENT
+            )
+            isMediaControlsEnabled && !isPeekDisplayExpanded
         }
     }
 
