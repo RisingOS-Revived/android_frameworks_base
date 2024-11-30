@@ -656,6 +656,7 @@ constructor(
             1 -> ObjectAnimator.ofFloat(v, "rotation", 0f, 360f)
             2 -> ObjectAnimator.ofFloat(v, "rotationX", 0f, 360f)
             3 -> ObjectAnimator.ofFloat(v, "rotationY", 0f, 360f)
+	    4 -> ObjectAnimator.ofFloat(v, "translationX", 0f, 25f, -25f, 25f, -25f, 15f, -15f, 6f, -6f, 0f)
             else -> return
         }
 
