@@ -653,10 +653,21 @@ constructor(
 
     private fun setAnimationTile(v: View) {
         val animTile: ObjectAnimator = when (animStyle) {
-            1 -> ObjectAnimator.ofFloat(v, "rotation", 0f, 360f)
-            2 -> ObjectAnimator.ofFloat(v, "rotationX", 0f, 360f)
-            3 -> ObjectAnimator.ofFloat(v, "rotationY", 0f, 360f)
-	    4 -> ObjectAnimator.ofFloat(v, "translationX", 0f, 25f, -25f, 25f, -25f, 15f, -15f, 6f, -6f, 0f)
+	    1 -> ObjectAnimator.ofFloat(v, "rotation", 0f, 360f) // Rotate
+	    2 -> ObjectAnimator.ofFloat(v, "rotationX", 0f, 360f) // Flip X
+	    3 -> ObjectAnimator.ofFloat(v, "rotationY", 0f, 360f) // Flip Y
+	    4 -> ObjectAnimator.ofFloat(v, "translationX", 0f, 25f, -25f, 25f, -25f, 15f, -15f, 6f, -6f, 0f) // Shake
+	    5 -> ObjectAnimator.ofFloat(v, "alpha", 0f, 1f) // Fade In
+	    6 -> ObjectAnimator.ofFloat(v, "scaleX", 1f, 1.2f, 0.8f, 1f) // Bounce Effect (Scale X)
+	    7 -> ObjectAnimator.ofFloat(v, "scaleY", 1f, 1.2f, 0.8f, 1f) // Bounce Effect (Scale Y)
+	    8 -> ObjectAnimator.ofFloat(v, "scaleX", 1f, 1.1f, 1f).apply {
+	        repeatCount = 0
+	        duration = 1000
+	    } // Pulse Animation X
+	    9 -> ObjectAnimator.ofFloat(v, "scaleY", 1f, 1.1f, 1f).apply {
+	        repeatCount = 0
+	        duration = 1000
+	    } // Pulse Animation Y
             else -> return
         }
 
