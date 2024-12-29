@@ -2664,10 +2664,12 @@ public final class CachedAppOptimizer {
                 (current, free) -> {
                     if (free < mFreezerBinderAsyncThreshold) {
                         Slog.w(TAG_AM, "pid " + current
-                                + " has " + free + " free async space, killing");
-                        killProcess(current, "Async binder space running out while frozen",
-                                ApplicationExitInfo.REASON_FREEZER,
-                                ApplicationExitInfo.SUBREASON_FREEZER_BINDER_ASYNC_FULL);
+                                + " has " + free + " free async space, unfreezing temporarily");
+                        for (ProcessRecord process : mAm.getLruProcessesLOSP()) {
+                            if (process.getPid() == current) {
+                                unfreezeTemporarily(process, UNFREEZE_REASON_PING);
+                            }
+                        }
                     }
                 },
 

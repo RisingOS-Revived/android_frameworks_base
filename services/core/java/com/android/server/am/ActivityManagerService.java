@@ -2821,6 +2821,11 @@ public class ActivityManagerService extends IActivityManager.Stub
         return mProcessList.getProcessNamesLOSP();
     }
 
+    @GuardedBy(anyOf = {"this", "mProcLock"})
+    final ArrayList<ProcessRecord> getLruProcessesLOSP() {
+        return mProcessList.getLruProcessesLOSP();
+    }
+
     void notifyPackageUse(String packageName, int reason) {
         getPackageManagerInternal().notifyPackageUse(packageName, reason);
     }
