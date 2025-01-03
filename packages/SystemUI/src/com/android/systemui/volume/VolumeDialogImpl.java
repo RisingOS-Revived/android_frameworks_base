@@ -1176,8 +1176,6 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
     }
 
     private void addSliderHapticsToRow(VolumeRow row) {
-        row.createPlugin(row.slider, mVibratorHelper, mMSDLPlayer, mSystemClock);
-        HapticSliderViewBinder.bind(row.slider, row.mHapticPlugin);
     }
 
     @VisibleForTesting void addSliderHapticsToRows() {
@@ -2713,6 +2711,7 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
             return;  // don't update if user is sliding
         }
         final int progress = row.slider.getProgress();
+        mVolumeUtils.performVolumeHaptics(mShowing, progress, row.ss.levelMax);
         final int level = getVolumeFromProgress(row.ss, row.slider, progress);
         final boolean rowVisible = row.view.getVisibility() == VISIBLE;
         final boolean inGracePeriod = (SystemClock.uptimeMillis() - row.userAttempt)
@@ -3261,6 +3260,7 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
                             userLevel);
                 }
             }
+            mVolumeUtils.performVolumeHaptics(mShowing, mRow.slider.getProgress(), mRow.ss.levelMax);
         }
 
         @Override
