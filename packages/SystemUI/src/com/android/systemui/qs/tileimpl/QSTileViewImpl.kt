@@ -940,20 +940,14 @@ constructor(
         lastIconTint = icon.getColor(state)
 
         // Long-press effects
-        updateLongPressEffect(state.handlesLongClick)
+	longPressEffect?.qsTile?.state?.handlesLongClick = hasLongClickEffect
     }
 
-    private fun updateLongPressEffect(handlesLongClick: Boolean) {
-        // The long press effect in the tile can't be updated if it is still running
+    private fun updateLongPressEffect(hasLongClickEffect: Boolean) {
         if (
-            longPressEffect?.state != QSLongPressEffect.State.IDLE &&
-                longPressEffect?.state != QSLongPressEffect.State.CLICKED
-        )
-            return
-
-        longPressEffect.qsTile?.state?.handlesLongClick = handlesLongClick
-        if (hasLongClickEffect && handlesLongClick &&
-                longPressEffect.initializeEffect(longPressEffectDuration)) {
+            hasLongClickEffect &&
+            longPressEffect?.initializeEffect(longPressEffectDuration) == true
+        ) {
             showRippleEffect = false
             longPressEffect.qsTile?.state?.state = lastState // Store the tile's state
             longPressEffect.resetState()
