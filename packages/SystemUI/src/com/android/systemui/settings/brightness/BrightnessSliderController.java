@@ -258,6 +258,7 @@ public class BrightnessSliderController extends ViewController<BrightnessSliderV
     }
 
     protected void handleSliderProgressChange(SeekBar seekBar, int progress, boolean fromUser) {
+        mView.setPercentage(progress);
         if (mListener != null) {
             mListener.onChanged(mTracking, progress, false);
             if (fromUser && mBrightnessSliderHapticPlugin != null) {
