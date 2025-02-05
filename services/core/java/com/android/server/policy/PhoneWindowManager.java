@@ -877,9 +877,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     private SmartPowerOffService mSmartPowerOffService;
     private boolean mSmartPowerOffEnabled;
-    
-    private String mPowerButtonDoublePressAction;
-    private String mPowerButtonDoublePressPkg;
 
     private class PolicyHandler extends Handler {
 
@@ -1156,12 +1153,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.LOCKSCREEN_ENABLE_POWER_MENU), true, this,
                     UserHandle.USER_ALL);
-            resolver.registerContentObserver(Settings.System.getUriFor(
-                    "power_button_action_double_press"), true, this,
-                    UserHandle.USER_ALL);
-            resolver.registerContentObserver(Settings.System.getUriFor(
-                    "power_button_action_double_press_custom_app_pkg"), true, this,
-                    UserHandle.USER_ALL);
             updateSettings();
         }
 
@@ -1387,7 +1378,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         + mShortPressOnPowerBehavior);
 
         if (count == 2) {
-            performPowerDoublePressAction(eventTime, interactive);
+            powerMultiPressAction(eventTime, interactive, mDoublePressOnPowerBehavior);
         } else if (count == 3) {
             powerMultiPressAction(eventTime, interactive, mTriplePressOnPowerBehavior);
         } else if (count > 3 && count <= getMaxMultiPressPowerCount()) {
@@ -1437,79 +1428,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     break;
                 }
             }
-        }
-    }
-
-    private void performPowerDoublePressAction(long eventTime, boolean interactive) {
-        switch (mPowerButtonDoublePressAction) {
-            case "none":
-                break;
-            case "camera":
-                final boolean keyguardActive = (mKeyguardDelegate != null
-                        && (mDefaultDisplayPolicy.isAwake() ? isKeyguardShowingAndNotOccluded() :
-                        mKeyguardDelegate.isShowing()));
-                Intent intent = new Intent(keyguardActive ? MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA_SECURE
-                        : MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA);
-                startActivityAsUser(intent, UserHandle.CURRENT_OR_SELF);
-                break;
-            case "mute":
-                AudioManager am = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
-                if (am.getRingerMode() == AudioManager.RINGER_MODE_SILENT) {
-                    am.setRingerMode(AudioManager.RINGER_MODE_NORMAL);
-                    Toast.makeText(mContext, "Phone unmuted", Toast.LENGTH_SHORT).show();
-                } else {
-                    am.setRingerMode(AudioManager.RINGER_MODE_SILENT);
-                    Toast.makeText(mContext, "Phone silenced", Toast.LENGTH_SHORT).show();
-                }
-                break;
-            case "flashlight":
-                toggleTorch();
-                break;
-            case "qr_scanner":
-                try {
-                    String qrScannerComponent = mContext.getResources().getString(
-                            com.android.internal.R.string.config_defaultQrCodeComponent
-                    );
-                    Intent qrIntent;
-                    if (!qrScannerComponent.isEmpty()) {
-                        qrIntent = new Intent();
-                        qrIntent.setComponent(ComponentName.unflattenFromString(qrScannerComponent));
-                        qrIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    } else {
-                        qrIntent = new Intent();
-                        qrIntent.setComponent(new ComponentName(
-                                "com.google.android.googlequicksearchbox",
-                                "com.google.android.apps.search.lens.LensActivity"
-                        ));
-                        qrIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    }
-                    startActivityAsUser(qrIntent, UserHandle.CURRENT_OR_SELF);
-                } catch (Exception e) {
-                    Toast.makeText(mContext, "Unable to launch QR Scanner", Toast.LENGTH_SHORT).show();
-                }
-                break;
-            case "wallet":
-                Intent walletIntent = mContext.getPackageManager().getLaunchIntentForPackage("com.google.android.apps.walletnfcrel");
-                if (walletIntent != null) {
-                    startActivityAsUser(walletIntent, UserHandle.CURRENT_OR_SELF);
-                }
-                break;
-            case "custom_app":
-                if (mPowerButtonDoublePressPkg != null && !mPowerButtonDoublePressPkg.isEmpty()) {
-                    Intent customAppIntent = mContext.getPackageManager().getLaunchIntentForPackage(mPowerButtonDoublePressPkg);
-                    if (customAppIntent != null) {
-                        startActivityAsUser(customAppIntent, UserHandle.CURRENT_OR_SELF);
-                    }
-                }
-                break;
-            case "brightness_boost":
-                if (!interactive) {
-                    wakeUpFromWakeKey(eventTime, KeyEvent.KEYCODE_POWER, false);
-                }
-                mPowerManager.boostScreenBrightness(eventTime);
-                break;
-            default:
-                break;
         }
     }
 
@@ -3571,14 +3489,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             mCameraLaunch = LineageSettings.System.getIntForUser(resolver,
                     LineageSettings.System.CAMERA_LAUNCH, 0,
                     UserHandle.USER_CURRENT) == 1;
-                    
-            mPowerButtonDoublePressAction = Settings.System.getStringForUser(resolver,
-                "power_button_action_double_press", UserHandle.USER_CURRENT);
-            if (mPowerButtonDoublePressAction == null) {
-                mPowerButtonDoublePressAction = "camera";
-            }
-            mPowerButtonDoublePressPkg = Settings.System.getStringForUser(resolver,
-                "power_button_action_double_press_custom_app_pkg", UserHandle.USER_CURRENT);
 
             boolean smartPowerOffEnabled = Settings.System.getIntForUser(resolver,
                     "smart_power_off_enabled", 0,
