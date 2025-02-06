@@ -72,6 +72,7 @@ import com.android.systemui.statusbar.policy.FlashlightController;
 import dagger.Lazy;
 
 import java.util.function.Consumer;
+import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -127,6 +128,17 @@ public class Dependency {
     private final ArrayMap<Object, Object> mDependencies = new ArrayMap<>();
     private final ArrayMap<Object, LazyDependencyCreator> mProviders = new ArrayMap<>();
 
+    /**
+     * Generic executor on a background thread.
+     */
+    private static final String BACKGROUND_EXECUTOR_NAME = "background_executor";
+
+    /**
+     * Generic executor on a background thread.
+     */
+    public static final DependencyKey<Executor> BACKGROUND_EXECUTOR =
+            new DependencyKey<>(BACKGROUND_EXECUTOR_NAME);
+
     @Inject DumpManager mDumpManager;
 
     @Inject Lazy<BroadcastDispatcher> mBroadcastDispatcher;
@@ -176,6 +188,7 @@ public class Dependency {
     @Inject Lazy<QSImpl> mQSImpl;
     @Inject Lazy<ScrimController> mScrimController;
     @Inject Lazy<NotificationListener> mNotificationListener;
+    @Inject @Background Lazy<Executor> mBackgroundExecutor;
 
     @Inject
     public Dependency() {
@@ -233,6 +246,7 @@ public class Dependency {
         mProviders.put(QSImpl.class, mQSImpl::get);
         mProviders.put(ScrimController.class, mScrimController::get);
         mProviders.put(NotificationListener.class, mNotificationListener::get);
+        mProviders.put(BACKGROUND_EXECUTOR, mBackgroundExecutor::get);
 
         Dependency.setInstance(this);
     }

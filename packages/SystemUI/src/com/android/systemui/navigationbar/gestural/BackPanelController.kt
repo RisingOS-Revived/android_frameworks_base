@@ -20,6 +20,7 @@ import android.content.res.Configuration
 import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Point
+import android.graphics.Rect
 import android.os.Handler
 import android.util.Log
 import android.util.MathUtils
@@ -27,6 +28,7 @@ import android.view.Gravity
 import android.view.HapticFeedbackConstants
 import android.view.MotionEvent
 import android.view.VelocityTracker
+import android.view.View
 import android.view.ViewConfiguration
 import android.view.WindowManager
 import androidx.annotation.VisibleForTesting
@@ -37,7 +39,9 @@ import com.android.app.viewcapture.ViewCaptureAwareWindowManager
 import com.android.internal.jank.Cuj
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.internal.util.LatencyTracker
+import com.android.systemui.Dependency
 import com.android.systemui.plugins.NavigationEdgeBackPlugin
+import com.android.systemui.shared.navigationbar.RegionSamplingHelper
 import com.android.systemui.statusbar.VibratorHelper
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.util.ViewController
@@ -45,6 +49,7 @@ import com.android.systemui.util.concurrency.BackPanelUiThread
 import com.android.systemui.util.concurrency.UiThreadContext
 import com.android.systemui.util.time.SystemClock
 import java.io.PrintWriter
+import java.util.concurrent.Executor
 import javax.inject.Inject
 import kotlin.math.abs
 import kotlin.math.max
@@ -135,6 +140,11 @@ internal constructor(
     @VisibleForTesting internal var params: EdgePanelParams = EdgePanelParams(resources)
     @VisibleForTesting internal var currentState: GestureState = GestureState.GONE
     private var previousState: GestureState = GestureState.GONE
+    
+    private var regionSamplingHelper: RegionSamplingHelper? = null
+    private val samplingRect = Rect()
+    private var leftInset = 0
+    private var rightInset = 0
 
     // Screen attributes
     private lateinit var layoutParams: WindowManager.LayoutParams
@@ -293,6 +303,22 @@ internal constructor(
         updateArrowState(GestureState.GONE, force = true)
         updateRestingArrowDimens()
         configurationController.addCallback(configurationListener)
+        regionSamplingHelper = RegionSamplingHelper(
+            mView,
+            object : RegionSamplingHelper.SamplingCallback {
+                override fun onRegionDarknessChanged(isRegionDark: Boolean) {
+                    mView.setIsDark(!isRegionDark)
+                }
+                override fun getSampledRegion(sampledView: View): Rect {
+                    return samplingRect
+                }
+                override fun isSamplingEnabled(): Boolean {
+                    return context.displayId == 0
+                }
+            },
+            Dependency.get(Dependency.BACKGROUND_EXECUTOR) as Executor
+        )
+        regionSamplingHelper?.setWindowVisible(true)
     }
 
     /** Update the arrow direction. The arrow should point the same way for both panels. */
@@ -319,6 +345,7 @@ internal constructor(
                 startIsLeft = mView.isLeftPanel
                 hasPassedDragSlop = false
                 mView.resetStretch()
+                regionSamplingStart()
                 mView.triggerLongSwipe = false
             }
             MotionEvent.ACTION_MOVE -> {
@@ -384,6 +411,7 @@ internal constructor(
                     }
                 }
                 velocityTracker = null
+                regionSamplingStop()
             }
             MotionEvent.ACTION_CANCEL -> {
                 mView.triggerLongSwipe = triggerLongSwipe
@@ -393,8 +421,39 @@ internal constructor(
                 interactionJankMonitor.cancel(Cuj.CUJ_BACK_PANEL_ARROW)
                 updateArrowState(GestureState.GONE)
                 velocityTracker = null
+                regionSamplingStop()
             }
         }
+    }
+    
+    fun regionSamplingStart() {
+        regionSamplingHelper?.start(samplingRect)
+    }
+
+    fun regionSamplingStop() {
+        regionSamplingHelper?.stop()
+    }
+
+    fun updateSamplingRect() {
+        val inset: Int = if (mView.getIsLeftPanel()) {
+            leftInset.toInt()
+        } else {
+            displaySize.x.toInt() - rightInset.toInt() - layoutParams.width.toInt()
+        }
+        updateSamplingRect(inset, layoutParams.y.toInt(), displaySize.x.toInt())
+    }
+
+    fun updateSamplingRect(left: Int, top: Int, width: Int) {
+        val rect = Rect()
+        mView.getArrowBoundingBox().round(rect)
+        samplingRect.set(rect)
+        samplingRect.offset(left, top)
+        if (samplingRect.right > width) {
+            samplingRect.offset(width - samplingRect.right, 0)
+        } else if (samplingRect.left < 0) {
+            samplingRect.offset(-samplingRect.left, 0)
+        }
+        regionSamplingHelper?.updateSamplingRect()
     }
 
     private fun cancelAllPendingAnimations() {
@@ -536,6 +595,7 @@ internal constructor(
 
         setArrowStrokeAlpha(gestureProgress)
         setVerticalTranslation(yOffset)
+        updateSamplingRect()
     }
 
     private fun setArrowStrokeAlpha(gestureProgress: Float?) {
@@ -668,6 +728,8 @@ internal constructor(
     override fun onDestroy() {
         cancelFailsafe()
         windowManager.removeView(mView)
+        regionSamplingHelper?.stop()
+        regionSamplingHelper = null
     }
 
     override fun setIsLeftPanel(isLeftPanel: Boolean) {
@@ -680,7 +742,10 @@ internal constructor(
             }
     }
 
-    override fun setInsets(insetLeft: Int, insetRight: Int) = Unit
+    override fun setInsets(insetLeft: Int, insetRight: Int) {
+        leftInset = insetLeft
+        rightInset = insetRight
+    }
 
     override fun setBackCallback(callback: NavigationEdgeBackPlugin.BackCallback) {
         backCallback = callback
@@ -774,6 +839,7 @@ internal constructor(
         yPosition = max(yPosition, params.minArrowYPosition.toFloat())
         yPosition -= layoutParams.height / 2.0f
         layoutParams.y = MathUtils.constrain(yPosition.toInt(), 0, displaySize.y)
+        updateSamplingRect()
     }
 
     override fun setDisplaySize(displaySize: Point) {
