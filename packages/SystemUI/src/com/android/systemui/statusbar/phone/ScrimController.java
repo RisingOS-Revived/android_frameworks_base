@@ -662,6 +662,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
                 mTimeTicker.schedule(mDozeParameters.getWallpaperAodDuration(),
                         AlarmTimeout.MODE_IGNORE_IF_SCHEDULED);
             });
+            com.android.systemui.util.ScrimUtils.getInstance(mScrimBehind.getContext()).onScrimDispatched();
         } else {
             DejankUtils.postAfterTraversal(mTimeTicker::cancel);
         }

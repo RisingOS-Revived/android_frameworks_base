@@ -68,6 +68,8 @@ import com.android.systemui.media.dialog.MediaOutputDialogManager;
 import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.FlashlightController;
+import com.android.systemui.statusbar.policy.KeyguardStateController;
+import com.android.systemui.statusbar.phone.ScrimController;
 
 import dagger.Lazy;
 
