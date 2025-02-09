@@ -1278,8 +1278,6 @@ public abstract class LayoutInflater {
             case "android.app.ViewStub": // 227 occurrences
             case "android.webkit.ViewStub": // 226 occurrences
                 return new android.view.ViewStub(context, attributeSet);
-            case "android.widget.TextView": // 4722 occurrences
-                return new android.widget.TextView(context, attributeSet);
             case "android.widget.ImageView": // 3044 occurrences
                 return new android.widget.ImageView(context, attributeSet);
             case "android.widget.RelativeLayout": // 2665 occurrences
