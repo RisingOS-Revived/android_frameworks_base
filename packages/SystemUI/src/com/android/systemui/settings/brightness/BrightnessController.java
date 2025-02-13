@@ -46,6 +46,8 @@ import android.widget.ImageView;
 
 import androidx.annotation.Nullable;
 
+import com.android.settingslib.Utils;
+
 import com.android.internal.display.BrightnessSynchronizer;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
@@ -452,6 +454,12 @@ public class BrightnessController implements ToggleSlider.Listener, MirroredBrig
             mIcon.setBackgroundResource(mAutomatic ?
                     R.drawable.bg_qs_brightness_auto_on :
                     R.drawable.bg_qs_brightness_auto_off);
+            int color = Utils.getColorAttrDefaultColor(mContext, mAutomatic 
+                    ? android.R.attr.textColorPrimaryInverse 
+                    : android.R.attr.colorAccent);
+            mIcon.post(() -> {
+                mIcon.getDrawable().setTint(color);
+            });
         }
     }
 
