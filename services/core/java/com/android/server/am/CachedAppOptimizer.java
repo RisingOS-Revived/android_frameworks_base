@@ -2667,7 +2667,7 @@ public final class CachedAppOptimizer {
                     if (free < mFreezerBinderAsyncThreshold) {
                         Slog.w(TAG_AM, "pid " + current
                                 + " has " + free + " free async space, unfreezing temporarily");
-                        for (ProcessRecord process : mAm.getLruProcessesLOSP()) {
+                        for (ProcessRecord process : new ArrayList<>(mAm.getLruProcessesLOSP())) {
                             if (process.getPid() == current) {
                                 unfreezeTemporarily(process, UNFREEZE_REASON_PING);
                             }
