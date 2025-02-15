@@ -1363,11 +1363,9 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         // Do not reset the default (current) IME when it is a 3rd-party IME
         String selectedMethodId = bindingController.getSelectedMethodId();
         final InputMethodSettings settings = InputMethodSettingsRepository.get(userId);
-        if (selectedMethodId != null) {
-            InputMethodInfo selectedMethod = settings.getMethodMap().get(selectedMethodId);
-            if (selectedMethod != null && !selectedMethod.isSystem()) {
-                return;
-            }
+        if (selectedMethodId != null
+                && !settings.getMethodMap().get(selectedMethodId).isSystem()) {
+            return;
         }
         final List<InputMethodInfo> suitableImes = InputMethodInfoUtils.getDefaultEnabledImes(
                 context, settings.getEnabledInputMethodList());
