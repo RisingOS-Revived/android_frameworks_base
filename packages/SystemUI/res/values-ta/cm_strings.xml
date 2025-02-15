@@ -23,7 +23,7 @@
     <string name="global_action_restart_system">முறைமை</string>
     <string name="global_action_restart_recovery">மீட்டெடுப்பு</string>
     <string name="global_action_restart_bootloader">தொடக்கயேற்றி</string>
-    <string name="global_action_restart_download">பதிவிறக்குக</string>
+    <string name="global_action_restart_download">பதிவிறக்கம்</string>
     <string name="global_action_restart_fastboot">விரைதொடக்கம்</string>
     <string name="global_action_restart_progress">மறுதொடங்குகின்றது\u2026</string>
     <string name="global_action_restart_recovery_progress">மீட்டெடுப்பு முறையில் மறுதொடங்குகின்றது\u2026</string>
@@ -31,12 +31,12 @@
     <string name="global_action_restart_download_progress">பதிவிறக்க முறையில் மறுதொடங்குகின்றது\u2026</string>
     <string name="global_action_restart_fastboot_progress">விரைதொடக்க முறையில் மறுதொடங்குகின்றது\u2026</string>
     <string name="global_action_current_user">தற்போது</string>
-    <string name="global_action_users">பயனர்</string>
+    <string name="global_action_users">பயனர்கள்</string>
     <string name="status_bar_icons_title">நிலைப்பட்டிப் படவுருகள்</string>
     <string name="drag_or_tap_to_add_tiles">பிடித்து இழுத்து அல்லது தட்டி ஓடுகளைச் சேர்க்க</string>
     <string name="quick_settings_ambient_display_label">சூழல்சார் திரை</string>
-    <string name="accessibility_quick_settings_ambient_display_off">சூழல்சார் திரை இயக்கம்.</string>
-    <string name="accessibility_quick_settings_ambient_display_on">சூழல்சார் திரை நிறுத்தம்.</string>
+    <string name="accessibility_quick_settings_ambient_display_off">சூழல்சார் திரை நிறுத்தம்.</string>
+    <string name="accessibility_quick_settings_ambient_display_on">சூழல்சார் திரை இயக்கம்.</string>
     <string name="quick_settings_aod_label">AOD</string>
     <string name="quick_settings_aod_off_powersave_label">AOD நிறுத்தம்\nமின்கலச் சேமிப்பான்</string>
     <string name="quick_settings_caffeine_label">தொடர்விழிப்பு</string>
@@ -47,7 +47,7 @@
     <string name="accessibility_quick_settings_heads_up_on">தலையுயர்த்தி இயக்கம்.</string>
     <string name="quick_settings_powershare_label">கம்பியில்லா மின்பகிர்வு</string>
     <string name="quick_settings_powershare_off_powersave_label">கம்பியில்லா மின்பகிர்வு நிறுத்தம்\nமின்கலச் சேமிப்பான்</string>
-    <string name="quick_settings_powershare_off_low_battery_label">கம்பியில்லா மின்பகிர்வு இயக்கம்\nமின்கலம் மிகக்குறைவு</string>
+    <string name="quick_settings_powershare_off_low_battery_label">கம்பியில்லா மின்பகிர்வு நிறுத்தம்\nமின்கலம் மிகக்குறைவு</string>
     <string name="quick_settings_powershare_enabled_label">கம்பியில்லா மின்பகிர்வு இயக்கப்பட்டது</string>
     <string name="quick_settings_reading_mode">படிப்புப் பயன்முறை</string>
     <string name="accessibility_quick_settings_reading_mode_on">படிப்புப் பயன்முறை இயக்கம்.</string>

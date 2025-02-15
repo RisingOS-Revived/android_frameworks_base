@@ -32,12 +32,13 @@
     <string name="global_action_restart_fastboot_progress">درحال راه‌اندازی مجدد به حالت فست‌بوت</string>
     <string name="global_action_current_user">فعلی</string>
     <string name="global_action_users">کاربران</string>
+    <string name="status_bar_icons_title">نمادهای نوار وضعیت</string>
+    <string name="drag_or_tap_to_add_tiles">نگه دارید &amp; بکشید یا ضربه بزنید تا کاشی‌ها را اضافه کنید.</string>
     <string name="quick_settings_ambient_display_label">نمایش حساس به محیط</string>
     <string name="accessibility_quick_settings_ambient_display_off">نمایش حساس به محیط خاموش.</string>
     <string name="accessibility_quick_settings_ambient_display_on">نمایش حساس به محیط روشن.</string>
     <string name="quick_settings_aod_label">صفحه نمایش همیشه روشن</string>
-    <string name="quick_settings_aod_off_powersave_label">AOD خاموش
-حالت ذخیره‌ی نیرو</string>
+    <string name="quick_settings_aod_off_powersave_label">صفحه همیشه روشن خاموش\nحالت ذخیره‌ی نیرو</string>
     <string name="quick_settings_caffeine_label">کافئین</string>
     <string name="accessibility_quick_settings_caffeine_off">حالت کافئین خاموش.</string>
     <string name="accessibility_quick_settings_caffeine_on">حالت کافئین روشن.</string>
@@ -66,4 +67,18 @@
     <string name="vpn_credentials_dialog_connect">اتصال</string>
     <string name="accessibility_dpad_left">نشانگر چپ</string>
     <string name="accessibility_dpad_right">نشانگر راست</string>
+    <string name="status_bar_firewall">دیوار آتش</string>
+    <string name="screenshot_delete_label">حذف</string>
+    <string name="screenshot_delete_description">حذف عکس صفحه</string>
+    <string name="screenrecord_delete_label">حذف</string>
+    <string name="screenrecord_delete_description">فیلم ضبط صفحه حذف شد</string>
+    <string name="screenrecord_lowquality_label">کیفیت کمتر</string>
+    <string name="screenrecord_lowquality_summary">برای انداره کوچیک تر فایل</string>
+    <string name="screenrecord_longer_timeout_switch_label">محدودیت اندازه فایل بزرگتر</string>
+    <string name="screenrecord_longer_timeout_switch_summary">محدود کردن اندازه ضبط به ۱۵ گیگابایت</string>
+    <string name="screenrecord_skip_time_label">رد کردن زمان‌سنج</string>
+    <string name="screenrecord_skip_time_summary">ردکردن 3 ثانیه انتظار</string>
+    <string name="screenrecord_hevc_switch_label">رمزگذاری HEVC</string>
+    <string name="screenrecord_hevc_switch_summary">از رمزگذار HEVC کارآمدتر استفاده کنید</string>
+    <string name="battery_notification_channel_tv">هشدار باتری</string>
 </resources>
