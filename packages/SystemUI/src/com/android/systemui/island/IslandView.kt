@@ -29,6 +29,7 @@ import android.media.AudioManager
 import android.os.AsyncTask
 import android.os.Bundle
 import android.os.Handler
+import android.os.SystemProperties
 import android.os.UserHandle
 import android.os.VibrationEffect
 import android.os.Vibrator
@@ -81,6 +82,7 @@ class IslandView : ExtendedFloatingActionButton {
 
     companion object {
         private const val TAG = "IslandView"
+        private const val PROP_COMPACT_HUN_ALWAYS_SHOW = "persist.sys.compact_heads_up_notification.always_show"
         private const val ANIMATION_DURATION = 600L
         private const val ANIMATION_DELAY = 150L
         private const val DISMISS_ANIMATION_DURATION = 300L
@@ -164,6 +166,12 @@ class IslandView : ExtendedFloatingActionButton {
         gestureHandler = null
         bgExecutor.shutdownNow()
         handler.removeCallbacksAndMessages(null)
+        // Re-enable compact HUN when island is detached
+        try {
+            SystemProperties.set(PROP_COMPACT_HUN_ALWAYS_SHOW, "1")
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to re-enable compact HUN", e)
+        }
     }
     
     private fun updateForegroundTaskSync() {
@@ -180,6 +188,7 @@ class IslandView : ExtendedFloatingActionButton {
         animator = IslandAnimator(this)
         notificationManager = IslandNotificationManager(context)
         TaskStackChangeListeners.getInstance().registerTaskStackListener(taskStackChangeListener)
+        disableCompactHun()
     }
 
     fun setScroller(scroller: NotificationStackScrollLayout?) {
@@ -533,6 +542,14 @@ class IslandView : ExtendedFloatingActionButton {
 
     fun isCurrentNotifActivityOnTop(packageName: String): Boolean {
         return topActivityPackage.isNotEmpty() && topActivityPackage == packageName
+    }
+
+    private fun disableCompactHun() {
+        try {
+            SystemProperties.set(PROP_COMPACT_HUN_ALWAYS_SHOW, "0")
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to disable compact HUN", e)
+        }
     }
 
 }
