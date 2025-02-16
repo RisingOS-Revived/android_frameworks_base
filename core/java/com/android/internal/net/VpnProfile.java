@@ -496,7 +496,11 @@ public final class VpnProfile implements Cloneable, Parcelable {
         }
     }
 
-    /** Returns {@code true} if the VPN type requires username and password */
+    /**
+     * Returns {@code true} if the VPN type requires username and password.
+     *
+     * <p>In sync with Settings's ConfigDialog.
+     */
     public boolean isUsernamePasswordRequiredVpnProfile() {
         switch (type) {
             case VpnProfile.TYPE_IKEV2_IPSEC_RSA: // fall through
