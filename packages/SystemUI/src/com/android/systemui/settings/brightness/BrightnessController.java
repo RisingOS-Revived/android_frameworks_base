@@ -330,11 +330,14 @@ public class BrightnessController implements ToggleSlider.Listener, MirroredBrig
         }
 
         mIcon = control.getIcon();
-        mIcon.setOnClickListener(v -> Settings.System.putIntForUser(mContext.getContentResolver(),
-                Settings.System.SCREEN_BRIGHTNESS_MODE, mAutomatic ?
-                    Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL :
-                    Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC,
-                UserHandle.USER_CURRENT));
+        mIcon.setOnClickListener(v -> {
+            Settings.System.putIntForUser(mContext.getContentResolver(),
+                Settings.System.SCREEN_BRIGHTNESS_MODE, 
+                mAutomatic ? Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL 
+                           : Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC,
+                UserHandle.USER_CURRENT);
+            com.android.internal.util.android.VibrationUtils.triggerVibration(context, 4);
+        });
     }
 
     public void registerCallbacks() {
