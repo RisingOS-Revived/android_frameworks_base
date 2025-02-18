@@ -221,7 +221,7 @@ class MediaCarouselScrollHandler(
         // reinflated appropriately
         cornerRadius =
             settingsButton.resources.getDimensionPixelSize(
-                Utils.getThemeAttr(settingsButton.context, android.R.attr.dialogCornerRadius)
+                R.dimen.notification_corner_radius
             )
         updateSettingsPresentation()
         scrollView.invalidateOutline()
