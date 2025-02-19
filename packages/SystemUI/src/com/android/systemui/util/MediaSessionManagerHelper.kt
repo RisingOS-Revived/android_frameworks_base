@@ -85,38 +85,40 @@ class MediaSessionManagerHelper private constructor(private val context: Context
     private fun startPeriodicUpdate() {
         updateJob = CoroutineScope(Dispatchers.Main).launch {
             while (isActive) {
-                updateMediaController()
-                updateMediaColors()
+                withContext(Dispatchers.IO) {
+                    updateMediaController()
+                    updateMediaColors()
+                }
                 delay(1000)
             }
         }
     }
     
     fun updateMediaColors() {
-        val metadata = getMediaMetadata()
-        val bitmap = metadata?.getBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART)
-            ?: metadata?.getBitmap(MediaMetadata.METADATA_KEY_ART)
-            ?: metadata?.getBitmap(MediaMetadata.METADATA_KEY_DISPLAY_ICON)
-        
-        val wallpaperColors = bitmap?.let { WallpaperColors.fromBitmap(it) }
-        if (wallpaperColors == null || wallpaperColors == mWallpaperColors) return
+        CoroutineScope(Dispatchers.IO).launch {
+            val metadata = getMediaMetadata()
+            val bitmap = metadata?.getBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART)
+                ?: metadata?.getBitmap(MediaMetadata.METADATA_KEY_ART)
+                ?: metadata?.getBitmap(MediaMetadata.METADATA_KEY_DISPLAY_ICON)
 
-        val config = context.resources.configuration
-        val currentNightMode = config.uiMode and Configuration.UI_MODE_NIGHT_MASK
-        val isDarkThemeOn = currentNightMode == Configuration.UI_MODE_NIGHT_YES
+            val wallpaperColors = bitmap?.let { WallpaperColors.fromBitmap(it) }
+            if (wallpaperColors == null || wallpaperColors == mWallpaperColors) return@launch
 
-        val colorScheme = ColorScheme(wallpaperColors, isDarkThemeOn)
-        val newMediaArtColor = if (isDarkThemeOn) {
-            colorScheme.accent1.s100
-        } else {
-            colorScheme.accent1.s800
-        }
+            val config = context.resources.configuration
+            val currentNightMode = config.uiMode and Configuration.UI_MODE_NIGHT_MASK
+            val isDarkThemeOn = currentNightMode == Configuration.UI_MODE_NIGHT_YES
 
-        if (currMediaArtColor != newMediaArtColor) {
-            currMediaArtColor = newMediaArtColor
-            mCurrentColorScheme = colorScheme
-            mWallpaperColors = wallpaperColors
-            notifyListeners { it.onMediaColorsChanged() }
+            val colorScheme = ColorScheme(wallpaperColors, isDarkThemeOn)
+            val newMediaArtColor = if (isDarkThemeOn) colorScheme.accent1.s100 else colorScheme.accent1.s800
+
+            if (currMediaArtColor != newMediaArtColor) {
+                withContext(Dispatchers.Main) {
+                    currMediaArtColor = newMediaArtColor
+                    mCurrentColorScheme = colorScheme
+                    mWallpaperColors = wallpaperColors
+                    notifyListeners { it.onMediaColorsChanged() }
+                }
+            }
         }
     }
 
@@ -186,12 +188,16 @@ class MediaSessionManagerHelper private constructor(private val context: Context
     }
 
     fun updateMediaController() {
-        val localController = getActiveLocalMediaController()
-        if (localController != null && !sameSessions(activeController, localController)) {
-            activeController?.unregisterCallback(mediaControllerCallback)
-            activeController = localController
-            activeController?.registerCallback(mediaControllerCallback)
-            notifyListeners()
+        CoroutineScope(Dispatchers.IO).launch {
+            val localController = getActiveLocalMediaController()
+            if (localController != null && !sameSessions(activeController, localController)) {
+                withContext(Dispatchers.Main) {
+                    activeController?.unregisterCallback(mediaControllerCallback)
+                    activeController = localController
+                    activeController?.registerCallback(mediaControllerCallback)
+                    notifyListeners()
+                }
+            }
         }
     }
 
