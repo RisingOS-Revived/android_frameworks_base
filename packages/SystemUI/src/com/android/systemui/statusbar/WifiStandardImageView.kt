@@ -19,7 +19,6 @@ import android.content.Context
 import android.content.res.Resources
 import android.provider.Settings
 import android.net.ConnectivityManager
-import android.net.Network
 import android.net.NetworkCapabilities
 import android.net.wifi.WifiManager
 import android.os.UserHandle
@@ -33,30 +32,21 @@ class WifiStandardImageView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : ImageView(context, attrs, defStyleAttr) {
 
-    private val connectivityManager: ConnectivityManager by lazy { context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager }
-    private val wifiManager: WifiManager by lazy { context.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager }
+    private val connectivityManager: ConnectivityManager by lazy { 
+        context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager 
+    }
+    private val wifiManager: WifiManager by lazy { 
+        context.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager 
+    }
     private var currWifiStandardEnabled = false
     private var currWifiStandard: Int = -1
     private var updateJob: Job? = null
-
-    private val updateRunnable = object : Runnable {
-        override fun run() {
-            val wifiStandardEnabled = getWifiStandardEnabled()
-            val wifiStandard = getWifiStandard()
-            if (currWifiStandard != wifiStandard 
-                || currWifiStandardEnabled != wifiStandardEnabled) {
-                currWifiStandard = wifiStandard
-                currWifiStandardEnabled = wifiStandardEnabled
-                updateWifiStandard()
-            }
-        }
-    }
 
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
         updateJob = CoroutineScope(Dispatchers.Main).launch {
             while (isAttachedToWindow) {
-                updateRunnable.run()
+                updateWifiStatus()
                 delay(1000)
             }
         }
@@ -65,6 +55,20 @@ class WifiStandardImageView @JvmOverloads constructor(
     override fun onDetachedFromWindow() {
         super.onDetachedFromWindow()
         updateJob?.cancel()
+    }
+
+    private suspend fun updateWifiStatus() {
+        val wifiStandardEnabled = withContext(Dispatchers.IO) { getWifiStandardEnabled() }
+        val wifiStandard = withContext(Dispatchers.IO) { getWifiStandard() }
+
+        if (currWifiStandard != wifiStandard || currWifiStandardEnabled != wifiStandardEnabled) {
+            currWifiStandard = wifiStandard
+            currWifiStandardEnabled = wifiStandardEnabled
+
+            withContext(Dispatchers.Main) {
+                updateWifiStandard()
+            }
+        }
     }
 
     private fun getWifiStandard(): Int {
