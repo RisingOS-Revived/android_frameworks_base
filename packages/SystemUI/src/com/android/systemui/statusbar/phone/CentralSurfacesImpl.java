@@ -2824,6 +2824,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces,
 
             DejankUtils.stopDetectingBlockingIpcs(tag);
             com.android.systemui.util.ScrimUtils.getInstance(mContext).onScreenStateChange();
+            android.os.SystemProperties.set("persist.sys.power_mode_limit_cpus", "1");
         }
 
         @Override
@@ -2891,6 +2892,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces,
             });
             DejankUtils.stopDetectingBlockingIpcs(tag);
             com.android.systemui.util.ScrimUtils.getInstance(mContext).onScreenStateChange();
+            android.os.SystemProperties.set("persist.sys.power_mode_limit_cpus", "0");
         }
 
         /**
