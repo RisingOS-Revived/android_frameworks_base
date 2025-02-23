@@ -21,7 +21,7 @@
         android:top="@dimen/rounded_slider_boundary_offset"
         android:bottom="@dimen/rounded_slider_boundary_offset">
         <shape>
-            <solid android:color="?attr/underSurface" />
+            <solid android:color="@*android:color/transparent" />
             <corners android:radius="@dimen/rounded_slider_background_rounded_corner" />
         </shape>
     </item>
