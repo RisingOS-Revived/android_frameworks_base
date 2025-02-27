@@ -7,6 +7,7 @@ import android.graphics.Matrix
 import android.graphics.Paint
 import android.graphics.Path
 import android.graphics.RectF
+import android.provider.Settings
 import android.util.MathUtils.min
 import android.view.ContextThemeWrapper
 import android.view.View
@@ -21,6 +22,7 @@ import com.android.systemui.res.R
 
 private const val TAG = "BackPanel"
 private const val DEBUG = false
+private const val BACK_GESTURE_STYLE_CLASSIC = "back_gesture_style_classic"
 
 class BackPanel(context: Context, private val latencyTracker: LatencyTracker) : View(context) {
 
@@ -321,6 +323,15 @@ class BackPanel(context: Context, private val latencyTracker: LatencyTracker) : 
         }
     }
 
+    /**
+     * Checks if the classic (old style) back gesture is enabled in settings
+     * @return true if classic style is enabled, false otherwise
+     */
+    private fun isClassicBackGestureEnabled(): Boolean {
+        return Settings.System.getInt(context.contentResolver, 
+            BACK_GESTURE_STYLE_CLASSIC, 0) == 1
+    }
+
     private fun calculateArrowPath(dx: Float, dy: Float): Path {
         // Draw circle when performing long edge swipe
         if (triggerLongSwipe) {
@@ -553,7 +564,16 @@ class BackPanel(context: Context, private val latencyTracker: LatencyTracker) : 
         if (isLeftPanel) {
             canvas.scale(-1f, 1f, dx / 2f, dy / 2f)
         }
-        canvas.drawPath(calculateArrowPathEx(arrowPath, arrowPaint, x = dx, y = dy), arrowPaint)
+        
+        // Use classic or new style based on settings
+        if (isClassicBackGestureEnabled()) {
+            // Classic style - draw as lines
+            canvas.drawPath(calculateArrowPath(dx = dx, dy = dy), arrowPaint)
+        } else {
+            // New style - draw as circles
+            canvas.drawPath(calculateArrowPathEx(arrowPath, arrowPaint, x = dx, y = dy), arrowPaint)
+        }
+        
         canvas.restore()
 
         if (trackingBackArrowLatency) {
