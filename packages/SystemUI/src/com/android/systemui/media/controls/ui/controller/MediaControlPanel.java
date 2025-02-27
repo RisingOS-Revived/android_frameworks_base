@@ -1436,21 +1436,22 @@ public class MediaControlPanel {
 
         // TODO(b/174236650): Make sure that the carousel indicator also fades out.
         // TODO(b/174236650): Instrument the animation to measure jank.
-        final ActivityTransitionAnimator.Controller controller =
-                new GhostedViewTransitionAnimatorController(player,
-                        InteractionJankMonitor.CUJ_SHADE_APP_LAUNCH_FROM_MEDIA_PLAYER) {
-                    @Override
-                    protected float getCurrentTopCornerRadius() {
-                        return mContext.getResources().getDimension(
-                                R.dimen.notification_corner_radius);
-                    }
+	final ActivityTransitionAnimator.Controller controller =
+        	new GhostedViewTransitionAnimatorController(player,
+                	InteractionJankMonitor.CUJ_SHADE_APP_LAUNCH_FROM_MEDIA_PLAYER) {
+	            @Override
+        	    protected float getCurrentTopCornerRadius() {
+                	return Settings.System.getInt(mContext.getContentResolver(),
+                        	Settings.System.NOTIFICATION_CORNER_RADIUS,
+                        	mContext.getResources().getDimensionPixelSize(R.dimen.notification_corner_radius));
+            	    }
 
-                    @Override
-                    protected float getCurrentBottomCornerRadius() {
-                        // TODO(b/184121838): Make IlluminationDrawable support top and bottom
-                        //  radius.
-                        return getCurrentTopCornerRadius();
-                    }
+	            @Override
+        	    protected float getCurrentBottomCornerRadius() {
+                	// TODO(b/184121838): Make IlluminationDrawable support top and bottom
+                	//  radius.
+                	return getCurrentTopCornerRadius();
+            	    }
                 };
 
         // When on the hub, wrap in the communal animation controller to ensure we exit the hub

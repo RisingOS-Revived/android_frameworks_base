@@ -973,7 +973,9 @@ public class NotificationStackScrollLayout
         mSidePaddings = mMinimumPaddings;  // Updated in onMeasure by updateSidePadding()
         mMinInteractionHeight = res.getDimensionPixelSize(
                 R.dimen.notification_min_interaction_height);
-        mCornerRadius = res.getDimensionPixelSize(R.dimen.notification_corner_radius);
+	mCornerRadius = Settings.System.getInt(mContext.getContentResolver(),
+		Settings.System.NOTIFICATION_CORNER_RADIUS,
+		res.getDimensionPixelSize(R.dimen.notification_corner_radius));
         mHeadsUpInset = mStatusBarHeight + res.getDimensionPixelSize(
                 R.dimen.heads_up_status_bar_padding);
         mQsScrollBoundaryPosition = SystemBarUtils.getQuickQsOffsetHeight(mContext);
@@ -1012,7 +1014,9 @@ public class NotificationStackScrollLayout
     }
 
     void updateCornerRadius() {
-        int newRadius = getResources().getDimensionPixelSize(R.dimen.notification_corner_radius);
+	int newRadius = Settings.System.getInt(mContext.getContentResolver(),
+		Settings.System.NOTIFICATION_CORNER_RADIUS,
+	        getResources().getDimensionPixelSize(R.dimen.notification_corner_radius));
         if (mCornerRadius != newRadius) {
             mCornerRadius = newRadius;
             invalidate();

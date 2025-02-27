@@ -6812,6 +6812,12 @@ public final class Settings {
         public static final String SMART_PIXELS_ON_POWER_SAVE = "smart_pixels_on_power_save";
 
         /**
+         * Whether to set corner radius in the QS cards.
+         * @hide
+         */
+	public static final String NOTIFICATION_CORNER_RADIUS = "notification_corner_radius";
+
+        /**
          * Whether to show daily data usage in the QS footer.
          * @hide
          */
