@@ -1040,9 +1040,17 @@ public class WallpaperManager {
         boolean returnDefault = which != FLAG_LOCK;
         Bitmap bm = sGlobals.peekWallpaperBitmap(mContext, returnDefault, which, cmProxy);
         if (bm != null) {
-            Drawable dr = new BitmapDrawable(mContext.getResources(), bm);
-            dr.setDither(false);
-            return dr;
+            java.io.ByteArrayOutputStream byteArrayOutputStream = new java.io.ByteArrayOutputStream();
+            boolean compressionSuccess = bm.compress(Bitmap.CompressFormat.WEBP_LOSSLESS, 100, byteArrayOutputStream);
+            if (compressionSuccess) {
+                byte[] webpData = byteArrayOutputStream.toByteArray();
+                Bitmap webpBitmap = BitmapFactory.decodeByteArray(webpData, 0, webpData.length);
+                if (webpBitmap != null) {
+                    Drawable dr = new BitmapDrawable(mContext.getResources(), webpBitmap);
+                    dr.setDither(false);
+                    return dr;
+                }
+            }
         }
         return null;
     }

@@ -32,14 +32,7 @@ open class SideLabelTileLayout(
 
     override fun updateResources(): Boolean {
         return super.updateResources().also {
-            val qsWidgetsEnabled = TileUtils.isQsWidgetsEnabled(mContext)
-            val maxRows = getResourceRows()
-            mMaxAllowedRows = when {
-                qsWidgetsEnabled -> {
-                    if (maxRows > 2) 2 else maxRows
-                }
-                else -> maxRows
-            }
+            mMaxAllowedRows = getResourceRows()
         }
     }
 
