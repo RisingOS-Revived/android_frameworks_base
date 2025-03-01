@@ -473,6 +473,10 @@ cc_library_shared_for_libandroid_runtime {
                 "libhidlbase", // libhwbinder is in here
             ],
         },
+        android_arm64: {
+            cflags: ["-fsplit-machine-functions"],
+            ldflags: ["-fsplit-machine-functions"],
+        }
     },
 }
 
