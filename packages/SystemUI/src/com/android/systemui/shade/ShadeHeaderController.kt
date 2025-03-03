@@ -22,6 +22,7 @@ import android.annotation.IdRes
 import android.app.PendingIntent
 import android.app.StatusBarManager
 import android.content.Intent
+import android.content.Context
 import android.content.res.ColorStateList
 import android.content.res.Configuration
 import android.graphics.Color
@@ -98,6 +99,7 @@ constructor(
     private val privacyIconsController: HeaderPrivacyIconsController,
     private val insetsProvider: StatusBarContentInsetsProvider,
     private val configurationController: ConfigurationController,
+    private val context: Context,
     private val variableDateViewControllerFactory: VariableDateViewController.Factory,
     @Named(SHADE_HEADER) private val batteryMeterViewController: BatteryMeterViewController,
     private val dumpManager: DumpManager,
@@ -182,6 +184,7 @@ constructor(
     private var cutout: DisplayCutout? = null
     private var lastInsets: WindowInsets? = null
     private var nextAlarmIntent: PendingIntent? = null
+    private var textColorPrimary = Color.TRANSPARENT
 
     private var qsDisabled = false
     private var visible = false
@@ -333,16 +336,17 @@ constructor(
                 clock.onDensityOrFontScaleChanged()
             }
 
-            override fun onUiModeChanged() {
-                updateQsBatteryStyle()
-            }
-
             override fun onThemeChanged() {
                 clock.setTextAppearance(R.style.TextAppearance_QS_Status)
                 date.setTextAppearance(R.style.TextAppearance_QS_Status)
                 updateQsHeaderClockDateVisibility()
                 mShadeCarrierGroup.updateTextAppearance(R.style.TextAppearance_QS_Status_Carriers)
                 updateResources()
+            }
+
+            override fun onUiModeChanged() {
+                updateResources()
+                updateQsBatteryStyle()
             }
         }
 
@@ -430,6 +434,7 @@ constructor(
             statusOverlayHoverListenerFactory.createListener(systemIconsHoverContainer)
         )
         updateQsHeaderClockDateVisibility()
+        updateResources()
     }
 
     override fun onViewDetached() {
@@ -623,6 +628,25 @@ constructor(
         val padding = resources.getDimensionPixelSize(R.dimen.qs_panel_padding)
         header.setPadding(padding, header.paddingTop, padding, header.paddingBottom)
         updateQQSPaddings()
+        qsBatteryModeController.updateResources()
+
+        val fillColor = Utils.getColorAttrDefaultColor(context, android.R.attr.textColorPrimary)
+        val inverseColor = Utils.getColorAttrDefaultColor(context, android.R.attr.textColorPrimaryInverse)
+        iconManager.setTint(fillColor, inverseColor)
+        val textColor = Utils.getColorAttrDefaultColor(context, android.R.attr.textColorPrimary)
+        val colorStateList = Utils.getColorAttr(context, android.R.attr.textColorPrimary)
+        if (textColor != textColorPrimary) {
+            val textColorSecondary = Utils.getColorAttrDefaultColor(context,
+                    android.R.attr.textColorSecondary)
+            textColorPrimary = textColor
+            if (iconManager != null) {
+                iconManager.setTint(textColor, inverseColor)
+            }
+            clock.setTextColor(textColorPrimary)
+            date.setTextColor(textColorPrimary)
+            mShadeCarrierGroup.updateColors(textColorPrimary, colorStateList)
+            batteryIcon.updateColors(textColorPrimary, textColorSecondary, textColorPrimary)
+        }
     }
 
     private fun updateQQSPaddings() {
