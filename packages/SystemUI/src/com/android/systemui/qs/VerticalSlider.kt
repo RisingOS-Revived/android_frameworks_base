@@ -88,7 +88,7 @@ open class VerticalSlider(context: Context, attrs: AttributeSet? = null) : CardV
     private val SLIDER_HAPTICS_TIMEOUT: Long = 100
 
     private val isNightMode: Boolean
-        get() = true // on default qs we always use dark mode
+        get() = (context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
 
     init {
         setOnTouchListener { view, event ->
