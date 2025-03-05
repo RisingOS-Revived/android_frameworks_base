@@ -117,6 +117,8 @@ public class Clock extends TextView implements
     private final CommandQueue mCommandQueue;
     private int mCurrentUserId;
 
+    private int sbClockBgStyle;
+
     private boolean mClockAutoHideLauncher = false;
     private boolean mClockVisibleByPolicy = true;
     private boolean mClockVisibleByUser = getVisibility() == View.VISIBLE;
@@ -337,6 +339,15 @@ public class Clock extends TextView implements
         }
     }
 
+    private void setupClockBackground() {
+        sbClockBgStyle = Settings.System.getIntForUser(
+            getContext().getContentResolver(), 
+            Settings.System.STATUSBAR_CLOCK_CHIP, 
+            0, 
+            android.os.UserHandle.USER_CURRENT
+        );
+    }
+
     private final BroadcastReceiver mIntentReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -542,7 +553,13 @@ public class Clock extends TextView implements
     @Override
     public void onDarkChanged(ArrayList<Rect> areas, float darkIntensity, int tint) {
         mNonAdaptedColor = DarkIconDispatcher.getTint(areas, this, tint);
-        setTextColor(mClockBgOn ? Color.WHITE : mNonAdaptedColor);
+
+        // Only set white if background is on and NOT the second background (index 1)
+        if (mClockBgOn && sbClockBgStyle != 2) {
+            setTextColor(Color.WHITE);
+        } else {
+            setTextColor(mNonAdaptedColor);
+        }
     }
 
     @Override
