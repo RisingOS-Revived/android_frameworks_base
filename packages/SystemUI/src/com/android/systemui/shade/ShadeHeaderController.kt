@@ -339,13 +339,13 @@ constructor(
             override fun onThemeChanged() {
                 clock.setTextAppearance(R.style.TextAppearance_QS_Status)
                 date.setTextAppearance(R.style.TextAppearance_QS_Status)
-                updateQsHeaderClockDateVisibility()
                 mShadeCarrierGroup.updateTextAppearance(R.style.TextAppearance_QS_Status_Carriers)
                 updateResources()
+                updateQsHeaderClockDateVisibility()
+                
             }
 
             override fun onUiModeChanged() {
-                updateResources()
                 updateQsBatteryStyle()
             }
         }
@@ -361,10 +361,12 @@ constructor(
     }
     
     fun updateQsHeaderClockDateVisibility() {
-        val color = if (qsClockStyle != 0) Color.TRANSPARENT else Color.WHITE
-        val colorStateList = ColorStateList.valueOf(color)
-        clock.setTextColor(colorStateList)
-        date.setTextColor(colorStateList)
+        if (qsClockStyle != 0) {
+            val color = Color.TRANSPARENT
+            val colorStateList = ColorStateList.valueOf(color)
+            clock.setTextColor(colorStateList)
+            date.setTextColor(colorStateList)
+        }  
     }
 
     override fun onInit() {
