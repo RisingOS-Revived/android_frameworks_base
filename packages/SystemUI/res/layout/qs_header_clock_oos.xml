@@ -1,24 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:orientation="horizontal"
-    android:gravity="center_vertical">
+    android:orientation="vertical"
+    android:gravity="center_horizontal">
 
     <FrameLayout
         android:id="@+id/oos_clock"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="start|center"
+        android:layout_gravity="center_horizontal"
         android:tag="clock"
         android:gravity="center_vertical"
         android:layoutDirection="ltr">
 
         <TextClock
-            android:layout_marginTop="8dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
             android:includeFontPadding="false"
             android:layout_gravity="start|center"
             android:format12Hour="hh:mm"
@@ -29,9 +28,9 @@
             android:textStyle="bold" />
 
         <TextClock
-            android:layout_marginTop="8dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
             android:layout_gravity="start|center"
             android:format12Hour="hh:mm"
             android:format24Hour="HH:mm"
@@ -44,18 +43,17 @@
     </FrameLayout>
 
     <TextClock
-        android:layout_marginTop="8dp"
         android:id="@+id/oos_date"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_gravity="center_vertical"
+        android:layout_marginTop="8dp"
         android:includeFontPadding="false"
         android:format12Hour="EEEE, MMM dd"
         android:format24Hour="EEEE, dd MMM"
         android:singleLine="true"
-        android:textAlignment="viewStart"
+        android:textAlignment="center"
         android:textColor="?android:attr/textColorSecondary"
         android:textSize="13sp"
         android:textStyle="bold" />
+
 </LinearLayout>
