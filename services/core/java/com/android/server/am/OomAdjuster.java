@@ -4162,6 +4162,11 @@ public class OomAdjuster {
         }
 
         // Reasons to freeze:
+        if (mService.mWakefulness.get() != PowerManagerInternal.WAKEFULNESS_AWAKE 
+            && proc.mState.getCurAdj() >= ProcessList.HOME_APP_ADJ) {
+            return true;   
+        }
+
         if (proc.mState.getCurAdj() >= mConstants.FREEZER_CUTOFF_ADJ) {
             // Oomscore is in a high enough state, it is safe to freeze.
             return true;
