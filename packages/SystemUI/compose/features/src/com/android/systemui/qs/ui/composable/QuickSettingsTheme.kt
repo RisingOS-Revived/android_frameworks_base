@@ -21,6 +21,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.runtime.LaunchedEffect
 import com.android.systemui.res.R
 
 @Composable
@@ -28,5 +29,13 @@ fun QuickSettingsTheme(content: @Composable () -> Unit) {
     val context = LocalContext.current
     val themedContext =
         remember(context) { ContextThemeWrapper(context, R.style.Theme_SystemUI_QuickSettings) }
-    CompositionLocalProvider(LocalContext provides themedContext) { content() }
+    CompositionLocalProvider(LocalContext provides themedContext) { 
+       content()
+
+       LaunchedEffect(themedContext) {
+            themedContext.theme?.apply {
+                applyStyle(R.style.Theme_SystemUI_QuickSettings, true)
+            }
+        }
+    }
 }
