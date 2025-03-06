@@ -44,6 +44,18 @@ public class QSContainerImplController extends ViewController<QSContainerImpl> {
         public void onConfigChanged(Configuration newConfig) {
             mView.updateResources(mQsPanelController, mQuickStatusBarHeaderController);
         }
+
+        @Override
+        public void onThemeChanged() {
+            mView.updateResources(mQsPanelController, mQuickStatusBarHeaderController);
+        }
+
+        @Override
+        public void onUiModeChanged() {
+            mView.updateResources(mQsPanelController, mQuickStatusBarHeaderController);
+        }
+
+
     };
     private final boolean mSceneContainerEnabled;
 

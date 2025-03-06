@@ -215,6 +215,7 @@ private fun QuickSettingsContent(
                     // if needed and the new view will be attached to the FrameLayout here.
                     update = {
                         qsSceneAdapter.setState(state())
+                        it.invalidate()
                         if (view.parent != it) {
                             it.removeAllViews()
                             (view.parent as? ViewGroup)?.removeView(view)

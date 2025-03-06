@@ -33,6 +33,7 @@ import androidx.annotation.Nullable;
 import com.android.systemui.Dumpable;
 import com.android.systemui.qs.customize.QSCustomizer;
 import com.android.systemui.res.R;
+import com.android.settingslib.Utils;
 import com.android.systemui.scene.shared.flag.SceneContainerFlag;
 import com.android.systemui.shade.LargeScreenHeaderHelper;
 import com.android.systemui.shade.TouchLogger;
@@ -222,6 +223,7 @@ public class QSContainerImpl extends FrameLayout implements Dumpable {
         if (marginsChanged) {
             updatePaddingsAndMargins(qsPanelController, quickStatusBarHeaderController);
         }
+        invalidate();
     }
 
     /**
