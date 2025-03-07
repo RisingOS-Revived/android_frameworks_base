@@ -168,6 +168,10 @@ public class ShadeCarrier extends LinearLayout {
         mCarrierText.setText(text);
     }
 
+    public void setCarrierTextColor(int color) {
+        mCarrierText.setTextColor(color);
+    }
+
     public void updateTextAppearance(@StyleRes int resId) {
         mCarrierText.setTextAppearance(resId);
         if (mModernMobileView != null) {
