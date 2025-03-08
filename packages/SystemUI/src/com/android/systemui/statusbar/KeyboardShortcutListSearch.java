@@ -428,9 +428,7 @@ public final class KeyboardShortcutListSearch {
                 mKeySearchResultMap.put(SHORTCUT_SPECIFICAPP_INDEX, false);
             } else {
                 mCurrentAppPackageName = result.get(0).getPackageName();
-                if (validateKeyboardShortcutHelperIconUri()) {
-                    KeyboardShortcuts.sanitiseShortcuts(result);
-                }
+                KeyboardShortcuts.sanitiseShortcuts(result);
                 mSpecificAppGroup.addAll(
                         reMapToKeyboardShortcutMultiMappingGroup(result));
                 mKeySearchResultMap.put(SHORTCUT_SPECIFICAPP_INDEX, true);
@@ -446,9 +444,7 @@ public final class KeyboardShortcutListSearch {
         // Add specific Ime shortcuts
         if (result != null) {
             if (!result.isEmpty()) {
-                if (validateKeyboardShortcutHelperIconUri()) {
-                    KeyboardShortcuts.sanitiseShortcuts(result);
-                }
+                KeyboardShortcuts.sanitiseShortcuts(result);
                 mInputGroup.addAll(
                         reMapToKeyboardShortcutMultiMappingGroup(result));
             }

@@ -412,10 +412,7 @@ public final class KeyboardShortcuts {
         mReceivedAppShortcutGroups =
                 result == null ? Collections.emptyList() : result;
 
-        if (validateKeyboardShortcutHelperIconUri()) {
-            sanitiseShortcuts(mReceivedAppShortcutGroups);
-        }
-
+        sanitiseShortcuts(mReceivedAppShortcutGroups);
         maybeMergeAndShowKeyboardShortcuts();
     }
 
@@ -423,10 +420,7 @@ public final class KeyboardShortcuts {
         mReceivedImeShortcutGroups =
                 result == null ? Collections.emptyList() : result;
 
-        if (validateKeyboardShortcutHelperIconUri()) {
-            sanitiseShortcuts(mReceivedImeShortcutGroups);
-        }
-
+        sanitiseShortcuts(mReceivedImeShortcutGroups);
         maybeMergeAndShowKeyboardShortcuts();
     }
 

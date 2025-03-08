@@ -100,12 +100,11 @@ public final class Helper {
             @UserIdInt int userId, @NonNull RemoteViews rView) {
         final AtomicBoolean permissionsOk = new AtomicBoolean(true);
 
-        rView.visitUris(
-                uri -> {
-                    int uriOwnerId = android.content.ContentProvider.getUserIdFromUri(uri, userId);
-                    boolean allowed = uriOwnerId == userId;
-                    permissionsOk.set(allowed & permissionsOk.get());
-                });
+        rView.visitUris(uri -> {
+            int uriOwnerId = android.content.ContentProvider.getUserIdFromUri(uri, userId);
+            boolean allowed = uriOwnerId == userId;
+            permissionsOk.set(allowed & permissionsOk.get());
+        });
 
         return permissionsOk.get();
     }
