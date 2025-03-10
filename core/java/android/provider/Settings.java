@@ -13435,6 +13435,13 @@ public final class Settings {
         public static final String ENABLE_LOCATION_PRIVACY_INDICATOR = "enable_location_privacy_indicator";
 
         /**
+         * Control which apps to hide from other user apps.
+         * @hide
+         */
+        @Readable
+        public static final String HIDE_APPLIST = "hide_applist";
+
+        /**
          * Whether to show privacy indicator for camera
          * @hide
          */
