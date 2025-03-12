@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2018-2024 crDroid Android Project
+ * Copyright (C) 2025 Rising Revived
  * Copyright (C) 2018-2019 AICP
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -47,6 +48,8 @@ public abstract class LogoImage extends ImageView implements DarkReceiver {
     public int mLogoPosition;
     private int mLogoStyle;
     private int mTintColor = Color.WHITE;
+    private boolean mUseCustomLogoColor;
+    private int mCustomLogoColor = Color.WHITE;
 
     class SettingsObserver extends ContentObserver {
 
@@ -63,6 +66,12 @@ public abstract class LogoImage extends ImageView implements DarkReceiver {
                     false, this);
             resolver.registerContentObserver(
                     Settings.System.getUriFor(Settings.System.STATUS_BAR_LOGO_STYLE),
+                    false, this);
+            resolver.registerContentObserver(
+                    Settings.System.getUriFor(Settings.System.STATUS_BAR_LOGO_USE_CUSTOM_COLOR),
+                    false, this);
+            resolver.registerContentObserver(
+                    Settings.System.getUriFor(Settings.System.STATUS_BAR_LOGO_CUSTOM_COLOR),
                     false, this);
         }
 
@@ -114,9 +123,11 @@ public abstract class LogoImage extends ImageView implements DarkReceiver {
 
     @Override
     public void onDarkChanged(ArrayList<Rect> areas, float darkIntensity, int tint) {
-        mTintColor = DarkIconDispatcher.getTint(areas, this, tint);
-        if (mShowLogo && isLogoVisible()) {
-            updateLogo();
+        if (!mUseCustomLogoColor) {
+            mTintColor = DarkIconDispatcher.getTint(areas, this, tint);
+            if (mShowLogo && isLogoVisible()) {
+                updateLogo();
+            }
         }
     }
 
@@ -228,17 +239,32 @@ public abstract class LogoImage extends ImageView implements DarkReceiver {
                 break;
         }
 
-        drawable.setTint(mTintColor);
+        // Use either the custom color or the system tint color
+        int logoColor = mUseCustomLogoColor ? mCustomLogoColor : mTintColor;
+        drawable.setTint(logoColor);
         setImageDrawable(drawable);
     }
 
     public void updateSettings() {
-        mShowLogo = Settings.System.getIntForUser(mContext.getContentResolver(),
+        ContentResolver resolver = mContext.getContentResolver();
+        
+        // Get existing settings
+        mShowLogo = Settings.System.getIntForUser(resolver,
                 Settings.System.STATUS_BAR_LOGO, 0, UserHandle.USER_CURRENT) != 0;
-        mLogoPosition = Settings.System.getIntForUser(mContext.getContentResolver(),
+        mLogoPosition = Settings.System.getIntForUser(resolver,
                 Settings.System.STATUS_BAR_LOGO_POSITION, 0, UserHandle.USER_CURRENT);
-        mLogoStyle = Settings.System.getIntForUser(mContext.getContentResolver(),
+        mLogoStyle = Settings.System.getIntForUser(resolver,
                 Settings.System.STATUS_BAR_LOGO_STYLE, 0, UserHandle.USER_CURRENT);
+        
+        // Get color settings
+        mUseCustomLogoColor = Settings.System.getIntForUser(resolver,
+                Settings.System.STATUS_BAR_LOGO_USE_CUSTOM_COLOR, 0, UserHandle.USER_CURRENT) != 0;
+        
+        if (mUseCustomLogoColor) {
+            mCustomLogoColor = Settings.System.getIntForUser(resolver,
+                    Settings.System.STATUS_BAR_LOGO_CUSTOM_COLOR, Color.WHITE, UserHandle.USER_CURRENT);
+        }
+
         if (!mShowLogo || !isLogoVisible()) {
             setImageDrawable(null);
             setVisibility(View.GONE);
