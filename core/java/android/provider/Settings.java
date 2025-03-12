@@ -6647,6 +6647,20 @@ public final class Settings {
          */
         public static final String STATUS_BAR_LOGO_STYLE = "status_bar_logo_style";
 
+	/**
+	 * Whether to use a custom color for the status bar logo
+	 * 0 = use system coloring (auto)
+	 * 1 = use custom color
+	 * @hide
+	 */
+	public static final String STATUS_BAR_LOGO_USE_CUSTOM_COLOR = "status_bar_logo_use_custom_color";
+
+	/**
+	 * Status bar logo custom color
+	 * @hide
+	 */
+	public static final String STATUS_BAR_LOGO_CUSTOM_COLOR = "status_bar_logo_custom_color";
+
         /**
          * Defines the screen-off animation to display
          * @hide
