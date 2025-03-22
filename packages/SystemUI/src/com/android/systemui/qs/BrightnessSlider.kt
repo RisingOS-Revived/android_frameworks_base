@@ -85,8 +85,7 @@ class BrightnessSlider(context: Context, attrs: AttributeSet? = null) :
         )
         displayManager.registerDisplayListener(
             mDisplayListener,
-            mHandler,
-            DisplayManager.EVENT_FLAG_DISPLAY_BRIGHTNESS
+            mHandler
         )
     }
 
