@@ -25,12 +25,17 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.graphics.Bitmap;
-import android.media.AppVolume;
 import android.media.AudioManager;
 import android.media.MediaMetadata;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 import androidx.core.app.NotificationCompat;
+
+import java.lang.reflect.Field;
+import java.util.List;
+import java.util.Collections;
+import java.lang.reflect.Method;
 
 import com.android.systemui.res.R;
 
@@ -62,16 +67,32 @@ public class NotificationUtil {
         notificationManager.createNotificationChannel(channel);
     }
 
-    public String getActiveVolumeApp() {
+    private String getActiveVolumeApp() {
         AudioManager audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
-        String mAppVolumeActivePackageName = "";
-        for (AppVolume av : audioManager.listAppVolumes()) {
-            if (av.isActive()) {
-                mAppVolumeActivePackageName = av.getPackageName();
-                break;
+        List appVolumes = getAppVolumes(audioManager);
+        for (Object av : appVolumes) {
+            try {
+                Method isActiveMethod = av.getClass().getMethod("isActive");
+                Boolean isActive = (Boolean) isActiveMethod.invoke(av);
+                if (isActive) {
+                    Field packageNameField = av.getClass().getField("packageName");
+                    return (String) packageNameField.get(av);
+                }
+            } catch (Exception e) {
+                // Log removed as per request
             }
         }
-        return mAppVolumeActivePackageName;
+        return "";
+    }
+
+    private List getAppVolumes(AudioManager audioManager) {
+        try {
+            Method method = AudioManager.class.getDeclaredMethod("listAppVolumes");
+            method.setAccessible(true);
+            return (List) method.invoke(audioManager);
+        } catch (Exception e) {
+            return Collections.emptyList();
+        }
     }
 
     private Runnable cancelNotificationTask = new Runnable() {
