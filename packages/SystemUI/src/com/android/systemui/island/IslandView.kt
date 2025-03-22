@@ -66,10 +66,12 @@ import android.view.ViewTreeObserver
 import androidx.transition.AutoTransition
 import androidx.transition.TransitionManager
 import com.android.systemui.res.R
+import java.lang.reflect.Method
 import com.android.systemui.shared.system.TaskStackChangeListener
 import com.android.systemui.shared.system.TaskStackChangeListeners
-import com.android.systemui.statusbar.policy.HeadsUpManager
+import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout
+import com.android.systemui.island.NotificationHandler
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 
 import com.android.settingslib.drawable.CircleFramedDrawable
@@ -84,7 +86,7 @@ import java.util.Locale
 class IslandView : ExtendedFloatingActionButton {
 
     private var notificationStackScroller: NotificationStackScrollLayout? = null
-    private var headsUpManager: HeadsUpManager? = null
+    private var notificationHandler: NotificationHandler? = null
 
     private var subtitleColor: Int = Color.parseColor("#66000000")
     private var titleSpannable: SpannableString = SpannableString("")
@@ -164,14 +166,15 @@ class IslandView : ExtendedFloatingActionButton {
         this.notificationStackScroller = scroller
     }
 
-    fun setHeadsupManager(headsUp: HeadsUpManager?) {
-        this.headsUpManager = headsUp
+    fun setNotificationHandler(handler: NotificationHandler?) {
+        this.notificationHandler = handler
     }
 
     private fun removeHun() {
-        val key = headsUpManager?.getTopEntry()?.row?.entry?.key ?: return
+        val sbn = notificationHandler?.getTopNotification() ?: return
+        val key = sbn.key
         val reason = "HUN removed" // Provide a meaningful reason for the removal
-        headsUpManager?.removeNotification(key, true /* releaseImmediately */, false /* animate */, reason)
+        notificationHandler?.removeNotification(key, true /* releaseImmediately */, false /* animate */, reason)
     }
 
     fun showIsland(show: Boolean, expandedFraction: Float) {
@@ -299,7 +302,7 @@ class IslandView : ExtendedFloatingActionButton {
     }
 
     private fun prepareIslandContent() {
-        val sbn = headsUpManager?.getTopEntry()?.row?.entry?.sbn ?: return
+        val sbn = notificationHandler?.getTopNotification() ?: return
         val notification = sbn.notification
         val (islandTitle, islandText) = resolveNotificationContent(notification)
         val iconDrawable = sequenceOf(
@@ -372,12 +375,30 @@ class IslandView : ExtendedFloatingActionButton {
 
     fun getActiveAppVolumePackage(): String {
         val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
-        for (av in audioManager.listAppVolumes()) {
-            if (av.isActive) {
-                return av.getPackageName()
+        val appVolumes = getAppVolumes(audioManager)
+        for (av in appVolumes) {
+            try {
+                val isActiveMethod = av.javaClass.getMethod("isActive")
+                val isActive = isActiveMethod.invoke(av) as Boolean
+                if (isActive) {
+                    val packageNameField = av.javaClass.getField("packageName")
+                    return packageNameField.get(av) as String
+                }
+            } catch (e: Exception) {
             }
         }
         return ""
+    }
+
+    private fun getAppVolumes(audioManager: AudioManager): List<Any> {
+        try {
+            val method = AudioManager::class.java.getDeclaredMethod("listAppVolumes")
+            method.isAccessible = true
+            @Suppress("UNCHECKED_CAST")
+            return method.invoke(audioManager) as List<Any>
+        } catch (e: Exception) {
+            return emptyList() 
+        }
     }
 
     fun drawableToBitmap(drawable: Drawable): Bitmap {
