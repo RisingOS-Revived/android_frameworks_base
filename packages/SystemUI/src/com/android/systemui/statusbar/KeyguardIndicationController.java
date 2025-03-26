@@ -118,6 +118,7 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.res.R;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.phone.FaceUnlockImageView;
+import com.android.systemui.statusbar.phone.FaceUnlockProxy;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.KeyguardIndicationTextView;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
@@ -1107,9 +1108,6 @@ public class KeyguardIndicationController {
     }
 
     private void hideFaceUnlockRecognizingMessage() {
-        if (mFaceIconView != null) {
-            mFaceIconView.setVisibility(View.GONE);
-        }
         String faceUnlockMessage = mContext.getResources().getString(
             R.string.face_unlock_recognizing);
         if (mBiometricMessage != null && mBiometricMessage.equals(faceUnlockMessage)) {
@@ -1900,9 +1898,7 @@ public class KeyguardIndicationController {
     };
 
     private void updateFaceIconViewState(FaceUnlockImageView.State state) {
-        if (mFaceIconView != null) {
-            mFaceIconView.setState(state);
-        }
+        FaceUnlockProxy.INSTANCE().setBouncerState(state);
     }
 
     private final KeyguardStateController.Callback mKeyguardStateCallback =
