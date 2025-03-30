@@ -4036,6 +4036,9 @@ public class OomAdjuster {
                     }
                 }
             }
+            if (uidRec.isIdle()) {
+                mProcessList.killAppIfBgRestrictedAndCachedIdleLocked(uidRec);
+            }
         }
         if (mService.mLocalPowerManager != null) {
             mService.mLocalPowerManager.finishUidChanges();
