@@ -7331,6 +7331,11 @@ public final class Settings {
          public static final String SHOW_MEDIA_PROGRESS = "show_media_progress";
 
         /**
+          * @hide
+          */
+         public static final String PROGRESS_BAR_OPACITY = "progress_bar_opacity";
+
+        /**
          * Whether to enable Smart Pixels
          * @hide
          */
