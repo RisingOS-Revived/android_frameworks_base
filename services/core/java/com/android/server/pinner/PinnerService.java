@@ -90,7 +90,10 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.HashSet;
+import java.util.Set;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
@@ -377,8 +380,65 @@ public final class PinnerService extends SystemService {
      */
     private void handlePinOnStart() {
         // Files to pin come from the overlay and can be specified per-device config
-        String[] filesToPin = mContext.getResources().getStringArray(
+        String[] overlayPinnedFiles = mContext.getResources().getStringArray(
                 com.android.internal.R.array.config_defaultPinnerServiceFiles);
+
+        String[] extraFiles = new String[] {
+            "/apex/com.android.art/javalib/okhttp.jar",
+            "/apex/com.android.art/javalib/bouncycastle.jar",
+            "/apex/com.android.media/javalib/updatable-media.jar",
+            "/apex/com.android.art/javalib/core-oj.jar",
+            "/apex/com.android.art/javalib/core-libart.jar",
+            "/system_ext/priv-app/SystemUI/SystemUI.apk", //google pixel devices pins SystemUIGoogle
+            "/system/framework/ext.jar",
+            "/system/framework/telephony-common.jar",
+            "/system/framework/oat",
+            "/system/framework/arm64",
+            "/system/framework/arm/boot-framework.oat",
+            "/system/framework/arm/boot-framework.vdex",
+            "/system/framework/arm/boot.oat",
+            "/system/framework/arm/boot.vdex",
+            "/system/framework/arm/boot-core-libart.oat",
+            "/system/framework/arm/boot-core-libart.vdex",
+            "/system/framework/arm/boot-ext.vdex",
+            "/system/lib/libhidltransport.so",
+            "/system/lib64/libutils.so",
+            "/system/lib64/libandroid_runtime.so",
+            "/system/lib64/libhwui.so",
+            "/system/lib64/libjpeg.so",
+            "/system/lib64/libandroidfw.so",
+            "/system/lib64/libandroid.so",
+            "/system/lib64/libandroid_servers.so",
+            "/system/lib/libRS.so",
+            "/system/lib/libRS_internal.so",
+            "/system/lib/libbcinfo.so",
+            "/system/lib/libRSDriver.so",
+            "/system/lib/libRSCpuRef.so",
+            "/system/lib/libblas.so",
+            "/system/lib64/libRS.so",
+            "/system/lib64/libRS_internal.so",
+            "/system/lib64/libbcinfo.so",
+            "/system/lib64/libRSDriver.so",
+            "/system/lib64/libRSCpuRef.so",
+            "/system/lib64/libblas.so",
+            "/vendor/lib/lib_aion_buffer.so",
+            "/vendor/lib64/lib_aion_buffer.so",
+            "/system/lib/libbinder.so",
+            "/system/lib/libbinder_ndk.so",
+            "/system/lib64/libbinder.so",
+            "/system/lib64/libbinder_ndk.so",
+            "/apex/com.android.art/lib64/libart.so",
+            "/apex/com.android.art/lib/libart.so",
+            "/system/lib/libgui.so",
+            "/system/lib64/libgui.so",
+            "/system/lib64/libmedia.so",
+            "/system/lib/libmedia.so"
+        };
+
+        Set<String> filesToPin = new LinkedHashSet<>();
+        Collections.addAll(filesToPin, overlayPinnedFiles);
+        Collections.addAll(filesToPin, extraFiles);
+
         // Continue trying to pin each file even if we fail to pin some of them
         for (String fileToPin : filesToPin) {
             pinFile(fileToPin, Integer.MAX_VALUE, /*appInfo=*/null, /*groupName=*/SYSTEM_GROUP_NAME,
