@@ -587,9 +587,7 @@ public final class WindowManagerGlobal {
         ViewRootImpl root = mRoots.get(index);
         View view = root.getView();
 
-        if (root != null) {
-            root.getImeFocusController().onWindowDismissed();
-        }
+        root.getImeFocusController().onWindowDismissed();
         boolean deferred = root.die(immediate);
         if (view != null) {
             view.assignParent(null);
