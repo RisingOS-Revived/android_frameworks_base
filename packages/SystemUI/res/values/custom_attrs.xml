@@ -8,4 +8,9 @@
     <declare-styleable name="ProgressImageView">
         <attr name="typeface" format="string" />
     </declare-styleable>
+
+    <!-- Progress colors -->
+    <color name="progress_color">@*android:color/system_accent1_400</color>
+    <color name="progress_background_color">#33FFFFFF</color>
+    <color name="action_chip_background_color">#33000000</color>
 </resources>
