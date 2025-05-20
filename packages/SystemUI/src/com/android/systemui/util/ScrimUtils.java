@@ -39,12 +39,13 @@ public class ScrimUtils {
     private final Handler mHandler;
     private final ScrimController mScrimController;
     private final StatusBarStateController mStatusBarStateController;
-    private final KeyguardStateController mKeyguardStateController;
     private final WallpaperDepthUtils mWallpaperDepthUtils;
     private final MediaArtUtils mMediaArtUtils;
     private final PeekDisplayViewController mPeekDisplayViewController;
     private final NowBarController mNowBarController;
-    
+
+    private KeyguardStateController mKeyguardStateController;
+
     private ExpansionState mExpansionState = ExpansionState.QS_NOT_EXPANDED;
 
     private final KeyguardStateController.Callback mKeyguardStateCallback =
@@ -82,9 +83,15 @@ public class ScrimUtils {
         mNowBarController = NowBarController.getInstance(mContext);
         mStatusBarStateController.addCallback(mStatusBarStateListener);
         mStatusBarStateListener.onDozingChanged(mStatusBarStateController.isDozing());
-        
-        mKeyguardStateController = Dependency.get(KeyguardStateController.class);
-        mKeyguardStateController.addCallback(mKeyguardStateCallback);
+
+        try {
+            mKeyguardStateController = Dependency.get(KeyguardStateController.class);
+            if (mKeyguardStateController != null) {
+                mKeyguardStateController.addCallback(mKeyguardStateCallback);
+            }
+        } catch (IllegalArgumentException e) {
+            mKeyguardStateController = null;
+        }
     }
 
     public static ScrimUtils getInstance(Context context) {
@@ -93,11 +100,11 @@ public class ScrimUtils {
         }
         return instance;
     }
-    
+
     public void setViewAlpha(float subjectAlpha) {
         mWallpaperDepthUtils.setSubjectAlpha(subjectAlpha);
         mMediaArtUtils.setSubjectAlpha(subjectAlpha);
-        mPeekDisplayViewController.setAlpha(subjectAlpha); 
+        mPeekDisplayViewController.setAlpha(subjectAlpha);
         mNowBarController.setAlpha(subjectAlpha);
     }
 
@@ -121,7 +128,7 @@ public class ScrimUtils {
             mNowBarController.hide();
         }
     }
-    
+
     public void onScreenStateChange() {
         updateNotifContainerElements();
         mHandler.postDelayed(() -> {
@@ -129,7 +136,7 @@ public class ScrimUtils {
         }, 250);
         mPeekDisplayViewController.resetShelves();
     }
-    
+
     private void updateNotifContainerElements() {
         mMediaArtUtils.updateMediaArtVisibility();
         mWallpaperDepthUtils.updateDepthWallpaperVisibility();
@@ -157,5 +164,9 @@ public class ScrimUtils {
 
     public float getScrimBehindAlphaKeyguard() {
         return mScrimController.getScrimBehindAlpha();
+    }
+
+    private boolean isKeyguardStateControllerAvailable() {
+        return mKeyguardStateController != null;
     }
 }
