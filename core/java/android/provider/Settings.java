@@ -14226,6 +14226,13 @@ public final class Settings {
         public static final String NOTIFICATION_ROW_TRANSPARENCY_LOCKSCREEN = "notification_row_transparency_lockscreen";
 
         /**
+         * User selectable keybox data.
+         * @hide
+         */
+        @Readable
+        public static final String KEYBOX_DATA = "keybox_data";
+
+        /**
          * Keys we no longer back up under the current schema, but want to continue to
          * process when restoring historical backup datasets.
          *
