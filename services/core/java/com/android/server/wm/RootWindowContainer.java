@@ -49,6 +49,7 @@ import static com.android.internal.protolog.WmProtoLogGroups.WM_SHOW_SURFACE_ALL
 import static com.android.server.policy.PhoneWindowManager.SYSTEM_DIALOG_REASON_ASSIST;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_LAYOUT;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
+import static com.android.server.wm.ActivityRecord.State.DESTROYED;
 import static com.android.server.wm.ActivityRecord.State.FINISHING;
 import static com.android.server.wm.ActivityRecord.State.PAUSED;
 import static com.android.server.wm.ActivityRecord.State.RESUMED;
@@ -151,6 +152,7 @@ import com.android.server.pm.UserManagerInternal;
 import com.android.server.policy.PermissionPolicyInternal;
 import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.utils.Slogf;
+import com.android.server.am.ProcessFreezerManager;
 import com.android.server.wm.utils.RegionUtils;
 import com.android.window.flags.Flags;
 
@@ -2386,12 +2388,12 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     ActivityRecord findTask(ActivityRecord r, TaskDisplayArea preferredTaskDisplayArea,
             boolean includeLaunchedFromBubble) {
         return findTask(r.getActivityType(), r.taskAffinity, r.intent, r.info,
-                preferredTaskDisplayArea, includeLaunchedFromBubble);
+                preferredTaskDisplayArea, includeLaunchedFromBubble, r);
     }
 
     @Nullable
     ActivityRecord findTask(int activityType, String taskAffinity, Intent intent, ActivityInfo info,
-            TaskDisplayArea preferredTaskDisplayArea, boolean includeLaunchedFromBubble) {
+            TaskDisplayArea preferredTaskDisplayArea, boolean includeLaunchedFromBubble, ActivityRecord r) {
         ProtoLog.d(WM_DEBUG_TASKS, "Looking for task of type=%s, taskAffinity=%s, intent=%s"
                         + ", info=%s, preferredTDA=%s, includeLaunchedFromBubble=%b", activityType,
                 taskAffinity, intent, info, preferredTaskDisplayArea, includeLaunchedFromBubble);
@@ -2403,9 +2405,27 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         if (preferredTaskDisplayArea != null) {
             mTmpFindTaskResult.process(preferredTaskDisplayArea);
             if (mTmpFindTaskResult.mIdealRecord != null) {
+                if(mTmpFindTaskResult.mIdealRecord.getState() == STOPPED) {
+                    ProcessFreezerManager freezer = ProcessFreezerManager.getInstance();
+                    if (freezer != null && freezer.useFreezerManager()) {
+                        freezer.startFreeze(r.packageName, ProcessFreezerManager.WARM_LAUNCH_FREEZE);
+                    }
+                }
                 return mTmpFindTaskResult.mIdealRecord;
             } else if (mTmpFindTaskResult.mCandidateRecord != null) {
                 candidateActivity = mTmpFindTaskResult.mCandidateRecord;
+            }
+        }
+
+        if ((mTmpFindTaskResult.mIdealRecord == null) ||
+            (mTmpFindTaskResult.mIdealRecord.getState() == DESTROYED)) {
+            if (r != null && r.isMainIntent(r.intent)) {
+                ProcessFreezerManager freezer = ProcessFreezerManager.getInstance();
+                if (freezer != null && freezer.useFreezerManager()) {
+                    freezer.startFreeze(r.packageName, ProcessFreezerManager.FIRST_LAUNCH_FREEZE);
+                }
+            } else if (r == null) {
+                Slog.w(TAG, "Should not happen! Didn't apply launch boost");
             }
         }
 

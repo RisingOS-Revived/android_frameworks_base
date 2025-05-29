@@ -3612,6 +3612,25 @@ public class OomAdjuster {
             state.setSetRawAdj(state.getCurRawAdj());
         }
 
+        ProcessFreezerManager freezer = ProcessFreezerManager.getInstance();
+        if (freezer != null && freezer.useFreezerManager()) {
+            // unfreeze process if user press home key before the first frame appeared
+            if ((state.getSetAdj() >= ProcessList.FOREGROUND_APP_ADJ &&
+                        state.getSetAdj() <= ProcessList.VISIBLE_APP_ADJ) &&
+                        state.getCurAdj() > ProcessList.VISIBLE_APP_ADJ) {
+                freezer.startUnfreeze(app.processName,
+                        ProcessFreezerManager.INTERRUPT_LAUNCH_UNFREEZE);
+            }
+            // check whether process/service that launching app depend on is in the freeze list
+            if (state.getSetAdj() >= state.getCurAdj() &&
+                        state.getCurAdj() <= ProcessList.VISIBLE_APP_ADJ) {
+                if (freezer.checkNeedFreezeProcessLocked(app)) {
+                    freezer.startUnfreezeService(app,
+                            ProcessFreezerManager.DEPEND_LAUNCH_UNFREEZE);
+                }
+            }
+        }
+
         int changes = 0;
 
         if (state.getCurAdj() != state.getSetAdj()) {
