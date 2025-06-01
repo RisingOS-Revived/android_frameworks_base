@@ -23,7 +23,6 @@ import androidx.constraintlayout.widget.Barrier
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import com.android.systemui.clocks.ClockStyle
-import com.android.systemui.customization.R as custR
 import com.android.systemui.keyguard.shared.model.KeyguardSection
 import com.android.systemui.res.R
 import com.android.systemui.util.settings.SecureSettings
@@ -41,7 +40,6 @@ constructor(
     
     override fun addViews(constraintLayout: ConstraintLayout) {
         
-        // Check if custom clock is enabled
         val clockStyle = secureSettings.getIntForUser(
             ClockStyle.CLOCK_STYLE_KEY, 0, UserHandle.USER_CURRENT
         )
@@ -49,12 +47,10 @@ constructor(
         
         if (!isCustomClockEnabled) return
         
-        // Remove existing clock style view if it exists
         constraintLayout.findViewById<View?>(R.id.clock_ls)?.let { existingView ->
             (existingView.parent as? ViewGroup)?.removeView(existingView)
         }
         
-        // Inflate the clock style layout
         val inflater = android.view.LayoutInflater.from(context)
         clockStyleView = inflater.inflate(R.layout.keyguard_clock_style, null) as ClockStyle
         clockStyleView?.apply {
@@ -70,10 +66,8 @@ constructor(
     }
     
     override fun bindData(constraintLayout: ConstraintLayout) {
-        // Trigger an update for the clock view to ensure it displays
         clockStyleView?.let { clockView ->
             clockView.onTimeChanged()
-            // Force a layout pass
             clockView.requestLayout()
         }
     }
@@ -82,72 +76,27 @@ constructor(
         if (!isCustomClockEnabled) return
         
         constraintSet.apply {
-            // Position the custom clock within the keyguard_status_area
-            connect(
-                R.id.clock_ls,
-                ConstraintSet.START,
-                ConstraintSet.PARENT_ID,
-                ConstraintSet.START
-            )
-            connect(
-                R.id.clock_ls,
-                ConstraintSet.END,
-                ConstraintSet.PARENT_ID,
-                ConstraintSet.END
-            )
+            // Clock positioning - TOP of hierarchy
+            connect(R.id.clock_ls, ConstraintSet.START, ConstraintSet.PARENT_ID, ConstraintSet.START)
+            connect(R.id.clock_ls, ConstraintSet.END, ConstraintSet.PARENT_ID, ConstraintSet.END)
             
-            // Position custom clock at the top of status area with minimal margin
-            // Use a small margin to avoid status bar overlap but keep it close to top
             val topMargin = (context.resources.getDimensionPixelSize(R.dimen.status_bar_height) * 1.25f).toInt()
-            connect(
-                R.id.clock_ls,
-                ConstraintSet.TOP,
-                ConstraintSet.PARENT_ID,
-                ConstraintSet.TOP,
-                topMargin
-            )
+            connect(R.id.clock_ls, ConstraintSet.TOP, ConstraintSet.PARENT_ID, ConstraintSet.TOP, topMargin)
             
-            // Ensure other elements are positioned below the custom clock
-            if (constraintSet.getConstraint(R.id.keyguard_slice_view) != null) {
-                connect(
-                    R.id.keyguard_slice_view,
-                    ConstraintSet.TOP,
-                    R.id.clock_ls,
-                    ConstraintSet.BOTTOM,
-                    context.resources.getDimensionPixelSize(R.dimen.below_clock_padding_start)
-                )
-            }
-            
-            if (constraintSet.getConstraint(R.id.keyguard_weather) != null) {
-                // Position weather below slice view if it exists, otherwise below clock
-                if (constraintSet.getConstraint(R.id.keyguard_slice_view) != null) {
-                    connect(
-                        R.id.keyguard_weather,
-                        ConstraintSet.TOP,
-                        R.id.keyguard_slice_view,
-                        ConstraintSet.BOTTOM,
-                        8
-                    )
-                } else {
-                    connect(
-                        R.id.keyguard_weather,
-                        ConstraintSet.TOP,
-                        R.id.clock_ls,
-                        ConstraintSet.BOTTOM,
-                        8
-                    )
-                }
-            }
-            
-            // Set dimensions
             constrainHeight(R.id.clock_ls, ConstraintSet.WRAP_CONTENT)
             constrainWidth(R.id.clock_ls, ConstraintSet.MATCH_CONSTRAINT)
-            
-            // Set side margins to 0 to match default clock positioning
             setMargin(R.id.clock_ls, ConstraintSet.START, 0)
             setMargin(R.id.clock_ls, ConstraintSet.END, 0)
+            setElevation(R.id.clock_ls, 1f)
             
-            // Update the barrier to include custom clock for proper notification positioning
+            // UNIFIED BARRIER - Create barrier in every section that could be last
+            createUnifiedBarrierAndNotificationConstraints(constraintSet)
+        }
+    }
+    
+    private fun createUnifiedBarrierAndNotificationConstraints(constraintSet: ConstraintSet) {
+        constraintSet.apply {
+            // UNIFIED BARRIER - Include ALL status area elements
             createBarrier(
                 R.id.smart_space_barrier_bottom,
                 Barrier.BOTTOM,
@@ -155,12 +104,16 @@ constructor(
                 *intArrayOf(
                     R.id.keyguard_slice_view,
                     R.id.keyguard_weather,
+                    R.id.default_weather_image,
+                    R.id.default_weather_text,
                     R.id.clock_ls,
-                    R.id.keyguard_info_widgets
+                    R.id.keyguard_info_widgets,
+                    R.id.keyguard_widgets,
+                    R.id.lockscreen_clock_view // Include fallback clock
                 )
             )
             
-            // Ensure notification icons are positioned below all status area content
+            // Position notifications below ALL status area content
             if (constraintSet.getConstraint(R.id.left_aligned_notification_icon_container) != null) {
                 connect(
                     R.id.left_aligned_notification_icon_container,
@@ -170,9 +123,6 @@ constructor(
                     context.resources.getDimensionPixelSize(R.dimen.below_clock_padding_start_icons)
                 )
             }
-            
-            // Set proper elevation within the status area
-            setElevation(R.id.clock_ls, 1f)
         }
     }
     
