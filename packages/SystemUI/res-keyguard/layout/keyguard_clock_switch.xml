@@ -81,12 +81,6 @@
             android:layout_height="0dp"
             android:visibility="gone" />
 
-        <View
-            android:id="@+id/keyguard_widgets"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:visibility="gone" />
-
         <!-- Dummy peek display -->
         <LinearLayout
             android:id="@+id/peek_display_area_top"
