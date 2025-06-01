@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 package com.android.systemui.keyguard.ui.view.layout.sections
+
 import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
@@ -35,12 +36,10 @@ constructor(
     
     override fun addViews(constraintLayout: ConstraintLayout) {
         
-        // Remove existing view with the same ID if it exists
         constraintLayout.findViewById<View?>(R.id.keyguard_info_widgets)?.let { existingView ->
             (existingView.parent as? ViewGroup)?.removeView(existingView)
         }
         
-        // Inflate the info widgets layout
         infoWidgetsView = LayoutInflater.from(context).inflate(
             R.layout.keyguard_info_widgets,
             constraintLayout,
@@ -57,76 +56,51 @@ constructor(
     }
     
     override fun bindData(constraintLayout: ConstraintLayout) {
-        // The ProgressImageView components handle their own data binding
-        // through their onAttachedToWindow/onDetachedFromWindow lifecycle
+        // ProgressImageView components handle their own data binding
     }
     
     override fun applyConstraints(constraintSet: ConstraintSet) {
         
         constraintSet.apply {
-            // Position info widgets within the keyguard_status_area
-            connect(
-                R.id.keyguard_info_widgets,
-                ConstraintSet.START,
-                ConstraintSet.PARENT_ID,
-                ConstraintSet.START
-            )
-            connect(
-                R.id.keyguard_info_widgets,
-                ConstraintSet.END,
-                ConstraintSet.PARENT_ID,
-                ConstraintSet.END
-            )
+            // Info widgets positioning - below WEATHER (3rd in hierarchy)
+            connect(R.id.keyguard_info_widgets, ConstraintSet.START, ConstraintSet.PARENT_ID, ConstraintSet.START)
+            connect(R.id.keyguard_info_widgets, ConstraintSet.END, ConstraintSet.PARENT_ID, ConstraintSet.END)
             
-            // Position below the weather view or clock_ls if available
-            if (constraintSet.getConstraint(R.id.keyguard_weather) != null) {
-                connect(
-                    R.id.keyguard_info_widgets,
-                    ConstraintSet.TOP,
-                    R.id.keyguard_weather,
-                    ConstraintSet.BOTTOM,
-                    8 // Small margin
-                )
-            } else if (constraintSet.getConstraint(R.id.clock_ls) != null) {
-                connect(
-                    R.id.keyguard_info_widgets,
-                    ConstraintSet.TOP,
-                    R.id.clock_ls,
-                    ConstraintSet.BOTTOM,
-                    8
-                )
-            } else if (constraintSet.getConstraint(R.id.keyguard_slice_view) != null) {
-                connect(
-                    R.id.keyguard_info_widgets,
-                    ConstraintSet.TOP,
-                    R.id.keyguard_slice_view,
-                    ConstraintSet.BOTTOM,
-                    8
-                )
-            } else {
-                // Last resort: position below the small clock
-                connect(
-                    R.id.keyguard_info_widgets,
-                    ConstraintSet.TOP,
-                    R.id.lockscreen_clock_view,
-                    ConstraintSet.BOTTOM,
-                    8
-                )
+            // Chain to weather (primary) or fallback hierarchy
+            when {
+                constraintSet.getConstraint(R.id.keyguard_weather) != null -> {
+                    connect(R.id.keyguard_info_widgets, ConstraintSet.TOP, R.id.keyguard_weather, ConstraintSet.BOTTOM, 12)
+                }
+                constraintSet.getConstraint(R.id.default_weather_image) != null -> {
+                    connect(R.id.keyguard_info_widgets, ConstraintSet.TOP, R.id.default_weather_image, ConstraintSet.BOTTOM, 12)
+                }
+                constraintSet.getConstraint(R.id.clock_ls) != null -> {
+                    connect(R.id.keyguard_info_widgets, ConstraintSet.TOP, R.id.clock_ls, ConstraintSet.BOTTOM, 12)
+                }
+                constraintSet.getConstraint(R.id.keyguard_slice_view) != null -> {
+                    connect(R.id.keyguard_info_widgets, ConstraintSet.TOP, R.id.keyguard_slice_view, ConstraintSet.BOTTOM, 12)
+                }
+                else -> {
+                    connect(R.id.keyguard_info_widgets, ConstraintSet.TOP, R.id.lockscreen_clock_view, ConstraintSet.BOTTOM, 12)
+                }
             }
             
-            // Set dimensions
             constrainHeight(R.id.keyguard_info_widgets, ConstraintSet.WRAP_CONTENT)
             constrainWidth(R.id.keyguard_info_widgets, ConstraintSet.MATCH_CONSTRAINT)
-            
-            // Set appropriate margins matching the XML structure
             setMargin(R.id.keyguard_info_widgets, ConstraintSet.START, 0)
             setMargin(R.id.keyguard_info_widgets, ConstraintSet.END, 0)
-            
-            // Ensure proper layering within the status area
+            // Add small bottom margin for AOD to prevent notification overlap
+            setMargin(R.id.keyguard_info_widgets, ConstraintSet.BOTTOM, 6) // 6dp bottom margin for AOD
             setElevation(R.id.keyguard_info_widgets, 1f)
             
-            // Update the barrier to include info widgets for proper notification positioning
-            // This ensures notifications appear below all status area content
+            // UNIFIED BARRIER - Create barrier in every section that could be last
+            createUnifiedBarrierAndNotificationConstraints(constraintSet)
+        }
+    }
+    
+    private fun createUnifiedBarrierAndNotificationConstraints(constraintSet: ConstraintSet) {
+        constraintSet.apply {
+            // UNIFIED BARRIER - Include ALL status area elements
             createBarrier(
                 R.id.smart_space_barrier_bottom,
                 Barrier.BOTTOM,
@@ -134,12 +108,16 @@ constructor(
                 *intArrayOf(
                     R.id.keyguard_slice_view,
                     R.id.keyguard_weather,
+                    R.id.default_weather_image,
+                    R.id.default_weather_text,
                     R.id.clock_ls,
-                    R.id.keyguard_info_widgets
+                    R.id.keyguard_info_widgets,
+                    R.id.keyguard_widgets,
+                    R.id.lockscreen_clock_view // Include fallback clock
                 )
             )
             
-            // Ensure notification icons are positioned below the barrier
+            // Position notifications below ALL status area content
             if (constraintSet.getConstraint(R.id.left_aligned_notification_icon_container) != null) {
                 connect(
                     R.id.left_aligned_notification_icon_container,
