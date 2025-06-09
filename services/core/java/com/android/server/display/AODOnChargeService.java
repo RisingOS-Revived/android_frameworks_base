@@ -40,7 +40,7 @@ public class AODOnChargeService extends SystemService {
     private final Context mContext;
     private final PowerManager mPowerManager;
 
-    private boolean mReceiverRegistered = false;
+    private boolean mListening = false;
     private boolean mAODActive = false;
     private boolean mServiceEnabled = false;
     private int mCurrentMode = MODE_DISABLED;
@@ -76,10 +76,10 @@ public class AODOnChargeService extends SystemService {
 
             Slog.v(TAG, "Settings changed: serviceEnabled=" + mServiceEnabled + ", aodActive=" + mAODActive);
 
-            if (mServiceEnabled) {
+            if (mServiceEnabled && !mListening) {
                 registerPowerReceiver();
                 refreshPowerState();
-            } else {
+            } else if (!mServiceEnabled && mListening) {
                 unregisterPowerReceiver();
                 maybeDeactivateAOD();
             }
@@ -104,9 +104,7 @@ public class AODOnChargeService extends SystemService {
     public void onBootPhase(int phase) {
         if (phase == SystemService.PHASE_BOOT_COMPLETED) {
             Slog.v(TAG, "Boot completed");
-            if (mServiceEnabled) {
-                refreshPowerState();
-            }
+            refreshPowerState();
         }
     }
 
@@ -118,27 +116,29 @@ public class AODOnChargeService extends SystemService {
     }
 
     private void registerPowerReceiver() {
-        if (mReceiverRegistered) return;
+        if (mListening) return;
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_BATTERY_CHANGED);
         filter.addAction(Intent.ACTION_POWER_DISCONNECTED);
         filter.addAction(Intent.ACTION_POWER_CONNECTED);
         mContext.registerReceiver(mPowerReceiver, filter);
-        mReceiverRegistered = true;
+        mListening = true;
         Slog.v(TAG, "Power receiver registered");
     }
 
     private void unregisterPowerReceiver() {
-        if (!mReceiverRegistered) return;
+        if (!mListening) return;
         mContext.unregisterReceiver(mPowerReceiver);
-        mReceiverRegistered = false;
+        mListening = false;
         Slog.v(TAG, "Power receiver unregistered");
     }
 
     private void handleBatteryStateChange(Intent intent) {
         if (!mServiceEnabled) {
-            mCurrentMode = MODE_DISABLED;
-            maybeDeactivateAOD();
+            if (mListening) {
+                mCurrentMode = MODE_DISABLED;
+                maybeDeactivateAOD();
+            }
             return;
         }
 
@@ -216,6 +216,7 @@ public class AODOnChargeService extends SystemService {
     }
 
     private void refreshPowerState() {
+        if (!mServiceEnabled || !mListening) return;
         Intent batteryStatus = mContext.registerReceiver(null, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
         if (batteryStatus != null) {
             handleBatteryStateChange(batteryStatus);
