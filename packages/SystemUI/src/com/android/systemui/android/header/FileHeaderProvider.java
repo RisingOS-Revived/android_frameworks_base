@@ -48,10 +48,13 @@ public class FileHeaderProvider implements
     private static final String HEADER_FILE_NAME = "custom_file_header_image";
 
     private Context mContext;
-    private Drawable mImage;
+    private Drawable mImage = null;
 
     public FileHeaderProvider(Context context) {
         mContext = context;
+        if (isCustomHeaderEnabled()) {
+            loadHeaderImage();
+        }
     }
 
     @Override
@@ -61,25 +64,21 @@ public class FileHeaderProvider implements
 
     @Override
     public void settingsChanged(Uri uri) {
-        final boolean customHeader = Settings.System.getIntForUser(mContext.getContentResolver(),
-                Settings.System.STATUS_BAR_CUSTOM_HEADER, 0,
-                UserHandle.USER_CURRENT) == 1;
-
-        if (uri != null && uri.equals(Settings.System.getUriFor(
-                Settings.System.STATUS_BAR_FILE_HEADER_IMAGE))) {
-            String imageUri = Settings.System.getStringForUser(mContext.getContentResolver(),
-                    Settings.System.STATUS_BAR_FILE_HEADER_IMAGE,
-                    UserHandle.USER_CURRENT);
-            if (imageUri != null) {
-                saveHeaderImage(Uri.parse(imageUri));
-            }
-        }
-        if (mImage != null) {
-            mImage = null;
-        }
-        if (customHeader) {
+        if (isCustomHeaderEnabled()) {
             loadHeaderImage();
         }
+    }
+    
+    private boolean isCustomHeaderEnabled() {
+        return Settings.System.getIntForUser(mContext.getContentResolver(),
+                Settings.System.STATUS_BAR_CUSTOM_HEADER, 0,
+                UserHandle.USER_CURRENT) == 1;
+    }
+    
+    private String getCustomHeaderPath() {
+        return Settings.System.getStringForUser(mContext.getContentResolver(),
+                    Settings.System.STATUS_BAR_FILE_HEADER_IMAGE,
+                    UserHandle.USER_CURRENT);
     }
 
     @Override
@@ -91,48 +90,21 @@ public class FileHeaderProvider implements
     public void disableProvider() {
     }
 
-    private void saveHeaderImage(Uri imageUri) {
-        if (DEBUG) Log.i(TAG, "Save header image " + imageUri);
-
-        if (imageUri == null) {
-            Log.e(TAG, "Image URI is null");
+    private void loadHeaderImage() {
+        if (mContext == null) return;
+        String path = getCustomHeaderPath();
+        if (path == null || path.isEmpty()) return;
+        final Bitmap bitmap = BitmapFactory.decodeFile(path);
+        if (bitmap == null) {
+            Log.d(TAG + "loadHeaderImage: ", "Failed to decode bitmap from file");
             return;
         }
-
-        File file = new File(mContext.getFilesDir(), HEADER_FILE_NAME);
-        try (InputStream imageStream = mContext.getContentResolver().openInputStream(imageUri);
-             FileOutputStream output = new FileOutputStream(file)) {
-
-            if (imageStream == null) {
-                Log.e(TAG, "Unable to open input stream for URI: " + imageUri);
-                return;
-            }
-            byte[] buffer = new byte[8 * 1024];
-            int read;
-
-            while ((read = imageStream.read(buffer)) != -1) {
-                output.write(buffer, 0, read);
-            }
-            output.flush();
-            if (DEBUG) Log.i(TAG, "Saved header image " + file.getAbsolutePath());
-        } catch (IOException e) {
-            Log.e(TAG, "Save header image failed for URI: " + imageUri, e);
-        }
-    }
-
-    private void loadHeaderImage() {
-        File file = new File(mContext.getFilesDir(), HEADER_FILE_NAME);
-        if (file.exists()) {
-            if (DEBUG) Log.i(TAG, "Load header image");
-            Bitmap image = ImageHelper.getCompressedBitmap(file.getAbsolutePath());
-            if (image != null) {
-                mImage = new BitmapDrawable(mContext.getResources(), image);
-            }
-        }
+        mImage = new BitmapDrawable(mContext.getResources(), bitmap);
     }
 
     @Override
     public Drawable getCurrent(final Calendar now) {
+        loadHeaderImage();
         return mImage;
     }
 }
