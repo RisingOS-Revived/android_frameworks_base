@@ -35,24 +35,30 @@ import com.android.systemui.Dependency;
 import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.DarkIconDispatcher.DarkReceiver;
 import com.android.systemui.res.R;
+import com.android.internal.util.android.OmniJawsClient;
 
 import java.util.ArrayList;
 
-public abstract class LogoImage extends ImageView implements DarkReceiver {
+public abstract class LogoImage extends ImageView implements DarkReceiver, OmniJawsClient.OmniJawsObserver {
 
     private Context mContext;
-
+    private Handler mHandler;
     private boolean mAttached;
-
     private boolean mShowLogo;
     public int mLogoPosition;
     private int mLogoStyle;
     private int mTintColor = Color.WHITE;
     private boolean mUseCustomLogoColor;
     private int mCustomLogoColor = Color.WHITE;
+    
+    private OmniJawsClient mWeatherClient;
+    private OmniJawsClient.WeatherInfo mWeatherInfo;
+    private boolean mWeatherClientInitialized = false;
+    
+    private int mLogoSize;
+    private boolean mLogoSizeInitialized = false;
 
     class SettingsObserver extends ContentObserver {
-
         public SettingsObserver(Handler handler) {
             super(handler);
         }
@@ -92,6 +98,8 @@ public abstract class LogoImage extends ImageView implements DarkReceiver {
     public LogoImage(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
         mContext = context;
+        mHandler = new Handler();
+        mWeatherClient = new OmniJawsClient(context);
     }
 
     protected abstract boolean isLogoVisible();
@@ -99,26 +107,80 @@ public abstract class LogoImage extends ImageView implements DarkReceiver {
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        if (mAttached)
-            return;
+        if (mAttached) return;
 
         mAttached = true;
 
-        SettingsObserver observer = new SettingsObserver(null);
+        SettingsObserver observer = new SettingsObserver(mHandler);
         observer.observe();
         updateSettings();
 
         Dependency.get(DarkIconDispatcher.class).addDarkReceiver(this);
+        initializeWeatherClient();
+        initializeLogoSize();
     }
 
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
-        if (!mAttached)
-            return;
+        if (!mAttached) return;
 
         mAttached = false;
         Dependency.get(DarkIconDispatcher.class).removeDarkReceiver(this);
+        cleanupWeatherClient();
+    }
+
+    private void initializeLogoSize() {
+        if (!mLogoSizeInitialized) {
+            mLogoSize = (int) (24 * getResources().getDisplayMetrics().density);
+            mLogoSizeInitialized = true;
+        }
+    }
+    
+    private Drawable createScaledDrawable(Drawable originalDrawable, int width, int height) {
+        if (originalDrawable == null) return null;
+        
+        android.graphics.Bitmap bitmap = android.graphics.Bitmap.createBitmap(
+            width, height, android.graphics.Bitmap.Config.ARGB_8888);
+        android.graphics.Canvas canvas = new android.graphics.Canvas(bitmap);
+        
+        originalDrawable.setBounds(0, 0, width, height);
+        originalDrawable.draw(canvas);
+        
+        return new android.graphics.drawable.BitmapDrawable(getResources(), bitmap);
+    }
+    
+    private void applyLogoSize(Drawable drawable) {
+        if (drawable != null && mLogoSizeInitialized) {
+            setScaleType(ImageView.ScaleType.FIT_CENTER);
+            drawable.setBounds(0, 0, mLogoSize, mLogoSize);
+            
+            getLayoutParams().width = mLogoSize;
+            getLayoutParams().height = mLogoSize;
+            setMaxWidth(mLogoSize);
+            setMaxHeight(mLogoSize);
+            setMinimumWidth(mLogoSize);
+            setMinimumHeight(mLogoSize);
+        }
+    }
+    
+    private void initializeWeatherClient() {
+        if (!mWeatherClientInitialized && mWeatherClient != null) {
+            mWeatherClient.addObserver(this);
+            mWeatherClientInitialized = true;
+            
+            if (mWeatherClient.isOmniJawsEnabled()) {
+                mWeatherClient.queryWeather();
+                mWeatherInfo = mWeatherClient.getWeatherInfo();
+            }
+        }
+    }
+    
+    private void cleanupWeatherClient() {
+        if (mWeatherClientInitialized && mWeatherClient != null) {
+            mWeatherClient.removeObserver(this);
+            mWeatherClientInitialized = false;
+        }
     }
 
     @Override
@@ -131,132 +193,192 @@ public abstract class LogoImage extends ImageView implements DarkReceiver {
         }
     }
 
+    @Override
+    public void weatherUpdated() {
+        mWeatherInfo = mWeatherClient.getWeatherInfo();
+        if (mShowLogo && isLogoVisible() && mLogoStyle == 34) {
+            updateLogo();
+        }
+    }
+
+    @Override
+    public void weatherError(int errorReason) {
+        mWeatherInfo = null;
+        if (mShowLogo && isLogoVisible() && mLogoStyle == 34) {
+            updateLogo();
+        }
+    }
+
     public void updateLogo() {
         Drawable drawable = null;
-        switch (mLogoStyle) {
-            case 0:
-            default:
-                drawable = mContext.getResources().getDrawable(R.drawable.ic_rising_logo);
-                break;
-            case 1:
-                drawable = mContext.getResources().getDrawable(R.drawable.ic_android_logo);
-                break;
-            case 2:
-                drawable = mContext.getResources().getDrawable(R.drawable.ic_adidas);
-                break;
-            case 3:
-                drawable = mContext.getResources().getDrawable(R.drawable.ic_alien);
-                break;
-            case 4:
-                drawable = mContext.getResources().getDrawable(R.drawable.ic_apple_logo);
-                break;
-            case 5:
-                drawable = mContext.getResources().getDrawable(R.drawable.ic_avengers);
-                break;
-            case 6:
-                drawable = mContext.getResources().getDrawable(R.drawable.ic_batman);
-                break;
-            case 7:
-                drawable = mContext.getResources().getDrawable(R.drawable.ic_batman_tdk);
-                break;
-            case 8:
-                drawable = mContext.getResources().getDrawable(R.drawable.ic_beats);
-                break;
-            case 9:
-                drawable = mContext.getResources().getDrawable(R.drawable.ic_biohazard);
-                break;
-            case 10:
-                drawable = mContext.getResources().getDrawable(R.drawable.ic_blackberry);
-                break;
-            case 11:
-                drawable = mContext.getResources().getDrawable(R.drawable.ic_cannabis);
-                break;
-            case 12:
-                drawable = mContext.getResources().getDrawable(R.drawable.ic_emoticon_cool);
-                break;
-            case 13:
-                drawable = mContext.getResources().getDrawable(R.drawable.ic_emoticon_devil);
-                break;
-            case 14:
-                drawable = mContext.getResources().getDrawable(R.drawable.ic_fire);
-                break;
-            case 15:
-                drawable = mContext.getResources().getDrawable(R.drawable.ic_heart);
-                break;
-            case 16:
-                drawable = mContext.getResources().getDrawable(R.drawable.ic_nike);
-                break;
-            case 17:
-                drawable = mContext.getResources().getDrawable(R.drawable.ic_pac_man);
-                break;
-            case 18:
-                drawable = mContext.getResources().getDrawable(R.drawable.ic_puma);
-                break;
-            case 19:
-                drawable = mContext.getResources().getDrawable(R.drawable.ic_rog);
-                break;
-            case 20:
-                drawable = mContext.getResources().getDrawable(R.drawable.ic_spiderman);
-                break;
-            case 21:
-                drawable = mContext.getResources().getDrawable(R.drawable.ic_superman);
-                break;
-            case 22:
-                drawable = mContext.getResources().getDrawable(R.drawable.ic_windows);
-                break;
-            case 23:
-                drawable = mContext.getResources().getDrawable(R.drawable.ic_xbox);
-                break;
-            case 24:
-                drawable = mContext.getResources().getDrawable(R.drawable.ic_ghost);
-                break;
-            case 25:
-                drawable = mContext.getResources().getDrawable(R.drawable.ic_ninja);
-                break;
-            case 26:
-                drawable = mContext.getResources().getDrawable(R.drawable.ic_robot);
-                break;
-            case 27:
-                drawable = mContext.getResources().getDrawable(R.drawable.ic_ironman);
-                break;
-            case 28:
-                drawable = mContext.getResources().getDrawable(R.drawable.ic_captain_america);
-                break;
-            case 29:
-                drawable = mContext.getResources().getDrawable(R.drawable.ic_flash);
-                break;
-            case 30:
-                drawable = mContext.getResources().getDrawable(R.drawable.ic_tux_logo);
-                break;
-            case 31:
-                drawable = mContext.getResources().getDrawable(R.drawable.ic_ubuntu_logo);
-                break;
-            case 32:
-                drawable = mContext.getResources().getDrawable(R.drawable.ic_mint_logo);
-                break;
-            case 33:
-                drawable = mContext.getResources().getDrawable(R.drawable.ic_amogus);
-                break;
+        
+        if (mLogoStyle == 34) {
+            if (mWeatherClient.isOmniJawsEnabled()) {
+                if (mWeatherInfo == null) {
+                    mWeatherClient.queryWeather();
+                    mWeatherInfo = mWeatherClient.getWeatherInfo();
+                }
+                
+                if (mWeatherInfo != null) {
+                    drawable = mWeatherClient.getWeatherConditionImage(mWeatherInfo.conditionCode);
+                    if (drawable != null) {
+                        drawable = createScaledDrawable(drawable, mLogoSize, mLogoSize);
+                        applyLogoSize(drawable);
+                    }
+                }
+                
+                if (drawable == null) {
+                    setImageDrawable(null);
+                    setVisibility(View.GONE);
+                    mHandler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (mShowLogo && isLogoVisible() && mLogoStyle == 34) {
+                                updateLogo();
+                            }
+                        }
+                    }, 2000);
+                    return;
+                }
+            } else {
+                setImageDrawable(null);
+                setVisibility(View.GONE);
+                return;
+            }
+        } else {
+            switch (mLogoStyle) {
+                case 0:
+                default:
+                    drawable = mContext.getResources().getDrawable(R.drawable.ic_rising_logo);
+                    break;
+                case 1:
+                    drawable = mContext.getResources().getDrawable(R.drawable.ic_android_logo);
+                    break;
+                case 2:
+                    drawable = mContext.getResources().getDrawable(R.drawable.ic_adidas);
+                    break;
+                case 3:
+                    drawable = mContext.getResources().getDrawable(R.drawable.ic_alien);
+                    break;
+                case 4:
+                    drawable = mContext.getResources().getDrawable(R.drawable.ic_apple_logo);
+                    break;
+                case 5:
+                    drawable = mContext.getResources().getDrawable(R.drawable.ic_avengers);
+                    break;
+                case 6:
+                    drawable = mContext.getResources().getDrawable(R.drawable.ic_batman);
+                    break;
+                case 7:
+                    drawable = mContext.getResources().getDrawable(R.drawable.ic_batman_tdk);
+                    break;
+                case 8:
+                    drawable = mContext.getResources().getDrawable(R.drawable.ic_beats);
+                    break;
+                case 9:
+                    drawable = mContext.getResources().getDrawable(R.drawable.ic_biohazard);
+                    break;
+                case 10:
+                    drawable = mContext.getResources().getDrawable(R.drawable.ic_blackberry);
+                    break;
+                case 11:
+                    drawable = mContext.getResources().getDrawable(R.drawable.ic_cannabis);
+                    break;
+                case 12:
+                    drawable = mContext.getResources().getDrawable(R.drawable.ic_emoticon_cool);
+                    break;
+                case 13:
+                    drawable = mContext.getResources().getDrawable(R.drawable.ic_emoticon_devil);
+                    break;
+                case 14:
+                    drawable = mContext.getResources().getDrawable(R.drawable.ic_fire);
+                    break;
+                case 15:
+                    drawable = mContext.getResources().getDrawable(R.drawable.ic_heart);
+                    break;
+                case 16:
+                    drawable = mContext.getResources().getDrawable(R.drawable.ic_nike);
+                    break;
+                case 17:
+                    drawable = mContext.getResources().getDrawable(R.drawable.ic_pac_man);
+                    break;
+                case 18:
+                    drawable = mContext.getResources().getDrawable(R.drawable.ic_puma);
+                    break;
+                case 19:
+                    drawable = mContext.getResources().getDrawable(R.drawable.ic_rog);
+                    break;
+                case 20:
+                    drawable = mContext.getResources().getDrawable(R.drawable.ic_spiderman);
+                    break;
+                case 21:
+                    drawable = mContext.getResources().getDrawable(R.drawable.ic_superman);
+                    break;
+                case 22:
+                    drawable = mContext.getResources().getDrawable(R.drawable.ic_windows);
+                    break;
+                case 23:
+                    drawable = mContext.getResources().getDrawable(R.drawable.ic_xbox);
+                    break;
+                case 24:
+                    drawable = mContext.getResources().getDrawable(R.drawable.ic_ghost);
+                    break;
+                case 25:
+                    drawable = mContext.getResources().getDrawable(R.drawable.ic_ninja);
+                    break;
+                case 26:
+                    drawable = mContext.getResources().getDrawable(R.drawable.ic_robot);
+                    break;
+                case 27:
+                    drawable = mContext.getResources().getDrawable(R.drawable.ic_ironman);
+                    break;
+                case 28:
+                    drawable = mContext.getResources().getDrawable(R.drawable.ic_captain_america);
+                    break;
+                case 29:
+                    drawable = mContext.getResources().getDrawable(R.drawable.ic_flash);
+                    break;
+                case 30:
+                    drawable = mContext.getResources().getDrawable(R.drawable.ic_tux_logo);
+                    break;
+                case 31:
+                    drawable = mContext.getResources().getDrawable(R.drawable.ic_ubuntu_logo);
+                    break;
+                case 32:
+                    drawable = mContext.getResources().getDrawable(R.drawable.ic_mint_logo);
+                    break;
+                case 33:
+                    drawable = mContext.getResources().getDrawable(R.drawable.ic_amogus);
+                    break;
+            }
         }
 
-        // Use either the custom color or the system tint color
-        int logoColor = mUseCustomLogoColor ? mCustomLogoColor : mTintColor;
-        drawable.setTint(logoColor);
-        setImageDrawable(drawable);
+        if (drawable != null) {
+            applyLogoSize(drawable);
+            
+            if (mLogoStyle != 34) {
+                int logoColor = mUseCustomLogoColor ? mCustomLogoColor : mTintColor;
+                drawable.setTint(logoColor);
+            }
+            
+            setImageDrawable(drawable);
+        }
     }
 
     public void updateSettings() {
         ContentResolver resolver = mContext.getContentResolver();
         
-        // Get existing settings
         mShowLogo = Settings.System.getIntForUser(resolver,
                 Settings.System.STATUS_BAR_LOGO, 0, UserHandle.USER_CURRENT) != 0;
         mLogoPosition = Settings.System.getIntForUser(resolver,
                 Settings.System.STATUS_BAR_LOGO_POSITION, 0, UserHandle.USER_CURRENT);
-        mLogoStyle = Settings.System.getIntForUser(resolver,
+        int newLogoStyle = Settings.System.getIntForUser(resolver,
                 Settings.System.STATUS_BAR_LOGO_STYLE, 0, UserHandle.USER_CURRENT);
         
-        // Get color settings
+        boolean wasWeatherStyle = (mLogoStyle == 34);
+        boolean isWeatherStyle = (newLogoStyle == 34);
+        mLogoStyle = newLogoStyle;
+        
         mUseCustomLogoColor = Settings.System.getIntForUser(resolver,
                 Settings.System.STATUS_BAR_LOGO_USE_CUSTOM_COLOR, 0, UserHandle.USER_CURRENT) != 0;
         
@@ -265,11 +387,29 @@ public abstract class LogoImage extends ImageView implements DarkReceiver {
                     Settings.System.STATUS_BAR_LOGO_CUSTOM_COLOR, Color.WHITE, UserHandle.USER_CURRENT);
         }
 
+        if (isWeatherStyle) {
+            if (!mWeatherClientInitialized) {
+                initializeWeatherClient();
+            }
+            
+            initializeLogoSize();
+            
+            if (mWeatherClient.isOmniJawsEnabled()) {
+                mWeatherClient.queryWeather();
+                mWeatherInfo = mWeatherClient.getWeatherInfo();
+            } else {
+                setImageDrawable(null);
+                setVisibility(View.GONE);
+                return;
+            }
+        }
+
         if (!mShowLogo || !isLogoVisible()) {
             setImageDrawable(null);
             setVisibility(View.GONE);
             return;
         }
+        
         updateLogo();
         setVisibility(View.VISIBLE);
     }
