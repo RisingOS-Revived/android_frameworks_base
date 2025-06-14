@@ -419,6 +419,17 @@ public class QSImpl implements QS, CommandQueue.Callbacks, StatusBarStateControl
             }
         }
         updateQsState();
+        resetOverScrollAmountIfNeeded();
+    }
+
+    public final void resetOverScrollAmountIfNeeded() {
+        View qs = getView();
+        if (qs == null || qs.getTranslationY() == 0.0f 
+                || mBypassController.getBouncerShowing() 
+                || mQsVisible || mStatusBarState == SHADE_LOCKED) {
+            return;
+        }
+        setOverScrollAmount(0);
     }
 
     @Override
