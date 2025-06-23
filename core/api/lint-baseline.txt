@@ -1307,6 +1307,10 @@ UnflaggedApi: android.app.ApplicationStartInfo#getStartupTimestamps():
     New API must be flagged with @FlaggedApi: method android.app.ApplicationStartInfo.getStartupTimestamps()
 UnflaggedApi: android.app.ApplicationStartInfo#writeToParcel(android.os.Parcel, int):
     New API must be flagged with @FlaggedApi: method android.app.ApplicationStartInfo.writeToParcel(android.os.Parcel,int)
+UnflaggedApi: android.app.Notification#FLAG_ALWAYS_SHOW_TICKER:
+    New API must be flagged with @FlaggedApi: field android.app.Notification.FLAG_ALWAYS_SHOW_TICKER
+UnflaggedApi: android.app.Notification#FLAG_ONLY_UPDATE_TICKER:
+    New API must be flagged with @FlaggedApi: field android.app.Notification.FLAG_ONLY_UPDATE_TICKER
 UnflaggedApi: android.app.Notification.TvExtender:
     New API must be flagged with @FlaggedApi: class android.app.Notification.TvExtender
 UnflaggedApi: android.app.Notification.TvExtender#TvExtender():

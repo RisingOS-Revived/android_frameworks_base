@@ -71,6 +71,8 @@
                 android:layout_height="match_parent"
                 android:layout_gravity="center_vertical|start"
                 android:clipChildren="false">
+                
+                <include layout="@layout/status_bar_lyric" />
 
                 <include layout="@layout/heads_up_status_bar_layout" />
 
