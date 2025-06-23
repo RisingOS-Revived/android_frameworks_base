@@ -77,6 +77,7 @@ import java.util.concurrent.TimeoutException;
 
 import com.android.internal.util.android.AttestationHooks;
 import com.android.internal.util.android.PixelPropsUtils;
+import com.android.internal.util.android.MeizuPropsUtils;
 
 /**
  * Base class for implementing application instrumentation code.  When running
@@ -112,6 +113,8 @@ public class Instrumentation {
     private static final long CONNECT_TIMEOUT_MILLIS = 60_000;
 
     private static final boolean VERBOSE = Log.isLoggable(TAG, Log.VERBOSE);
+    
+    private static final String DISGUISE_PROPS_FOR_MUSIC_APP = "persist.sys.disguise_props_for_music_app";
 
     /**
      * If set, will print the stack trace for activity starts within the process
@@ -1351,6 +1354,11 @@ public class Instrumentation {
         app.attach(context);
         AttestationHooks.setProps(context);
         PixelPropsUtils.setProps(context);
+        String packageName = context.getPackageName();
+        PixelPropsUtils.setProps(packageName);
+        if (SystemProperties.getBoolean(DISGUISE_PROPS_FOR_MUSIC_APP, false)) {
+            MeizuPropsUtils.setProps(packageName);
+        }
         return app;
     }
     
@@ -1370,6 +1378,12 @@ public class Instrumentation {
         app.attach(context);
         AttestationHooks.setProps(context);
         PixelPropsUtils.setProps(context);
+        String packageName = context.getPackageName();
+        com.android.internal.util.android.PixelPropsUtils.setProps(context);
+        PixelPropsUtils.setProps(packageName);
+        if (SystemProperties.getBoolean(DISGUISE_PROPS_FOR_MUSIC_APP, false)) {
+            MeizuPropsUtils.setProps(packageName);
+        }
         return app;
     }
 
