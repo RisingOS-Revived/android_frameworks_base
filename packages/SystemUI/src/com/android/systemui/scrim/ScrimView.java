@@ -404,7 +404,7 @@ public class ScrimView extends View {
             setRenderEffect(RenderEffect.createBlurEffect(
                     blurRadius,
                     blurRadius,
-                    Shader.TileMode.CLAMP));
+                    Shader.TileMode.MIRROR));
         } else {
             debugLog("Resetting blur RenderEffect to ScrimView " + mScrimName);
             setRenderEffect(null);
