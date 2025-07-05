@@ -13582,6 +13582,19 @@ public final class Settings {
         public static final String PULSE_ON_NEW_TRACKS = "pulse_on_new_tracks";
 
         /**
+         * Whether to show ambient instead of waking for the tap gesture
+         * @hide
+         */
+        public static final String DOZE_TAP_GESTURE_AMBIENT = "doze_tap_gesture_ambient";
+
+        /**
+         * Whether to show ambient instead of waking for the pickup gesture
+         * Do note quick pickup (device sensor) is already configured to do that
+         * @hide
+         */
+        public static final String DOZE_PICK_UP_GESTURE_AMBIENT = "doze_pick_up_gesture_ambient";
+
+        /**
          * Keys we no longer back up under the current schema, but want to continue to
          * process when restoring historical backup datasets.
          *
@@ -13977,19 +13990,6 @@ public final class Settings {
          * @hide
          */
         public static final String VPN_ENFORCE_DNS_STORE = "vpn_enforce_dns_store";
-
-        /**
-         * Whether to show ambient instead of waking for the dt2w gesture
-         * @hide
-         */
-        public static final String DOZE_DOUBLE_TAP_GESTURE_AMBIENT = "doze_double_tap_gesture_ambient";
-
-        /**
-         * Whether to show ambient instead of waking for the pickup gesture
-         * Do note quick pickup (device sensor) is already configured to do that
-         * @hide
-         */
-        public static final String DOZE_PICK_UP_GESTURE_AMBIENT = "doze_pick_up_gesture_ambient";
 
         /**
          *  Toggle the media squiggle animation
