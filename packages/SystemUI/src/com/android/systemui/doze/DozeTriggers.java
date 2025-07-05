@@ -374,11 +374,18 @@ public class DozeTriggers implements DozeMachine.Part {
         return mKeyguardStateController.isOccluded();
     }
 
+    private boolean dozeInsteadOfWake(@DozeLog.Reason int reason) {
+        switch (reason) {
+            case DozeLog.REASON_SENSOR_PICKUP:
+                return mConfig.pickupGestureAmbient(UserHandle.USER_CURRENT);
+            case DozeLog.REASON_SENSOR_TAP:
+                return mConfig.tapGestureAmbient(UserHandle.USER_CURRENT);
+        }
+        return false;
+    }
+
     private void gentleWakeUp(@DozeLog.Reason int reason) {
-        if (reason == DozeLog.REASON_SENSOR_PICKUP &&
-            mConfig.pickupGestureAmbient(UserHandle.USER_CURRENT) ||
-            reason == DozeLog.REASON_SENSOR_DOUBLE_TAP
-            && mConfig.doubleTapGestureAmbient(UserHandle.USER_CURRENT)) {
+        if (dozeInsteadOfWake(reason)) {
             requestPulse(reason, true, null);
             return;
         }
