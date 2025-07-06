@@ -290,4 +290,7 @@
     <!-- Low light Dream -->
     <color name="low_light_clock_background_color">#000000</color>
     <color name="low_light_clock_text_color">#CCCCCC</color>
+
+    <!-- Mistouch -->
+    <color name="keyguard_mistouch_prevention_text_color">#767579</color>
 </resources>

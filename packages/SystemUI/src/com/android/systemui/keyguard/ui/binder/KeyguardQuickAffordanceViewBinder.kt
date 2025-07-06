@@ -372,6 +372,7 @@ constructor(
                     },
                     msdlPlayer,
                 )
+                com.android.systemui.keyguard.MistouchInteractor.get().handleAffordanceLongClick()
             }
 
             onTouchListener.cancel()

@@ -134,6 +134,7 @@ constructor(
                 !falsingManager.isFalseDoubleTap
         ) {
             powerInteractor.wakeUpIfDozing("PULSING_DOUBLE_TAP", PowerManager.WAKE_REASON_TAP)
+            com.android.systemui.keyguard.MistouchInteractor.get().handleDoubleTapPowerGesture()
             return true
         }
 
