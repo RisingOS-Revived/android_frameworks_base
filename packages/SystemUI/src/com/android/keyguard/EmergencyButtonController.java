@@ -195,6 +195,7 @@ public class EmergencyButtonController extends ViewController<EmergencyButton> {
                         Log.wtf(TAG, "TelecomManager was null, cannot launch emergency dialer");
                         return;
                     }
+                    com.android.systemui.keyguard.MistouchInteractor.Companion.get().handleEmergencyButtonClick();
                     Intent emergencyDialIntent =
                             mTelecomManager.createLaunchEmergencyDialerIntent(null /* number*/)
                                     .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
