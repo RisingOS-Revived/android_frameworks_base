@@ -27,7 +27,20 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
+import java.util.function.Consumer;
+
 public class ScrimUtils {
+
+    public interface ScrimEventListener {
+        default void onKeyguardShowingChanged(boolean showing) {}
+        default void onKeyguardFadingAwayChanged(boolean fadingAway) {}
+        default void onKeyguardGoingAwayChanged(boolean goingAway) {}
+        default void onPrimaryBouncerShowingChanged(boolean showing) {}
+        default void onDozingChanged() {}
+        default void onExpandedFractionChanged(float expandedFraction) {}
+        default void onBarStateChanged(int state) {}
+        default void onQsVisibilityChanged(boolean visible) {}
+    }
 
     public enum ExpansionState {
         QS_NOT_EXPANDED,
@@ -48,16 +61,22 @@ public class ScrimUtils {
 
     private ExpansionState mExpansionState = ExpansionState.QS_NOT_EXPANDED;
 
+    private final WeakListenerManager<ScrimEventListener> listeners = new WeakListenerManager<>();
+
     private final KeyguardStateController.Callback mKeyguardStateCallback =
             new KeyguardStateController.Callback() {
                 @Override
                 public void onKeyguardFadingAwayChanged() {
                     onKgFadingAwayChanged();
+                    notifyListeners(listener -> listener.onKeyguardFadingAwayChanged(
+                        mKeyguardStateController.isKeyguardFadingAway()));
                 }
 
                 @Override
                 public void onKeyguardGoingAwayChanged() {
                     onKgGoingAwayChanged();
+                    notifyListeners(listener -> listener.onKeyguardGoingAwayChanged(
+                        mKeyguardStateController.isKeyguardGoingAway()));
                 }
             };
 
@@ -65,10 +84,13 @@ public class ScrimUtils {
             new StatusBarStateController.StateListener() {
                 @Override
                 public void onStateChanged(int newState) {
+                    notifyListeners(listener -> listener.onBarStateChanged(newState));
+                    notifyListeners(listener -> listener.onKeyguardShowingChanged(newState == KEYGUARD));
                 }
                 @Override
                 public void onDozingChanged(boolean dozing) {
                     onDozeChanged(dozing);
+                    notifyListeners(ScrimEventListener::onDozingChanged);
                 }
             };
 
@@ -101,6 +123,22 @@ public class ScrimUtils {
         return instance;
     }
 
+    public static ScrimUtils get() {
+        return instance;
+    }
+
+    public void addListener(ScrimEventListener listener) {
+        listeners.addListener(listener);
+    }
+
+    public void removeListener(ScrimEventListener listener) {
+        listeners.removeListener(listener);
+    }
+
+    private void notifyListeners(Consumer<ScrimEventListener> callback) {
+        listeners.notifyConsumer(callback);
+    }
+
     public void setViewAlpha(float subjectAlpha) {
         mWallpaperDepthUtils.setSubjectAlpha(subjectAlpha);
         mMediaArtUtils.setSubjectAlpha(subjectAlpha);
@@ -116,6 +154,9 @@ public class ScrimUtils {
             return;
         }
         mExpansionState = state;
+
+        notifyListeners(listener -> listener.onQsVisibilityChanged(state == ExpansionState.QS_FULLY_EXPANDED));
+
         if (mExpansionState == ExpansionState.QS_NOT_EXPANDED) {
             mWallpaperDepthUtils.updateDepthWallpaper();
             mMediaArtUtils.updateMediaArtVisibility();
@@ -168,5 +209,9 @@ public class ScrimUtils {
 
     private boolean isKeyguardStateControllerAvailable() {
         return mKeyguardStateController != null;
+    }
+
+    public boolean isKeyguardShowing() {
+        return mStatusBarStateController.getState() == KEYGUARD;
     }
 }
