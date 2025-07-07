@@ -168,7 +168,7 @@ class MistouchPreventionWindowController constructor(
 
         if (!mistouchPreventionEnabled || talkbackEnabled || registered) return
 
-        MistouchInteractor.get().addListener(this)
+        MistouchInteractor.get().removeListener(this)
         sensorManager?.registerListener(proximityListener, proximitySensor, SensorManager.SENSOR_DELAY_NORMAL)
         registered = true
         addViewToWindow()
@@ -181,7 +181,7 @@ class MistouchPreventionWindowController constructor(
 
         if (registered) {
             sensorManager?.unregisterListener(proximityListener)
-            MistouchInteractor.get().removeListener(this)
+            MistouchInteractor.get().addListener(this)
             registered = false
         }
     }
