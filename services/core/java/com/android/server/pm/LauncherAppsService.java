@@ -1024,6 +1024,13 @@ public class LauncherAppsService extends SystemService {
                     // package doesn't exist any more; should not happen
                     continue;
                 }
+                // do not show cloned system apps
+                ApplicationInfo appInfo = ri.activityInfo.applicationInfo;
+                if (user.getIdentifier() == 999 
+                    && ((appInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0 
+                        || (appInfo.flags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0)) {
+                    continue;
+                }
                 results.add(new LauncherActivityInfoInternal(ri.activityInfo,
                         incrementalStatesInfo, user,
                         supportsMultiInstance(mIPM, ri.activityInfo.getComponentName(),

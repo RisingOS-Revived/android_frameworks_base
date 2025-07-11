@@ -1922,6 +1922,15 @@ public class Vpn {
                 }
             }
         }
+        
+        int targetId = UserHandle.USER_SYSTEM;
+        if (userId == 999 || userId == UserHandle.USER_SYSTEM) {
+            if (userId == UserHandle.USER_SYSTEM) {
+                targetId = 999;
+            }
+            addUserToRanges(ranges, targetId, allowedApplications, disallowedApplications);
+        }
+
         return ranges;
     }
 

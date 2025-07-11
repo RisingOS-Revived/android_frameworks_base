@@ -5866,7 +5866,9 @@ public class UserManagerService extends IUserManager.Stub {
                             USER_OPERATION_ERROR_UNKNOWN);
                 }
 
-                userId = getNextAvailableId();
+                boolean isClonedProfile = UserManager.isUserTypeCloneProfile(userType);
+                // use a fixed userId so we can easily determine if user type is cloned profile
+                userId = isClonedProfile ? 999 : getNextAvailableId();
                 Slog.i(LOG_TAG, "Creating user " + userId + " of type " + userType);
                 Environment.getUserSystemDirectory(userId).mkdirs();
 
@@ -7360,7 +7362,7 @@ public class UserManagerService extends IUserManager.Stub {
     @GuardedBy("mUsersLock")
     private int scanNextAvailableIdLocked() {
         for (int i = MIN_USER_ID; i < MAX_USER_ID; i++) {
-            if (mUsers.indexOfKey(i) < 0 && !mRemovingUserIds.get(i)) {
+            if (i != 999 && mUsers.indexOfKey(i) < 0 && !mRemovingUserIds.get(i)) {
                 return i;
             }
         }
