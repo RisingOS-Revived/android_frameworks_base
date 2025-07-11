@@ -2128,7 +2128,10 @@ public class ApplicationsState {
 
         @Override
         public boolean filterApp(AppEntry entry) {
-            return !hasFlag(entry.info.privateFlags, ApplicationInfo.PRIVATE_FLAG_IS_RESOURCE_OVERLAY);
+            boolean isClonedSystemApp = hasFlag(
+                    entry.info.flags, ApplicationInfo.FLAG_SYSTEM)
+                    && entry.isClonedProfile();
+            return !isClonedSystemApp || !hasFlag(entry.info.privateFlags, ApplicationInfo.PRIVATE_FLAG_IS_RESOURCE_OVERLAY);
         }
     };
 

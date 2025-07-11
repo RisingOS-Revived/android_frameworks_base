@@ -8401,9 +8401,20 @@ public class NotificationManagerService extends SystemService {
             // not great -  throw immediately below
         }
 
+        // avoid duplicate system notifications e.g: duplicate firmware upgrade notifications
+        if (userId == 999 && ("android".equals(pkg) || "android".equals(opPkg))) {
+            return false;
+        }
+
         if (notificationUid == INVALID_UID) {
-            throw new SecurityException("Caller " + opPkg + ":" + callingUid
-                    + " trying to post for invalid pkg " + pkg + " in user " + incomingUserId);
+            if (userId == 999) {
+                Slog.w(TAG, opPkg + ":" + callingUid + " trying to post notification for nonexistent pkg " + pkg + " in dual");
+                return false;
+            }
+            if ("com.google.android.gms".equals(opPkg)) {
+                return false;
+            }
+            throw new SecurityException("Caller " + opPkg + ":" + callingUid + " trying to post for invalid pkg " + pkg + " in user " + incomingUserId);
         }
 
         IBinder allowlistToken = notification.getAllowlistToken();
