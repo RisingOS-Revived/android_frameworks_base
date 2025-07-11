@@ -371,6 +371,16 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             final ActivityRecord r = task.getTopNonFinishingActivity(
                     false /* includeOverlays */, mIncludeLaunchedFromBubble);
 
+            if (r != null && !r.finishing && r.launchMode != LAUNCH_SINGLE_INSTANCE) {
+                if (r.mUserId != userId) {
+                    if ((r.mUserId == 999 && userId == UserHandle.USER_SYSTEM) 
+                            || (r.mUserId == UserHandle.USER_SYSTEM && userId == 999)) {
+                        Slog.d(RootWindowContainer.TAG_TASKS, "[Cloned Profile] skip checking. r.userId= " + r.mUserId + ", userId= " + userId);
+                        return false;
+                    }
+                }
+            }
+
             if (r == null || r.finishing || r.mUserId != userId
                     || r.launchMode == ActivityInfo.LAUNCH_SINGLE_INSTANCE) {
                 ProtoLog.d(WM_DEBUG_TASKS, "Skipping %s: mismatch root %s", task, r);
