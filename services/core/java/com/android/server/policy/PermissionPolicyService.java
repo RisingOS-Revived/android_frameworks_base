@@ -1069,6 +1069,11 @@ public final class PermissionPolicyService extends SystemService {
                 // ops to keep compatibility.
                 return;
             }
+            
+            final int userId = mPackageManager.getUserId();
+            if (userId == 999 && userId != UserHandle.getUserHandleForUid(uid).getIdentifier()) {
+                return;
+            }
 
             for (String permission : pkgInfo.requestedPermissions) {
                 addAppOps(pkgInfo, pkg, permission);
