@@ -143,4 +143,8 @@
     <string name="keyguard_mistouch_description">Remove anything covering this area</string>
     <string name="keyguard_mistouch_exit_desciption">Press volume up key to exit</string>
     <string name="keyguard_mistouch_title">Mistouch prevention</string>
+    
+    <!-- Mistouch - Game -->
+    <string name="click_again">Click again</string>
+    <string name="swipe_again">Swipe again</string>
 </resources>

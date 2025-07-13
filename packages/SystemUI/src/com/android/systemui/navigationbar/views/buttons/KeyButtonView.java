@@ -136,8 +136,14 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
                 // Log.d("KeyButtonView", "longpressed: " + this);
                 if (isLongClickable()) {
                     // Just an old-fashioned ImageView
-                    performLongClick();
-                    mLongClicked = true;
+                    if (mCode == KeyEvent.KEYCODE_HOME && KeyButtonViewEx.Companion.get().shouldInterceptHomeKey(mContext)) {
+                        mLongClicked = true;
+                        return;
+                    } else {
+                        performLongClick();
+                        mLongClicked = true;
+                        return;
+                    }
                 } else {
                     if (mCode != KEYCODE_UNKNOWN) {
                         sendEvent(KeyEvent.ACTION_DOWN, KeyEvent.FLAG_LONG_PRESS);
@@ -335,22 +341,21 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
             case MotionEvent.ACTION_UP:
                 final boolean doIt = isPressed() && !mLongClicked;
                 setPressed(false);
-                final boolean doHapticFeedback = (SystemClock.uptimeMillis() - mDownTime) > 150;
-                if (showSwipeUI) {
-                    if (doIt) {
-                        // Apply haptic feedback on touch up since there is none on touch down
-                        performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
-                        playSoundEffect(SoundEffectConstants.CLICK);
-                    }
-                } else if (doHapticFeedback && !mLongClicked) {
-                    // Always send a release ourselves because it doesn't seem to be sent elsewhere
-                    // and it feels weird to sometimes get a release haptic and other times not.
-                    performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY_RELEASE);
+                if (showSwipeUI && doIt) {
+                    performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
+                    playSoundEffect(SoundEffectConstants.CLICK);
                 }
                 if (mCode != KEYCODE_UNKNOWN) {
                     if (doIt) {
-                        sendEvent(KeyEvent.ACTION_UP, 0);
-                        sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_CLICKED);
+                        if (mCode == KeyEvent.KEYCODE_BACK && KeyButtonViewEx.Companion.get().shouldInterceptBackKey(mContext)) {
+                            sendEvent(KeyEvent.ACTION_UP, KeyEvent.FLAG_CANCELED);
+                        } else if (mCode == KeyEvent.KEYCODE_HOME && KeyButtonViewEx.Companion.get().shouldInterceptHomeKey(mContext)) {
+                            sendEvent(KeyEvent.ACTION_UP, KeyEvent.FLAG_CANCELED);
+                            removeCallbacks(mCheckLongPress);
+                        } else {
+                            sendEvent(KeyEvent.ACTION_UP, 0);
+                            sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_CLICKED);
+                        }
                     } else {
                         sendEvent(KeyEvent.ACTION_UP, KeyEvent.FLAG_CANCELED);
                     }
