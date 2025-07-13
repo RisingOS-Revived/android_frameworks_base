@@ -132,22 +132,10 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical">
 
-                    <FrameLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="24dp"
-                        android:clickable="false"
-                        android:layout_gravity="center_vertical|start">
-                        <ImageView
-                            android:id="@+id/signal_icon"
-                            android:autoMirrored="true"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center"/>
-                    </FrameLayout>
-
                     <LinearLayout
                         android:layout_width="match_parent"
-                        android:layout_height="72dp">
+                        android:layout_height="72dp"
+                        android:orientation="horizontal">
 
                         <FrameLayout
                             android:layout_width="24dp"
@@ -213,7 +201,8 @@
                     <LinearLayout
                         android:id="@+id/fiveg_layout"
                         android:layout_width="match_parent"
-                        android:layout_height="72dp">
+                        android:layout_height="72dp"
+                        android:orientation="horizontal">
 
                         <FrameLayout
                             android:layout_width="24dp"
@@ -285,7 +274,8 @@
                 <LinearLayout
                     android:id="@+id/hotspot_layout"
                     style="@style/InternetDialog.Network"
-                    android:layout_height="72dp">
+                    android:layout_height="72dp"
+                    android:orientation="horizontal">
 
                     <FrameLayout
                         android:layout_width="24dp"
@@ -355,6 +345,7 @@
                     style="@style/InternetDialog.Network"
                     android:layout_height="@dimen/internet_dialog_wifi_toggle_height"
                     android:gravity="center"
+                    android:orientation="horizontal"
                     android:clickable="false"
                     android:focusable="false">
 
@@ -408,6 +399,7 @@
                     android:layout_marginTop="8dp"
                     android:paddingStart="20dp"
                     android:paddingEnd="24dp"
+                    android:orientation="horizontal"
                     android:background="@drawable/settingslib_switch_bar_bg_on"
                     android:visibility="gone">
 
@@ -472,7 +464,8 @@
                 style="@style/InternetDialog.Network"
                 android:layout_height="56dp"
                 android:paddingTop="8dp"
-                android:paddingStart="20dp">
+                android:paddingStart="20dp"
+                android:orientation="horizontal">
 
                 <FrameLayout
                     android:layout_width="24dp"
