@@ -46,6 +46,8 @@ import android.widget.ProgressBar;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.android.systemui.statusbar.notification.headsup.HeadsUpManager;
+import com.android.systemui.statusbar.notification.headsup.OnHeadsUpChangedListener;
 import com.android.systemui.res.R;
 import com.android.systemui.util.IconFetcher;
 import com.android.systemui.statusbar.OnGoingActionProgressGroup;
@@ -59,7 +61,8 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ExecutorService;
 
-public class OnGoingActionProgressController implements NotificationListener.NotificationHandler, KeyguardStateController.Callback {
+public class OnGoingActionProgressController implements NotificationListener.NotificationHandler,
+        KeyguardStateController.Callback, OnHeadsUpChangedListener {
     private static final String TAG = "OngoingActionProgressController";
     private static final String ONGOING_ACTION_CHIP_ENABLED = "ongoing_action_chip";
     private static final String SHOW_MEDIA_PROGRESS = "show_media_progress";
@@ -79,6 +82,7 @@ public class OnGoingActionProgressController implements NotificationListener.Not
     private final SettingsObserver mSettingsObserver;
     private final KeyguardStateController mKeyguardStateController;
     private final NotificationListener mNotificationListener;
+    private final HeadsUpManager mHeadsUpManager;
     private final IconFetcher mIconFetcher;
     private final MediaSessionManagerHelper mMediaSessionHelper;
     private final Executor mBackgroundExecutor;
@@ -106,6 +110,7 @@ public class OnGoingActionProgressController implements NotificationListener.Not
     private boolean mShowMediaProgress = true;
     private boolean mIsTrackingProgress = false;
     private boolean mIsForceHidden = false;
+    private boolean mHeadsUpPinned = false;
     private boolean mIsEnabled;
     private boolean mIsCompactModeEnabled = false;
     private int mCurrentProgress = 0;
@@ -153,8 +158,8 @@ public class OnGoingActionProgressController implements NotificationListener.Not
 
     public OnGoingActionProgressController(
             Context context, OnGoingActionProgressGroup progressGroup,
-            NotificationListener notificationListener,
-            KeyguardStateController keyguardStateController) {
+            NotificationListener notificationListener, KeyguardStateController keyguardStateController,
+            HeadsUpManager headsUpManager) {
         if (progressGroup == null) {
             Log.wtf(TAG, "progressGroup is null");
             throw new IllegalArgumentException("progressGroup cannot be null");
@@ -167,6 +172,7 @@ public class OnGoingActionProgressController implements NotificationListener.Not
         }
 
         mKeyguardStateController = keyguardStateController;
+        mHeadsUpManager = headsUpManager;
         mContext = context;
         mContentResolver = context.getContentResolver();
         mHandler = new Handler(Looper.getMainLooper());
@@ -186,6 +192,7 @@ public class OnGoingActionProgressController implements NotificationListener.Not
         mGestureDetector = new GestureDetector(mContext, new MediaGestureListener());
 
         mKeyguardStateController.addCallback(this);
+        mHeadsUpManager.addListener(this);
         mNotificationListener.addNotificationHandler(this);
         mSettingsObserver.register();
         
@@ -296,7 +303,7 @@ public class OnGoingActionProgressController implements NotificationListener.Not
         mProgressRootView.setAlpha(opacity);
         mCompactRootView.setAlpha(opacity);
         
-        if (mIsForceHidden) {
+        if (mIsForceHidden || mHeadsUpPinned) {
             mProgressRootView.setVisibility(View.GONE);
             mCompactRootView.setVisibility(View.GONE);
             return;
@@ -323,6 +330,8 @@ public class OnGoingActionProgressController implements NotificationListener.Not
             mCompactRootView.setVisibility(View.GONE);
             
             if (isMediaPlaying) {
+                mProgressRootView.setVisibility(View.VISIBLE);
+
                 if (mNeedsFullUiUpdate) {
                     updateMediaProgressFull();
                     mNeedsFullUiUpdate = false;
@@ -766,6 +775,12 @@ private void updateMediaProgressCompact() {
         onNotificationRemoved(sbn);
     }
 
+     @Override
+    public void onHeadsUpPinnedModeChanged(boolean inPinnedMode) {
+        mHeadsUpPinned = inPinnedMode;
+        requestUiUpdate();
+    }
+
     @Override
     public void onNotificationRankingUpdate(NotificationListenerService.RankingMap _rankingMap) {
     }
@@ -842,6 +857,7 @@ private void updateMediaProgressCompact() {
         
         mSettingsObserver.unregister();
         mKeyguardStateController.removeCallback(this);
+        mHeadsUpManager.removeListener(this);
         mMediaSessionHelper.removeMediaMetadataListener(mMediaMetadataListener);
         
         mMediaProgressHandler.removeCallbacks(mMediaProgressRunnable);

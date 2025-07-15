@@ -1353,10 +1353,10 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces,
                         mPhoneStatusBarViewController.setBrightnessControlEnabled(mBrightnessControl);
                         mBurnInProtectionController.setPhoneStatusBarView(mPhoneStatusBarViewController.getPhoneStatusBarView());
                         mOnGoingActionProgressController =
-                                new OnGoingActionProgressController(
-                                        mContext,
-                                        statusBarViewController.getOngoingActionProgressGroup(),
-                                        mNotificationListener, mKeyguardStateController);
+                             new OnGoingActionProgressController(
+                                     mContext,
+                                     statusBarViewController.getOngoingActionProgressGroup(), mNotificationListener,
+                                     mKeyguardStateController, mHeadsUpManager);
                     });
         }
         if (!StatusBarRootModernization.isEnabled() && !StatusBarConnectedDisplays.isEnabled()) {
