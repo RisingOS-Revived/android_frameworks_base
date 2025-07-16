@@ -21,4 +21,17 @@
 
     <!-- Largest size an avatar might need to be drawn in the power menu user picker -->
     <dimen name="global_actions_avatar_size">24dp</dimen>
+
+    <!-- QuickSettings -->
+    <dimen name="qs_status_bar_margin_end">16dp</dimen>
+    <dimen name="qs_status_bar_margin_start">16dp</dimen>
+    <dimen name="qs_status_bar_margin_top">16dp</dimen>
+    <dimen name="qs_status_bar_data_margin_top">-7dp</dimen>
+    <dimen name="qqs_status_bar_margin_top">12dp</dimen>
+    <dimen name="qqs_status_bar_text_size">15dp</dimen>
+    <dimen name="qqs_status_bar_height">63dp</dimen>
+    <dimen name="nt_qs_panel_padding_top">19dp</dimen>
+    <dimen name="nt_qqs_layout_margin_top">0dp</dimen>
+    <dimen name="custom_qs_tile_height">72dp</dimen>
+    <dimen name="qs_brightness_slider_height">56dp</dimen>
 </resources>
