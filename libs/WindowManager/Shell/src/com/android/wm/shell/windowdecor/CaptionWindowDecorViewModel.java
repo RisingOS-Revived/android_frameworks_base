@@ -54,6 +54,8 @@ import android.window.WindowContainerTransaction;
 
 import androidx.annotation.Nullable;
 
+import com.android.internal.jank.InteractionJankMonitor;
+
 import com.android.wm.shell.R;
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
 import com.android.wm.shell.ShellTaskOrganizer;
@@ -68,9 +70,14 @@ import com.android.wm.shell.splitscreen.SplitScreenController;
 import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.transition.FocusTransitionObserver;
 import com.android.wm.shell.transition.Transitions;
+import com.android.wm.shell.windowdecor.common.WindowDecorTaskResourceLoader;
 import com.android.wm.shell.windowdecor.common.viewhost.WindowDecorViewHost;
 import com.android.wm.shell.windowdecor.common.viewhost.WindowDecorViewHostSupplier;
 import com.android.wm.shell.windowdecor.extension.TaskInfoKt;
+
+import kotlinx.coroutines.CoroutineScope;
+import kotlinx.coroutines.ExperimentalCoroutinesApi;
+import kotlinx.coroutines.MainCoroutineDispatcher;
 
 /**
  * View model for the window decoration with a caption and shadows. Works with
@@ -93,8 +100,12 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel, FocusT
     private final Region mExclusionRegion = Region.obtain();
     private final InputManager mInputManager;
     private final WindowDecorViewHostSupplier<WindowDecorViewHost> mWindowDecorViewHostSupplier;
+    private final InteractionJankMonitor mInteractionJankMonitor;
     private TaskOperations mTaskOperations;
     private FocusTransitionObserver mFocusTransitionObserver;
+    private final @ShellMainThread MainCoroutineDispatcher mMainDispatcher;
+    private final @ShellBackgroundThread CoroutineScope mBgScope;
+    private final WindowDecorTaskResourceLoader mTaskResourceLoader;
 
     /**
      * Whether to pilfer the next motion event to send cancellations to the windows below.
@@ -124,6 +135,8 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel, FocusT
             Context context,
             Handler mainHandler,
             @ShellMainThread ShellExecutor shellExecutor,
+            @ShellMainThread MainCoroutineDispatcher mainDispatcher,
+            @ShellBackgroundThread CoroutineScope bgScope,
             @ShellBackgroundThread ShellExecutor bgExecutor,
             Choreographer mainChoreographer,
             IWindowManager windowManager,
@@ -134,10 +147,14 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel, FocusT
             SyncTransactionQueue syncQueue,
             Transitions transitions,
             FocusTransitionObserver focusTransitionObserver,
-            WindowDecorViewHostSupplier<WindowDecorViewHost> windowDecorViewHostSupplier) {
+            WindowDecorViewHostSupplier<WindowDecorViewHost> windowDecorViewHostSupplier,
+            InteractionJankMonitor interactionJankMonitor,
+            WindowDecorTaskResourceLoader taskResourceLoader) {
         mContext = context;
         mMainExecutor = shellExecutor;
         mMainHandler = mainHandler;
+        mMainDispatcher = mainDispatcher;
+        mBgScope = bgScope;
         mBgExecutor = bgExecutor;
         mWindowManager = windowManager;
         mMainChoreographer = mainChoreographer;
@@ -148,6 +165,8 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel, FocusT
         mTransitions = transitions;
         mFocusTransitionObserver = focusTransitionObserver;
         mWindowDecorViewHostSupplier = windowDecorViewHostSupplier;
+        mInteractionJankMonitor = interactionJankMonitor;
+        mTaskResourceLoader = taskResourceLoader;
         if (!Transitions.ENABLE_SHELL_TRANSITIONS) {
             mTaskOperations = new TaskOperations(null, mContext, mSyncQueue);
         }
@@ -335,28 +354,58 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel, FocusT
                         mContext,
                         mContext.createContextAsUser(UserHandle.of(taskInfo.userId), 0 /* flags */),
                         mDisplayController,
+                        mTaskResourceLoader,
                         mTaskOrganizer,
                         taskInfo,
-                        taskSurface,
                         mMainHandler,
+                        taskSurface,
                         mMainExecutor,
+                        mMainDispatcher,
+                        mBgScope,
                         mBgExecutor,
                         mMainChoreographer,
                         mSyncQueue,
                         mWindowDecorViewHostSupplier);
         mWindowDecorByTaskId.put(taskInfo.taskId, windowDecoration);
 
-        final FluidResizeTaskPositioner taskPositioner =
-                new FluidResizeTaskPositioner(mTaskOrganizer, mTransitions, windowDecoration,
-                        mDisplayController);
+        final DragPositioningCallback taskPositioner = createDragPositioningCallback(
+                windowDecoration);
         final CaptionTouchEventListener touchEventListener =
                 new CaptionTouchEventListener(taskInfo, taskPositioner);
         windowDecoration.setCaptionListeners(touchEventListener, touchEventListener);
         windowDecoration.setDragPositioningCallback(taskPositioner);
-        windowDecoration.setTaskDragResizer(taskPositioner);
+        windowDecoration.setTaskDragResizer((VeiledResizeTaskPositioner) taskPositioner);
         windowDecoration.relayout(taskInfo, startT, finishT,
                 false /* applyStartTransactionOnDraw */, false /* setTaskCropAndPosition */,
                 mFocusTransitionObserver.hasGlobalFocus(taskInfo), mExclusionRegion);
+    }
+
+    private DragPositioningCallback createDragPositioningCallback(
+            CaptionWindowDecoration windowDecoration) {
+        windowDecoration.createResizeVeil();
+
+        // Create a proper implementation of DragEventListener instead of using a lambda
+        DragPositioningCallbackUtility.DragEventListener dragEventListener =
+            new DragPositioningCallbackUtility.DragEventListener() {
+                @Override
+                public void onDragStart(int taskId) {
+                    // Empty implementation
+                }
+
+                @Override
+                public void onDragMove(int taskId) {
+                    // Empty implementation
+                }
+            };
+
+        return new VeiledResizeTaskPositioner(
+                mTaskOrganizer,
+                windowDecoration,
+                mDisplayController,
+                dragEventListener,  // Use the full implementation
+                mTransitions,
+                mInteractionJankMonitor,
+                mMainHandler);
     }
 
     private class CaptionTouchEventListener implements
