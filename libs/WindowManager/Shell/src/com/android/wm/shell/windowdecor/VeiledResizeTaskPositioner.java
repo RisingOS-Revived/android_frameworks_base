@@ -64,7 +64,7 @@ public class VeiledResizeTaskPositioner implements TaskPositioner, Transitions.T
     // timing out in the middle of a resize or drag action.
     private static final long LONG_CUJ_TIMEOUT_MS = TimeUnit.SECONDS.toMillis(10L);
 
-    private DesktopModeWindowDecoration mDesktopWindowDecoration;
+    private WindowDecoration<?> mDesktopWindowDecoration;
     private ShellTaskOrganizer mTaskOrganizer;
     private DisplayController mDisplayController;
     private ArrayList<DragPositioningCallbackUtility.DragEventListener>
@@ -83,7 +83,7 @@ public class VeiledResizeTaskPositioner implements TaskPositioner, Transitions.T
     private final Handler mHandler;
 
     public VeiledResizeTaskPositioner(ShellTaskOrganizer taskOrganizer,
-            DesktopModeWindowDecoration windowDecoration,
+            WindowDecoration<?> windowDecoration,
             DisplayController displayController,
             DragPositioningCallbackUtility.DragEventListener dragEventListener,
             Transitions transitions, InteractionJankMonitor interactionJankMonitor,
@@ -93,7 +93,7 @@ public class VeiledResizeTaskPositioner implements TaskPositioner, Transitions.T
     }
 
     public VeiledResizeTaskPositioner(ShellTaskOrganizer taskOrganizer,
-            DesktopModeWindowDecoration windowDecoration,
+            WindowDecoration<?> windowDecoration,
             DisplayController displayController,
             DragPositioningCallbackUtility.DragEventListener dragEventListener,
             Supplier<SurfaceControl.Transaction> supplier, Transitions transitions,
@@ -156,10 +156,22 @@ public class VeiledResizeTaskPositioner implements TaskPositioner, Transitions.T
                         mDragEventListeners) {
                     dragEventListener.onDragMove(mDesktopWindowDecoration.mTaskInfo.taskId);
                 }
-                mDesktopWindowDecoration.showResizeVeil(mRepositionTaskBounds);
+                if(mDesktopWindowDecoration instanceof DesktopModeWindowDecoration) {
+                    ((DesktopModeWindowDecoration) mDesktopWindowDecoration)
+                        .showResizeVeil(mRepositionTaskBounds);
+                } else {
+                    ((CaptionWindowDecoration) mDesktopWindowDecoration)
+                        .showResizeVeil(mRepositionTaskBounds);
+                }
                 mIsResizingOrAnimatingResize = true;
             } else {
-                mDesktopWindowDecoration.updateResizeVeil(mRepositionTaskBounds);
+                if(mDesktopWindowDecoration instanceof DesktopModeWindowDecoration) {
+                    ((DesktopModeWindowDecoration) mDesktopWindowDecoration)
+                        .updateResizeVeil(mRepositionTaskBounds);
+                } else {
+                    ((CaptionWindowDecoration) mDesktopWindowDecoration)
+                        .updateResizeVeil(mRepositionTaskBounds);
+                }
             }
         } else if (mCtrlType == CTRL_TYPE_UNDEFINED) {
             // Begin window drag CUJ instrumentation only when drag position moves.
@@ -183,7 +195,13 @@ public class VeiledResizeTaskPositioner implements TaskPositioner, Transitions.T
                 DragPositioningCallbackUtility.changeBounds(
                         mCtrlType, mRepositionTaskBounds, mTaskBoundsAtDragStart, mStableBounds,
                         delta, mDisplayController, mDesktopWindowDecoration);
-                mDesktopWindowDecoration.updateResizeVeil(mRepositionTaskBounds);
+                if(mDesktopWindowDecoration instanceof DesktopModeWindowDecoration) {
+                    ((DesktopModeWindowDecoration) mDesktopWindowDecoration)
+                        .updateResizeVeil(mRepositionTaskBounds);
+                } else {
+                    ((CaptionWindowDecoration) mDesktopWindowDecoration)
+                        .updateResizeVeil(mRepositionTaskBounds);
+                }
                 final WindowContainerTransaction wct = new WindowContainerTransaction();
                 wct.setBounds(mDesktopWindowDecoration.mTaskInfo.token, mRepositionTaskBounds);
                 mTransitions.startTransition(TRANSIT_CHANGE, wct, this);
@@ -215,7 +233,13 @@ public class VeiledResizeTaskPositioner implements TaskPositioner, Transitions.T
 
     private void resetVeilIfVisible() {
         if (mIsResizingOrAnimatingResize) {
-            mDesktopWindowDecoration.hideResizeVeil();
+            if(mDesktopWindowDecoration instanceof DesktopModeWindowDecoration) {
+                ((DesktopModeWindowDecoration) mDesktopWindowDecoration)
+                    .hideResizeVeil();
+            } else {
+                ((CaptionWindowDecoration) mDesktopWindowDecoration)
+                    .hideResizeVeil();
+            }
             mIsResizingOrAnimatingResize = false;
         }
     }
