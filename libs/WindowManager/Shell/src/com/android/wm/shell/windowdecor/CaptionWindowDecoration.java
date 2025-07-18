@@ -23,6 +23,8 @@ import static com.android.wm.shell.windowdecor.DragResizeWindowGeometry.getLarge
 import static com.android.wm.shell.windowdecor.DragResizeWindowGeometry.getResizeEdgeHandleSize;
 import static com.android.wm.shell.windowdecor.DragResizeWindowGeometry.getResizeHandleEdgeInset;
 
+import static com.android.launcher3.icons.BaseIconFactory.MODE_DEFAULT;
+
 import android.annotation.NonNull;
 import android.annotation.SuppressLint;
 import android.app.ActivityManager;
@@ -30,16 +32,23 @@ import android.app.ActivityManager.RunningTaskInfo;
 import android.app.WindowConfiguration;
 import android.app.WindowConfiguration.WindowingMode;
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Insets;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.Region;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Handler;
+import android.util.Log;
 import android.util.Size;
 import android.view.Choreographer;
 import android.view.Display;
@@ -56,6 +65,10 @@ import android.window.DesktopModeFlags;
 import android.window.WindowContainerTransaction;
 
 import com.android.internal.policy.ScreenDecorationsUtils;
+
+import com.android.launcher3.icons.BaseIconFactory;
+import com.android.launcher3.icons.IconProvider;
+
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.wm.shell.R;
 import com.android.wm.shell.ShellTaskOrganizer;
@@ -66,9 +79,15 @@ import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.shared.annotations.ShellBackgroundThread;
 import com.android.wm.shell.shared.annotations.ShellMainThread;
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus;
+import com.android.wm.shell.windowdecor.common.WindowDecorTaskResourceLoader;
 import com.android.wm.shell.windowdecor.common.viewhost.WindowDecorViewHost;
 import com.android.wm.shell.windowdecor.common.viewhost.WindowDecorViewHostSupplier;
 import com.android.wm.shell.windowdecor.extension.TaskInfoKt;
+
+import kotlinx.coroutines.CoroutineScope;
+import kotlinx.coroutines.MainCoroutineDispatcher;
+
+import java.util.function.BiConsumer;
 
 /**
  * Defines visuals and behaviors of a window decoration of a caption bar and shadows. It works with
@@ -76,8 +95,11 @@ import com.android.wm.shell.windowdecor.extension.TaskInfoKt;
  * maximize button and close button.
  */
 public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearLayout> {
-    private final Handler mHandler;
+    private static final String TAG = "CaptionWindowDecoration";
+    private final @ShellMainThread Handler mHandler;
     private final @ShellMainThread ShellExecutor mMainExecutor;
+    private final @ShellMainThread MainCoroutineDispatcher mMainDispatcher;
+    private final @ShellBackgroundThread CoroutineScope mBgScope;
     private final @ShellBackgroundThread ShellExecutor mBgExecutor;
     private final Choreographer mChoreographer;
     private final SyncTransactionQueue mSyncQueue;
@@ -91,26 +113,37 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
     private final RelayoutResult<WindowDecorLinearLayout> mResult =
             new RelayoutResult<>();
 
+    private ResizeVeil mResizeVeil;
+    private Bitmap mResizeVeilBitmap;
+    private final @NonNull WindowDecorTaskResourceLoader mTaskResourceLoader;
+
     CaptionWindowDecoration(
             Context context,
             @NonNull Context userContext,
             DisplayController displayController,
+            @NonNull WindowDecorTaskResourceLoader taskResourceLoader,
             ShellTaskOrganizer taskOrganizer,
             RunningTaskInfo taskInfo,
+            @ShellMainThread Handler handler,
             SurfaceControl taskSurface,
-            Handler handler,
             @ShellMainThread ShellExecutor mainExecutor,
+            @ShellMainThread MainCoroutineDispatcher mainDispatcher,
+            @ShellBackgroundThread CoroutineScope bgScope,
             @ShellBackgroundThread ShellExecutor bgExecutor,
             Choreographer choreographer,
             SyncTransactionQueue syncQueue,
             @NonNull WindowDecorViewHostSupplier<WindowDecorViewHost> windowDecorViewHostSupplier) {
-        super(context, userContext, displayController, taskOrganizer, taskInfo,
-                taskSurface, windowDecorViewHostSupplier);
+        super(context, userContext, displayController, taskOrganizer, taskInfo, taskSurface, windowDecorViewHostSupplier);
         mHandler = handler;
         mMainExecutor = mainExecutor;
         mBgExecutor = bgExecutor;
         mChoreographer = choreographer;
         mSyncQueue = syncQueue;
+        mTaskResourceLoader = taskResourceLoader;
+        mMainDispatcher = mainDispatcher;
+        mBgScope = bgScope;
+        
+        loadAppInfo();
     }
 
     void setCaptionListeners(
@@ -434,6 +467,64 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
         mDragResizeListener = null;
     }
 
+    private void loadAppInfo() {
+        String packageName = mTaskInfo.realActivity.getPackageName();
+        PackageManager pm = mContext.getApplicationContext().getPackageManager();
+        try {
+            IconProvider provider = new IconProvider(mContext);
+            Drawable appIcon = provider.getIcon(pm.getActivityInfo(mTaskInfo.baseActivity,
+                    PackageManager.ComponentInfoFlags.of(0)));
+            final BaseIconFactory resizeVeilIconFactory = createIconFactory(mContext,
+                    R.dimen.desktop_mode_resize_veil_icon_size);
+            mResizeVeilBitmap = resizeVeilIconFactory
+                    .createScaledBitmap(appIcon, MODE_DEFAULT);
+        } catch (PackageManager.NameNotFoundException e) {
+            Log.w(TAG, "Package not found: " + packageName, e);
+        }
+    }
+
+    private BaseIconFactory createIconFactory(Context context, int dimensions) {
+        final Resources resources = context.getResources();
+        final int densityDpi = resources.getDisplayMetrics().densityDpi;
+        final int iconSize = resources.getDimensionPixelSize(dimensions);
+        return new BaseIconFactory(context, densityDpi, iconSize);
+    }
+
+    /**
+     * Create the resize veil for this task. Note the veil's visibility is View.GONE by default
+     * until a resize event calls showResizeVeil below.
+     */
+    void createResizeVeil() {
+        mResizeVeil = new ResizeVeil(mContext, mDisplayController, mTaskResourceLoader, mMainDispatcher, mBgScope, mTaskSurface, mSurfaceControlTransactionSupplier, mTaskInfo);
+    }
+
+    /**
+     * Fade in the resize veil
+     */
+    void showResizeVeil(Rect taskBounds) {
+        mResizeVeil.showVeil(mTaskSurface, taskBounds, mTaskInfo);
+    }
+
+    /**
+     * Set new bounds for the resize veil
+     */
+    void updateResizeVeil(Rect newBounds) {
+        mResizeVeil.updateResizeVeil(newBounds);
+    }
+
+    /**
+     * Fade the resize veil out.
+     */
+    void hideResizeVeil() {
+        mResizeVeil.hideVeil();
+    }
+
+    private void disposeResizeVeil() {
+        if (mResizeVeil == null) return;
+        mResizeVeil.dispose();
+        mResizeVeil = null;
+    }
+
     private static int getTopPadding(RelayoutParams params, Rect taskBounds,
             InsetsState insetsState) {
         if (!params.mRunningTaskInfo.isFreeform()) {
@@ -460,6 +551,7 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
     @Override
     public void close() {
         closeDragResizeListener();
+        disposeResizeVeil();
         super.close();
     }
 
