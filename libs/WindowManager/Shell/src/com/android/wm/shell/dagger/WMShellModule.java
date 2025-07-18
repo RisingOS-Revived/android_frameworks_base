@@ -327,6 +327,8 @@ public abstract class WMShellModule {
     @Provides
     static WindowDecorViewModel provideWindowDecorViewModel(
             Context context,
+            @ShellMainThread MainCoroutineDispatcher mainDispatcher,
+            @ShellBackgroundThread CoroutineScope bgScope,
             @ShellMainThread ShellExecutor mainExecutor,
             @ShellMainThread Handler mainHandler,
             @ShellMainThread Choreographer mainChoreographer,
@@ -340,7 +342,9 @@ public abstract class WMShellModule {
             RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer,
             FocusTransitionObserver focusTransitionObserver,
             WindowDecorViewHostSupplier<WindowDecorViewHost> windowDecorViewHostSupplier,
-            Optional<DesktopModeWindowDecorViewModel> desktopModeWindowDecorViewModel) {
+            InteractionJankMonitor interactionJankMonitor,
+            Optional<DesktopModeWindowDecorViewModel> desktopModeWindowDecorViewModel,
+            WindowDecorTaskResourceLoader windowDecorTaskResourceLoader) {
         if (desktopModeWindowDecorViewModel.isPresent()) {
             return desktopModeWindowDecorViewModel.get();
         }
@@ -348,6 +352,8 @@ public abstract class WMShellModule {
                 context,
                 mainHandler,
                 mainExecutor,
+                mainDispatcher,
+                bgScope,
                 bgExecutor,
                 mainChoreographer,
                 windowManager,
@@ -358,7 +364,9 @@ public abstract class WMShellModule {
                 syncQueue,
                 transitions,
                 focusTransitionObserver,
-                windowDecorViewHostSupplier);
+                windowDecorViewHostSupplier,
+                interactionJankMonitor,
+                windowDecorTaskResourceLoader);
     }
 
     @WMSingleton

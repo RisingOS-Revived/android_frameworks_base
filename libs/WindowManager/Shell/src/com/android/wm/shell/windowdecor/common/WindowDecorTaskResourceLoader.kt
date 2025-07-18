@@ -159,9 +159,7 @@ class WindowDecorTaskResourceLoader(
     }
 
     private fun checkWindowDecorExists(taskInfo: RunningTaskInfo) {
-        check(existingTasks.contains(taskInfo.taskId)) {
-            "Attempt to obtain resource for non-existent decoration"
-        }
+        return;
     }
 
     private fun loadAppResources(taskInfo: RunningTaskInfo): AppResources {
