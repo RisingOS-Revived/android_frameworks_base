@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:height="18dp"
+    android:width="18dp"
+    android:viewportWidth="18.0"
+    android:viewportHeight="18.0">
+    <path
+        android:fillColor="@color/pinned_window_button_color"
+        android:pathData="M1.425,18L0,16.575L4.6,12H2V10H8V16H6V13.4L1.425,18ZM10,8V2H12V4.6L16.575,0L18,1.425L13.4,6H16V8H10Z" />
+</vector>

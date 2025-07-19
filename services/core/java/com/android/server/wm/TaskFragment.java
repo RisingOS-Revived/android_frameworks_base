@@ -68,7 +68,7 @@ import static com.android.server.wm.TaskFragmentProto.MIN_WIDTH;
 import static com.android.server.wm.TaskFragmentProto.WINDOW_CONTAINER;
 import static com.android.server.wm.WindowContainerChildProto.TASK_FRAGMENT;
 
-import static org.sun.os.DebugConstants.DEBUG_POP_UP;
+import static org.rising.DebugConstants.DEBUG_POP_UP;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;

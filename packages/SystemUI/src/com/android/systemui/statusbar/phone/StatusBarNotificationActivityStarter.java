@@ -96,7 +96,7 @@ import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
 
-import org.sun.systemui.statusbar.phone.PopUpViewController;
+import com.android.systemui.statusbar.phone.PopUpViewController;
 
 /**
  * Status bar implementation of {@link NotificationActivityStarter}.

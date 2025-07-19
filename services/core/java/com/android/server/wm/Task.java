@@ -116,7 +116,7 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
 import static java.lang.Integer.MAX_VALUE;
 
-import static org.sun.os.DebugConstants.DEBUG_POP_UP;
+import static org.rising.DebugConstants.DEBUG_POP_UP;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -2059,9 +2059,7 @@ class Task extends TaskFragment {
 	mWindowContainerExt.transitionFreeze(this);
 	if (shouldStartChangeTransition(prevWinMode, mTmpPrevBounds)) {
 	    mTransitionController.collectVisibleChange(this);
-	    if (PopUpWindowController.getInstance().shouldInitializeChangeTransition(this, prevWinMode)) {
-	        initializeChangeTransition(mTmpPrevBounds);
-	    }
+	    PopUpWindowController.getInstance().shouldInitializeChangeTransition(this, prevWinMode);
 	}
 
         // If the configuration supports persistent bounds (eg. Freeform), keep track of the
@@ -2907,7 +2905,6 @@ class Task extends TaskFragment {
 	return mForceResizeOverride || ActivityInfo.isResizeableMode(mResizeMode)
         	|| getWindowConfiguration().isPopUpWindowMode()
 	        || (mSupportsPictureInPicture && checkPictureInPictureSupport);
-                || (mSupportsPictureInPicture && checkPictureInPictureSupport);
     }
 
     /**

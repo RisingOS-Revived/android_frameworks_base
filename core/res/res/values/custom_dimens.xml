@@ -29,4 +29,17 @@
     <dimen name="status_bar_padding_start">8dp</dimen>
     <dimen name="status_bar_padding_end">4dp</dimen>
     <dimen name="status_bar_padding_top">0dp</dimen>
+
+    <!-- Pop-Up View -->
+    <dimen name="mini_window_bar_width">114dp</dimen>
+    <dimen name="mini_window_bar_height">4.8dp</dimen>
+    <dimen name="mini_window_bar_radius">2.4dp</dimen>
+    <dimen name="mini_window_bar_margin">16dp</dimen>
+    <dimen name="mini_window_corner_radius">28dp</dimen>
+    <dimen name="pinned_window_corner_radius">28dp</dimen>
+    <dimen name="pinned_window_dismiss_button_padding_height">10dp</dimen>
+    <dimen name="pinned_window_dismiss_button_padding_width">11dp</dimen>
+    <dimen name="pinned_window_dismiss_gradient_bg_height">140dp</dimen>
+    <dimen name="pinned_window_menu_corner_radius_large">8dp</dimen>
+    <dimen name="pinned_window_menu_corner_radius_small">8dp</dimen>
 </resources>

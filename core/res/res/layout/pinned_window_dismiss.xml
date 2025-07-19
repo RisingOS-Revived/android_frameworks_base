@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+     Copyright (C) 2023 The Nameless-AOSP Project
+     SPDX-License-Identifier: Apache-2.0
+-->
+<com.android.server.wm.PinnedWindowDismissView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
+    android:background="@drawable/pinned_window_dismiss_gradient_bg"
+    android:layout_width="match_parent"
+    android:layout_height="140dp">
+
+    <LinearLayout
+        android:gravity="center"
+        android:layout_gravity="center"
+        android:orientation="horizontal"
+        android:id="@+id/pinned_window_dismiss_button"
+        android:background="@drawable/pinned_window_dismiss_button_bg"
+        android:paddingLeft="14dp"
+        android:paddingRight="14dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:minWidth="112dp"
+        android:minHeight="50dp">
+        <ImageView
+            android:id="@+id/pinned_window_dismiss_button_image_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/pinned_window_close_button" />
+        <TextView
+            android:textSize="16dp"
+            android:textColor="?attr/colorAccentPrimary"
+            android:id="@+id/pinned_window_dismiss_button_text_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/kg_reordering_delete_drop_target_text"
+            android:fontFamily="roboto-regular"
+            android:layout_marginStart="7dp" />
+    </LinearLayout>
+</com.android.server.wm.PinnedWindowDismissView>

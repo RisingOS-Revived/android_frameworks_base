@@ -30,6 +30,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.Resources;
 import android.database.ContentObserver;
+import android.graphics.Point;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -101,6 +102,8 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.function.Function;
 import java.util.function.IntSupplier;
+
+import com.android.server.wm.DisplayResolutionController;
 
 /**
  * The DisplayModeDirector is responsible for determining what modes are allowed to be automatically
@@ -353,6 +356,12 @@ public class DisplayModeDirector {
                         votes, lowestConsideredPriority, highestConsideredPriority);
 
                 primarySummary.adjustSize(defaultMode, modes);
+
+                final Point p = DisplayResolutionController.getInstance().getResolution();
+                if (p.x > 0 && p.y > 0) {
+                    primarySummary.width = p.x;
+                    primarySummary.height = p.y;
+                }
 
                 availableModes = primarySummary.filterModes(modes);
                 if (!availableModes.isEmpty()) {

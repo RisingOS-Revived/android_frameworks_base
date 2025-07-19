@@ -116,7 +116,7 @@ import java.util.function.Predicate;
  */
 class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<E>
         implements Comparable<WindowContainer>, Animatable,
-        InsetsControlTarget {
+        InsetsControlTarget, SurfaceFreezerExt.Freezable {
 
     private static final String TAG = TAG_WITH_CLASS_NAME ? "WindowContainer" : TAG_WM;
 
@@ -207,6 +207,8 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      * Applied as part of the animation pass in "prepareSurfaces".
      */
     protected final SurfaceAnimator mSurfaceAnimator;
+
+    private SurfaceFreezerExt mSurfaceFreezer;
 
     /** The parent leash added for animation. */
     @Nullable
@@ -325,6 +327,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         mTransitionController = mWmService.mAtmService.getTransitionController();
         mSyncTransaction = wms.mTransactionFactory.get();
         mSurfaceAnimator = new SurfaceAnimator(this, this::onAnimationFinished, wms);
+        mSurfaceFreezer = new SurfaceFreezerExt(this, wms);
         mWindowContainerExt = new WindowContainerExt(this, mSurfaceFreezer);
     }
 
@@ -3051,6 +3054,10 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             syncTransaction.setPosition(mSurfaceControl, 0, 0);
         }
         mLastSurfacePosition.set(0, 0);
+    }
+
+    @Override
+    public void onAnimationLeashDestroyed(SurfaceControl.Transaction t) {
     }
 
     @Override

@@ -3,4 +3,9 @@
 <resources>
     <!-- Bootleg unneccesary gradient declaration | Just for our shishu bars -->
     <color name="bootleg_accent_gradient_end_color">@*android:color/system_accent3_600</color>
+
+    <!-- Pop-Up View -->
+    <color name="pinned_window_button_background_color">#F2F0F2F2</color>
+    <color name="pinned_window_button_color">#CC06080A</color>
+    <color name="pinned_window_dim_color">#3306080A</color>
 </resources>

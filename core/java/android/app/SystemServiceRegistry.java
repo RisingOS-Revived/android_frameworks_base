@@ -294,6 +294,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
+import org.rising.content.ContextExt;
+import org.rising.view.DisplayResolutionManager;
+import org.rising.view.IDisplayResolutionManagerService;
+
 /**
  * Manages all of the system services that can be returned by {@link Context#getSystemService}.
  * Used by {@link ContextImpl}.
@@ -1791,6 +1795,15 @@ public final class SystemServiceRegistry {
                             IAppLockManagerService.Stub.asInterface(binder));
                     }
                 });
+
+        registerService(ContextExt.DISPLAY_RESOLUTION_MANAGER_SERVICE, DisplayResolutionManager.class,
+                new CachedServiceFetcher<DisplayResolutionManager>() {
+            @Override
+            public DisplayResolutionManager createService(ContextImpl ctx) {
+                IBinder binder = ServiceManager.getService(ContextExt.DISPLAY_RESOLUTION_MANAGER_SERVICE);
+                IDisplayResolutionManagerService service = IDisplayResolutionManagerService.Stub.asInterface(binder);
+                return new DisplayResolutionManager(ctx.getOuterContext(), service);
+            }});
 
         // DO NOT do a flag check like this unless the flag is read-only.
         // (because this code is executed during preload in zygote.)

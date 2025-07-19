@@ -1522,8 +1522,6 @@ class ActivityStarter {
         final Transition transition = isIndependent ? newTransition
                 : mService.getTransitionController().getCollectingTransition();
 
-        mService.mWindowManager.mTaskPositioningController.cancelWindowPositionerInputEvent();
-
         mLastStartActivityResult = startActivityUnchecked(r, sourceRecord, voiceSession,
                 request.voiceInteractor, startFlags, checkedOptions,
                 inTask, inTaskFragment, balVerdict, intentGrants, realCallingUid, transition,
