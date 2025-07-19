@@ -158,6 +158,11 @@ public class SystemSettingsValidators {
         VALIDATORS.put(System.AUTO_TIME, BOOLEAN_VALIDATOR);
         VALIDATORS.put(System.AUTO_TIME_ZONE, BOOLEAN_VALIDATOR);
         VALIDATORS.put(System.SHOW_GTALK_SERVICE_STATUS, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(System.POP_UP_KEEP_MUTE_IN_MINI, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(System.POP_UP_SINGLE_TAP_ACTION, new InclusiveIntegerRangeValidator(0, 2));
+        VALIDATORS.put(System.POP_UP_DOUBLE_TAP_ACTION, new InclusiveIntegerRangeValidator(0, 2));
+        VALIDATORS.put(System.POP_UP_NOTIFICATION_JUMP_PORTRAIT, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(System.POP_UP_NOTIFICATION_JUMP_LANDSCAPE, BOOLEAN_VALIDATOR);
         VALIDATORS.put(
                 System.WALLPAPER_ACTIVITY,
                 new Validator() {

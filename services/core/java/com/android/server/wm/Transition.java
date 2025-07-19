@@ -80,7 +80,7 @@ import static com.android.server.wm.WindowContainer.AnimationFlags.PARENTS;
 import static com.android.server.wm.WindowState.BLAST_TIMEOUT_DURATION;
 import static com.android.window.flags.Flags.enableDisplayFocusInShellTransitions;
 
-import static org.sun.os.DebugConstants.DEBUG_POP_UP;
+import static org.rising.DebugConstants.DEBUG_POP_UP;
 
 import android.annotation.ColorInt;
 

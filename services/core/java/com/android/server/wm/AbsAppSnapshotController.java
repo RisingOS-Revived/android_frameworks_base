@@ -23,7 +23,7 @@ import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_SCREENSHOT;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
-import static org.sun.os.DebugConstants.DEBUG_POP_UP;
+import static org.rising.DebugConstants.DEBUG_POP_UP;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -204,6 +204,9 @@ abstract class AbsAppSnapshotController<TYPE extends WindowContainer,
             return null;
         }
         final SnapshotSupplier supplier = captureSnapshot(source, allowAppTheme);
+        if (supplier == null) {
+            return null;
+        }
         supplier.setConsumer(t -> {
             synchronized (mService.mGlobalLock) {
                 if (!source.isAttached()) {
