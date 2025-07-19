@@ -44,6 +44,8 @@ import android.util.ArrayMap;
 
 import java.util.Map;
 
+import org.rising.view.DisplayResolutionManager;
+
 /**
  * Validators for Global settings
  */
@@ -476,5 +478,11 @@ public class GlobalSettingsValidators {
                         }));
         VALIDATORS.put(Global.Wearable.GESTURE_PRIMARY_ACTION_USER_PREFERENCE, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Global.Wearable.GESTURE_DISMISS_ACTION_USER_PREFERENCE, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(Global.DISPLAY_WIDTH_CUSTOM, new Validator() {
+            @Override
+            public boolean validate(String value) {
+                return DisplayResolutionManager.isDisplayWidthStrValid(value);
+            }
+        });
     }
 }

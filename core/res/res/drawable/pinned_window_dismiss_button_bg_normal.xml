@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+     Copyright (C) 2023 The Nameless-AOSP Project
+     SPDX-License-Identifier: Apache-2.0
+-->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
+    android:shape="rectangle">
+    <corners android:radius="53dp" />
+    <stroke
+        android:width="2dp"
+        android:color="?attr/colorAccentPrimary" />
+</shape>

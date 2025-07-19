@@ -125,7 +125,7 @@ import static com.android.server.wm.Task.REPARENT_KEEP_ROOT_TASK_AT_FRONT;
 import static com.android.server.wm.WindowManagerService.MY_PID;
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_NORMAL;
 
-import static org.sun.os.DebugConstants.DEBUG_POP_UP;
+import static org.rising.DebugConstants.DEBUG_POP_UP;
 
 import android.Manifest;
 import android.annotation.IntDef;

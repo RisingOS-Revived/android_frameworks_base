@@ -4296,8 +4296,8 @@ final class ActivityRecord extends WindowToken {
         // closing the task.
         final WindowContainer trigger = remove && task != null && task.getChildCount() == 1
                 ? task : this;
-        final Transition tr = mTransitionController.requestCloseTransitionIfNeeded(trigger),
-                trigger != this || getChildCount() == 0);
+	final Transition tr = mTransitionController.requestCloseTransitionIfNeeded(trigger,
+	        trigger != this || getChildCount() == 0);
         if (tr != null) {
             tr.collectClose(trigger);
         } else if (mTransitionController.isCollecting()) {
@@ -8164,14 +8164,8 @@ final class ActivityRecord extends WindowToken {
         aspectRatioPolicy.setLetterboxBoundsForFixedOrientationAndAspectRatio(
                 new Rect(resolvedBounds));
 
-        if (newParentConfiguration.windowConfiguration.isPopUpWindowMode() || isPopUpView()) {
-            if (mInSizeCompatModeForBounds) {
-                clearSizeCompatMode();
-            }
-            mCompatDisplayInsets = null;
-            mSizeCompatBounds = null;
-            mSizeCompatScale = 1.0f;
-            resolvedConfig.unset();
+	if (newParentConfig.windowConfiguration.isPopUpWindowMode() || isPopUpView()) {
+            getResolvedOverrideConfiguration().unset();
             return;
         }
     }

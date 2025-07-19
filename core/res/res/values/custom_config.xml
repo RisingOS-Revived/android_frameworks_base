@@ -278,4 +278,19 @@
          <item>com.android.contacts</item>
          <item>com.android.documentsui</item>
     </string-array>
+
+    <!-- Pop-Up View -->
+    <bool name="config_popUpView_defaultGestureEnabled">true</bool>
+    <bool name="config_popUpView_defaultShowMoreCircles">false</bool>
+    <bool name="config_popUpView_defaultKeepMuteInMini">true</bool>
+    <integer name="config_popUpView_defaultSingleTapAction">1</integer>
+    <integer name="config_popUpView_defaultDoubleTapAction">2</integer>
+    <bool name="config_popUpView_defaultNotificationPortJump">false</bool>
+    <bool name="config_popUpView_defaultNotificationLandJump">false</bool>
+    <string-array name="config_popUpView_forceUpdateDpiPackages" translatable="false">
+    </string-array>
+
+    <!-- Overlays that to be enabled in FHD+ resolution -->
+    <string-array name="config_fhdResolutionOverlays" translatable="false">
+    </string-array>
 </resources>

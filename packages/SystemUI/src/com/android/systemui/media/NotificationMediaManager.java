@@ -106,10 +106,9 @@ public class NotificationMediaManager implements Dumpable, TunerService.Tunable 
     @VisibleForTesting
     MediaController mMediaController;
     private String mMediaNotificationKey;
-    private MediaMetadata mMediaMetadata;
-
     private String mNowPlayingNotificationKey;
     private String mNowPlayingTrack;
+    private MediaMetadata mMediaMetadata;
 
     private final SysuiColorExtractor mColorExtractor;
 
@@ -163,11 +162,8 @@ public class NotificationMediaManager implements Dumpable, TunerService.Tunable 
                     notifUtils.showNowPlayingNotification(metadata);
                 }
             }
-            if (notificationMediaManagerBackgroundExecution()) {
-                mBackgroundExecutor.execute(() -> setMediaMetadata(metadata));
-            } else {
-                setMediaMetadata(metadata);
-            }
+            // Remove the conditional check and just execute in background
+            mBackgroundExecutor.execute(() -> setMediaMetadata(metadata));
             dispatchUpdateMediaMetaData();
         }
     };
@@ -366,7 +362,7 @@ public class NotificationMediaManager implements Dumpable, TunerService.Tunable 
     private void updateMediaMetaData(MediaListener callback) {
         int playbackState = getMediaControllerPlaybackState(mMediaController);
         mHandler.post(() -> {
-        callback.onPrimaryMetadataOrStateChanged(mMediaMetadata, playbackState);
+            callback.onPrimaryMetadataOrStateChanged(mMediaMetadata, playbackState);
         });
         callback.setMediaNotificationColor(mColorExtractor.getMediaBackgroundColor());
     }
@@ -409,7 +405,7 @@ public class NotificationMediaManager implements Dumpable, TunerService.Tunable 
      */
     void findPlayingMediaNotification(@NonNull List<StatusBarNotification> allNotifications) {
         // Promote the media notification with a controller in 'playing' state, if any.
-        StatusBarNotification statusBarNotification = null;
+        StatusBarNotification mediaNotification = null;
         MediaController controller = null;
         for (StatusBarNotification sbn : allNotifications) {
             Notification notif = sbn.getNotification();
@@ -425,7 +421,7 @@ public class NotificationMediaManager implements Dumpable, TunerService.Tunable 
                             Log.v(TAG, "DEBUG_MEDIA: found mediastyle controller matching "
                                     + sbn.getKey());
                         }
-                        statusBarNotification = sbn;
+                        mediaNotification = sbn;
                         controller = aController;
                         break;
                     }
@@ -433,7 +429,7 @@ public class NotificationMediaManager implements Dumpable, TunerService.Tunable 
             }
         }
 
-        setUpControllerAndKey(controller, statusBarNotification);
+        setUpControllerAndKey(controller, mediaNotification);
     }
 
     private void setUpControllerAndKey(
@@ -489,7 +485,6 @@ public class NotificationMediaManager implements Dumpable, TunerService.Tunable 
                 callbacks.get(i).onPrimaryMetadataOrStateChanged(mMediaMetadata, state);
                 callbacks.get(i).setMediaNotificationColor(mColorExtractor.getMediaBackgroundColor());
             }
-            MediaSessionManager.Companion.get().onPlaybackStateChanged(state);
         });
     }
 

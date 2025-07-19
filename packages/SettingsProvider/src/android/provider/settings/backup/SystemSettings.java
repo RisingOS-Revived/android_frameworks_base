@@ -125,7 +125,13 @@ public class SystemSettings {
                 Settings.System.NOTIFICATION_COOLDOWN_ALL,
                 Settings.System.NOTIFICATION_COOLDOWN_VIBRATE_UNLOCKED,
                 Settings.System.PREFERRED_REGION,
-                Settings.System.CV_ENABLED
+                Settings.System.CV_ENABLED,
+	        Settings.System.POP_UP_KEEP_MUTE_IN_MINI,
+        	Settings.System.POP_UP_SINGLE_TAP_ACTION,
+	        Settings.System.POP_UP_DOUBLE_TAP_ACTION,
+	        Settings.System.POP_UP_NOTIFICATION_JUMP_PORTRAIT,
+        	Settings.System.POP_UP_NOTIFICATION_JUMP_LANDSCAPE,
+	        Settings.System.POP_UP_NOTIFICATION_BLACKLIST
         ));
         if (Flags.backUpSmoothDisplayAndForcePeakRefreshRate()) {
             settings.add(Settings.System.PEAK_REFRESH_RATE);
