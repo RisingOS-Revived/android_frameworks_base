@@ -243,7 +243,6 @@ public class DisplayPolicy {
     private volatile boolean mHasStatusBar;
     private volatile boolean mHasNavigationBar;
     private volatile boolean mForceNavbar;
-    private volatile boolean mTaskBarEnabled;
     // Can the navigation bar ever move to the side?
     private volatile boolean mNavigationBarCanMove;
     private volatile boolean mNavigationBarAlwaysShowOnSideGesture;
@@ -410,9 +409,6 @@ public class DisplayPolicy {
             ContentResolver resolver = mContext.getContentResolver();
             resolver.registerContentObserver(LineageSettings.System.getUriFor(
                     LineageSettings.System.FORCE_SHOW_NAVBAR), false, this,
-                    UserHandle.USER_ALL);
-            resolver.registerContentObserver(LineageSettings.System.getUriFor(
-                    LineageSettings.System.ENABLE_TASKBAR), false, this,
                     UserHandle.USER_ALL);
 
             updateSettings();
@@ -736,13 +732,6 @@ public class DisplayPolicy {
         mForceNavbar = LineageSettings.System.getIntForUser(resolver,
                 LineageSettings.System.FORCE_SHOW_NAVBAR, 0,
                 UserHandle.USER_CURRENT) == 1;
-        mTaskBarEnabled = LineageSettings.System.getIntForUser(resolver,
-                LineageSettings.System.ENABLE_TASKBAR, isTablet() ? 1 : 0,
-                UserHandle.USER_CURRENT) != 0;
-    }
-
-    private boolean isTablet() {
-        return getCurrentUserResources().getConfiguration().smallestScreenWidthDp >= 600;
     }
 
     private int getDisplayId() {
@@ -1865,12 +1854,10 @@ public class DisplayPolicy {
                 R.bool.config_remoteInsetsControllerControlsSystemBars);
 
         updateConfigurationAndScreenSizeDependentBehaviors();
-        
-        final boolean isMobileTaskbarEnabled = !isTablet() && mTaskBarEnabled;
 
         final boolean shouldAttach =
                 res.getBoolean(R.bool.config_attachNavBarToAppDuringTransition)
-                        && !isMobileTaskbarEnabled;
+                        && !Flags.enableTinyTaskbar();
         if (mShouldAttachNavBarToAppDuringTransition != shouldAttach) {
             mShouldAttachNavBarToAppDuringTransition = shouldAttach;
         }
