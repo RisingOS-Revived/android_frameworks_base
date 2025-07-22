@@ -126,7 +126,6 @@ public final class PixelPropsUtils {
             "com.google.android.apps.wallpaper.pixel",
             "com.google.android.apps.weather",
             "com.google.android.googlequicksearchbox",
-            "com.google.android.soundpicker",
             "com.google.android.wallpaper.effects",
             "com.google.pixel.livewallpaper",
             "com.microsoft.android.smsorganizer",
