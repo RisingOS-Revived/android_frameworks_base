@@ -17,6 +17,9 @@
 package com.android.systemui.qs;
 
 import android.content.Intent;
+import android.content.BroadcastReceiver;
+import android.content.IntentFilter;
+import android.os.BatteryManager;
 import android.provider.Settings;
 import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
@@ -115,12 +118,17 @@ public class QsControlsView extends FrameLayout {
     public static final int INTERNET_LABEL_INACTIVE = R.string.quick_settings_internet_label;
     public static final int WIFI_LABEL_INACTIVE = R.string.quick_settings_wifi_label;
 
-    private View mSettingsButton, mVoiceAssist, mRunningServiceButton, mInterfaceButton, mMediaCard, mAccessBg, mWidgetsBg, mConnectivityBg;
-    private View mClockTimer, mCalculator, mCamera, mPagerLayout, mMediaLayout, mAccessLayout, mWidgetsLayout, mConnectivityLayout;
+    private View mSettingsButton, mVoiceAssist, mRunningServiceButton, mInterfaceButton, mMediaCard, mAccessBg, mWidgetsBg, mConnectivityBg, mWeatherBg;
+    private View mClockTimer, mCalculator, mCamera, mPagerLayout, mMediaLayout, mAccessLayout, mWidgetsLayout, mConnectivityLayout, mWeatherLayout;
     private LaunchableLinearLayout mInternetButton, mBtButton;
     private ImageView mTorch;
     
-    private QsControlsPageIndicator mAccessPageIndicator, mMediaPageIndicator, mWidgetsPageIndicator;
+    private BroadcastReceiver mBatteryReceiver;
+    private TextView mBatteryPercentage;
+    private TextView mBatteryTemp;
+    private TextView mBatteryRemaining;
+
+    private QsControlsPageIndicator mAccessPageIndicator, mMediaPageIndicator, mWidgetsPageIndicator, mWeatherPageIndicator;
     private VerticalSlider mBrightnessSlider, mVolumeSlider;
 
     private final ActivityStarter mActivityStarter;
@@ -234,6 +242,7 @@ public class QsControlsView extends FrameLayout {
         mVolumeSlider = findViewById(R.id.qs_controls_volume_slider);
         
         // Initialize all the layout views
+        mWeatherLayout = findViewById(R.id.qs_controls_weather);
         mConnectivityLayout = findViewById(R.id.qs_controls_tile_connectivity);
         mMediaLayout = findViewById(R.id.qs_controls_media);
         mAccessLayout = findViewById(R.id.qs_controls_tile_access);
@@ -268,6 +277,7 @@ public class QsControlsView extends FrameLayout {
         
         // Initialize background/container views
         mAccessBg = mAccessLayout.findViewById(R.id.qs_controls_access_layout);
+        mWeatherBg = mWeatherLayout.findViewById(R.id.qs_controls_weather_layout);
         mConnectivityBg = mConnectivityLayout.findViewById(R.id.qs_controls_connectivity_layout);
         mWidgetsBg = mWidgetsLayout.findViewById(R.id.qs_controls_widgets_layout);
         
@@ -275,13 +285,14 @@ public class QsControlsView extends FrameLayout {
         mAccessPageIndicator = mAccessLayout.findViewById(R.id.access_page_indicator);
         mMediaPageIndicator = mMediaLayout.findViewById(R.id.media_page_indicator);
         mWidgetsPageIndicator = mWidgetsLayout.findViewById(R.id.widgets_page_indicator);
+        mWeatherPageIndicator = mWidgetsLayout.findViewById(R.id.weather_page_indicator);
         
         // Clear the widget views list to avoid duplicates
         mWidgetViews.clear();
         
         // Add the main pages to the widget views list in proper order
         // This order determines the page sequence in the ViewPager
-        collectViews(mWidgetViews, mMediaLayout, mConnectivityLayout, mAccessLayout, mWidgetsLayout);
+        collectViews(mWidgetViews, mMediaLayout, mWeatherLayout, mConnectivityLayout, mAccessLayout, mWidgetsLayout);
         
         // Collect control tiles
         collectViews(mConnectivityTiles, mInternetButton, mBtButton);
@@ -293,6 +304,9 @@ public class QsControlsView extends FrameLayout {
         // Setup the ViewPager with the collected views
         setupViewPager();
         
+        // Initialize battery status views
+        initializeBatteryViews();
+        
         // Initialize handler for media updates
         mHandler = new Handler();
         mMediaUpdater = new Runnable() {
@@ -303,6 +317,68 @@ public class QsControlsView extends FrameLayout {
             }
         };
         updateMediaController();
+    }
+
+    private void initializeBatteryViews() {
+        mBatteryPercentage = mWeatherLayout.findViewById(R.id.battery_percentage);
+        mBatteryTemp = mWeatherLayout.findViewById(R.id.battery_temp);
+        mBatteryRemaining = mWeatherLayout.findViewById(R.id.battery_remaining);
+        
+        setupBatteryReceiver();
+        getInitialBatteryStatus();
+    }
+    
+    private void setupBatteryReceiver() {
+        mBatteryReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                if (Intent.ACTION_BATTERY_CHANGED.equals(intent.getAction())) {
+                    updateBatteryInfo(intent);
+                }
+            }
+        };
+    }
+    
+    private void getInitialBatteryStatus() {
+        // Get current battery status using sticky broadcast
+        IntentFilter filter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
+        Intent batteryStatus = mContext.registerReceiver(null, filter);
+        if (batteryStatus != null) {
+            updateBatteryInfo(batteryStatus);
+        }
+    }
+    
+    private void updateBatteryInfo(Intent intent) {
+        if (mBatteryPercentage == null || mBatteryTemp == null || mBatteryRemaining == null) {
+            return;
+        }
+        
+        try {
+            int level = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, 0);
+            int scale = intent.getIntExtra(BatteryManager.EXTRA_SCALE, 100);
+            float batteryPct = level * 100 / (float) scale;
+            float temp = intent.getIntExtra(BatteryManager.EXTRA_TEMPERATURE, 0) / 10f;
+            int status = intent.getIntExtra(BatteryManager.EXTRA_STATUS, -1);
+            boolean isCharging = status == BatteryManager.BATTERY_STATUS_CHARGING;
+            boolean isFull = status == BatteryManager.BATTERY_STATUS_FULL;
+            
+            // Update UI
+            mBatteryPercentage.setText(String.format("%d%%", Math.round(batteryPct)));
+            mBatteryTemp.setText(String.format("%.1f°C", temp));
+            
+            if (isFull) {
+                mBatteryRemaining.setText("Charged 🔋");
+            } else if (isCharging) {
+                mBatteryRemaining.setText("Charging ⚡");
+            } else {
+                mBatteryRemaining.setText("Discharging 🌩️");
+            }
+        } catch (Exception e) {
+            // Fallback values
+            mBatteryPercentage.setText("--%");
+            mBatteryTemp.setText("--°C");
+            mBatteryRemaining.setText("Unknown");
+        }
     }
 
     @Override
@@ -317,12 +393,27 @@ public class QsControlsView extends FrameLayout {
         mBluetoothController.addCallback(mBtCallback);
         mNetworkController.addCallback(mWifiSignalCallback);
         mNetworkController.addCallback(mCellSignalCallback);
+
+        // Register battery receiver
+        if (mBatteryReceiver != null) {
+            IntentFilter filter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
+            mContext.registerReceiver(mBatteryReceiver, filter);
+        }
     }
     
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         mFlashlightController.removeCallback(mFlashlightCallback);
+
+        // Unregister battery receiver
+        if (mBatteryReceiver != null) {
+            try {
+                mContext.unregisterReceiver(mBatteryReceiver);
+            } catch (IllegalArgumentException e) {
+                // Receiver not registered
+            }
+        }
     }
 
     private final BluetoothController.Callback mBtCallback = new BluetoothController.Callback() {
@@ -593,6 +684,11 @@ public class QsControlsView extends FrameLayout {
             mMediaPageIndicator.setPageCount(pageCount);
         }
 
+        if (mWeatherPageIndicator != null) {
+            mWeatherPageIndicator.setupWithViewPager(mViewPager);
+            mWeatherPageIndicator.setPageCount(pageCount);
+        }
+
         if (mWidgetsPageIndicator != null) {
             mWidgetsPageIndicator.setupWithViewPager(mViewPager);
             mWidgetsPageIndicator.setPageCount(pageCount);
@@ -607,6 +703,9 @@ public class QsControlsView extends FrameLayout {
                 }
                 if (mMediaPageIndicator != null) {
                     mMediaPageIndicator.onPageScrolled(position, positionOffset);
+                }
+                if (mWeatherPageIndicator != null) {
+                    mWeatherPageIndicator.onPageScrolled(position, positionOffset);
                 }
                 if (mWidgetsPageIndicator != null) {
                     mWidgetsPageIndicator.onPageScrolled(position, positionOffset);
@@ -624,6 +723,9 @@ public class QsControlsView extends FrameLayout {
                 }
                 if (mMediaPageIndicator != null) {
                     mMediaPageIndicator.setCurrentItem(position);
+                }
+                if (mWeatherPageIndicator != null) {
+                    mWeatherPageIndicator.setCurrentItem(position);
                 }
                 if (mWidgetsPageIndicator != null) {
                     mWidgetsPageIndicator.setCurrentItem(position);
@@ -654,9 +756,10 @@ public class QsControlsView extends FrameLayout {
 
         // Update corresponding layouts based on position
         mMediaLayout.setVisibility(selectedPosition == 0 ? View.VISIBLE : View.GONE);
-        mConnectivityLayout.setVisibility(selectedPosition == 1 ? View.VISIBLE : View.GONE);
-        mAccessLayout.setVisibility(selectedPosition == 2 ? View.VISIBLE : View.GONE);
-        mWidgetsLayout.setVisibility(selectedPosition == 3 ? View.VISIBLE : View.GONE);
+        mWeatherLayout.setVisibility(selectedPosition == 1 ? View.VISIBLE : View.GONE);
+        mConnectivityLayout.setVisibility(selectedPosition == 2 ? View.VISIBLE : View.GONE);
+        mAccessLayout.setVisibility(selectedPosition == 3 ? View.VISIBLE : View.GONE);
+        mWidgetsLayout.setVisibility(selectedPosition == 4 ? View.VISIBLE : View.GONE);
     }
 
     public void updateColors() {
@@ -666,14 +769,16 @@ public class QsControlsView extends FrameLayout {
         mContainerColor = mContext.getResources().getColor(isNightMode() ? R.color.qs_controls_container_bg_color_dark : R.color.qs_controls_container_bg_color_light);
         updateConnectivityTiles();
 	updateTiles();
-        if (mAccessBg != null && mMediaCard != null && mWidgetsBg != null && mConnectivityBg != null) {
+        if (mAccessBg != null && mMediaCard != null && mWidgetsBg != null && mWeatherBg != null && mConnectivityBg != null) {
             mMediaCard.getBackground().setTint(mContainerColor);
             mAccessBg.setBackgroundTintList(ColorStateList.valueOf(mContainerColor));
             mWidgetsBg.setBackgroundTintList(ColorStateList.valueOf(mContainerColor));
+	    mWeatherBg.setBackgroundTintList(ColorStateList.valueOf(mContainerColor));
         }
-        if (mAccessPageIndicator != null && mMediaPageIndicator != null && mWidgetsPageIndicator != null) {
+        if (mAccessPageIndicator != null && mMediaPageIndicator != null && mWeatherPageIndicator != null && mWidgetsPageIndicator != null) {
             mAccessPageIndicator.updateColors(isNightMode());
             mMediaPageIndicator.updateColors(isNightMode());
+            mWeatherPageIndicator.updateColors(isNightMode());
             mWidgetsPageIndicator.updateColors(isNightMode());
         }
         updateInternetButtonState();
@@ -753,7 +858,7 @@ public class QsControlsView extends FrameLayout {
     private void collectViews(List<View> viewList, View... views) {
         // Determine if we're collecting main page views
         boolean isCollectingMainViews = views.length > 0 && 
-            (views[0] == mMediaLayout || views[0] == mConnectivityLayout || 
+            (views[0] == mMediaLayout || views[0] == mWeatherLayout || views[0] == mConnectivityLayout || 
              views[0] == mAccessLayout || views[0] == mWidgetsLayout);
              
         // Clear the list if we're collecting main page views to avoid duplicates
