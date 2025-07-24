@@ -16,6 +16,10 @@
     <!-- media player layout -->
     <include layout="@layout/qs_controls_media_widgets" />
 
+    <!-- weather layout  -->
+    <include layout="@layout/qs_controls_weather"
+        android:visibility="gone" />
+
     <!-- connectivity layout  -->
     <include layout="@layout/qs_controls_tile_connectivity"
         android:visibility="gone" />
