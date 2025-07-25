@@ -9394,21 +9394,26 @@ public class WindowManagerService extends IWindowManager.Stub
         boolean didTransfer;
         try {
             synchronized (mGlobalLock) {
+                Slog.d("WindowManager", "transferTouchGesture called: from=" + transferFromToken
+                        + ", to=" + transferToToken + ", callingUid=" + callingUid);
                 // If the transferToToken exists in the input to window map, it means the request
                 // is to transfer from embedded to host. Otherwise, the transferToToken
                 // represents an embedded window so transfer from host to embedded.
                 WindowState windowStateTo = mInputToWindowMap.get(transferToToken.getToken());
                 if (windowStateTo != null) {
+                    Slog.d("WindowManager", "Branch: toHost, windowStateTo=" + windowStateTo);
                     didTransfer = mEmbeddedWindowController.transferToHost(callingUid,
                             transferFromToken,
                             windowStateTo);
                 } else {
                     WindowState windowStateFrom = mInputToWindowMap.get(
                             transferFromToken.getToken());
+                    Slog.d("WindowManager", "Branch: toEmbedded, windowStateFrom=" + windowStateFrom);
                     didTransfer = mEmbeddedWindowController.transferToEmbedded(callingUid,
                             windowStateFrom,
                             transferToToken);
                 }
+                Slog.d("WindowManager", "transferTouchGesture result: " + didTransfer);
             }
         } finally {
             Binder.restoreCallingIdentity(identity);
