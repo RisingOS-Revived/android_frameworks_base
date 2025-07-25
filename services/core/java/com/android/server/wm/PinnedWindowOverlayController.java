@@ -255,17 +255,7 @@ class PinnedWindowOverlayController {
                     if (actionMasked == MotionEvent.ACTION_UP && mWmService != null) {
                         final IWindow window = getIWindow();
                         if (window != null) {
-                            try {
-                                mWmService.getClass().getMethod("finishTaskPositioning", IWindow.class)
-                                    .invoke(mWmService, window);
-                            } catch (Exception e) {
-                                try {
-                                    mWmService.getClass().getMethod("endTaskPositioning", IWindow.class)
-                                        .invoke(mWmService, window);
-                                } catch (Exception e2) {
-                                    Slog.w(TAG, "Unable to finish task positioning", e2);
-                                }
-                            }
+                            mWmService.mTaskPositioningController.finishTaskPositioning(window);
                         }
                     }
                     mDragging = false;
@@ -279,17 +269,8 @@ class PinnedWindowOverlayController {
                     if (mWmService != null) {
                         final IWindow window = getIWindow();
                         if (window != null) {
-                            try {
-                                mWmService.getClass().getMethod("startMovingTask", IWindow.class, float.class, float.class)
-                                    .invoke(mWmService, window, event.getRawX(), event.getRawY());
-                            } catch (Exception e) {
-                                try {
-                                    mWmService.getClass().getMethod("beginTaskPositioning", IWindow.class, float.class, float.class)
-                                        .invoke(mWmService, window, event.getRawX(), event.getRawY());
-                                } catch (Exception e2) {
-                                    Slog.w(TAG, "Unable to start moving task", e2);
-                                }
-                            }
+                            mWmService.mTaskPositioningController.startMovingTask(window,
+                                    event.getRawX(), event.getRawY());
                         }
                     }
                     if (mTaskWindowSurfaceInfo != null && mTaskWindowSurfaceInfo.cancelPopUpViewAnimation()) {

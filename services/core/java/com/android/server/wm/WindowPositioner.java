@@ -111,11 +111,6 @@ class WindowPositioner implements IBinder.DeathRecipient {
         mService = service;
     }
 
-    private Choreographer getChoreographer() {
-        // Get choreographer from the animation handler's looper
-        return Choreographer.getInstance();
-    }
-
     boolean onInputEvent(InputEvent event) {
         if (!(event instanceof MotionEvent) || (event.getSource() & SOURCE_CLASS_POINTER) == 0) {
             return false;
@@ -226,7 +221,7 @@ class WindowPositioner implements IBinder.DeathRecipient {
                     mTaskWindowSurfaceInfo.resizeWindowWithAnimation(startPos, endPos,
                             mWindowDragBounds.width(), mWindowDragBounds.height(),
                             startWinScale, endWinScale, mTmpRect2, mStartRotationWasLandscape);
-                    finishTaskPositioning();
+                    mService.mTaskPositioningController.finishTaskPositioning();
                     return true;
                 }
                 if (mLastMiniWindowDragScaleType == MINI_WINDOW_DRAG_SCALE_TYPE_TO_PINNED) {
@@ -238,7 +233,7 @@ class WindowPositioner implements IBinder.DeathRecipient {
                                 }
                                 enterPinnedWindowingMode();
                                 PopUpWindowController.getInstance().updateFocusedApp();
-                                finishTaskPositioning();
+                                mService.mTaskPositioningController.finishTaskPositioning();
                             } catch (Throwable th) {
                                 throw th;
                             }
@@ -253,7 +248,7 @@ class WindowPositioner implements IBinder.DeathRecipient {
                                 Slog.d(TAG, "exitMiniWindowingMode!");
                             }
                             exitMiniWindowingMode();
-                            finishTaskPositioning();
+                            mService.mTaskPositioningController.finishTaskPositioning();
                         }
                     });
                     return true;
@@ -303,7 +298,7 @@ class WindowPositioner implements IBinder.DeathRecipient {
                         mWindowDragBounds.width(), mWindowDragBounds.height(),
                         winScale, xVelocity, yVelocity);
             }
-            finishTaskPositioning();
+            mService.mTaskPositioningController.finishTaskPositioning();
             return true;
         }
     }
@@ -371,7 +366,7 @@ class WindowPositioner implements IBinder.DeathRecipient {
 
         mDisplayContent.getDisplayRotation().pause();
 
-        return showInputSurface(win.getDisplayId())
+        return mService.mTaskPositioningController.showInputSurface(win.getDisplayId())
             .thenRun(() -> {
                 synchronized (this.mService.mGlobalLock) {
                     final Rect displayBounds = mTmpRect2;
@@ -390,7 +385,7 @@ class WindowPositioner implements IBinder.DeathRecipient {
                         mTask = win.getTask();
                         mTaskWindowSurfaceInfo = mTask.mWindowContainerExt.getTaskWindowSurfaceInfo();
                     } catch (RemoteException e) {
-                        finishTaskPositioning();
+                        mService.mTaskPositioningController.finishTaskPositioning();
                     }
                 }
             });
@@ -406,7 +401,7 @@ class WindowPositioner implements IBinder.DeathRecipient {
             return;
         }
 
-        hideInputSurface(mDisplayContent.getDisplayId());
+        mService.mTaskPositioningController.hideInputSurface(mDisplayContent.getDisplayId());
         mService.mInputManager.removeInputChannel(mClientChannel.getToken());
 
         mInputEventReceiver.dispose();
@@ -524,7 +519,10 @@ class WindowPositioner implements IBinder.DeathRecipient {
     private void endDragLocked() {
         mResizing = false;
     }
-
+    private Choreographer getChoreographer() {
+        // Get choreographer from the animation handler's looper
+        return Choreographer.getInstance();
+    }
     private boolean isOrientationReversed() {
         if (mTask == null) {
             return false;
@@ -665,33 +663,7 @@ class WindowPositioner implements IBinder.DeathRecipient {
 
     @Override
     public void binderDied() {
-        finishTaskPositioning();
-    }
-
-    private void finishTaskPositioning() {
-       if (DEBUG_POP_UP) {
-           Slog.d(TAG, "finishTaskPositioning");
-       }
-       unregister();
-    }
-
-    private CompletableFuture<Void> showInputSurface(int displayId) {
-        if (DEBUG_POP_UP) {
-            Slog.d(TAG, "showInputSurface for display " + displayId);
-        }
-        if (mDisplayContent != null) {
-            mDisplayContent.getInputMonitor().updateInputWindowsLw(true);
-        }
-        return completedFuture(null);
-    }
-
-    private void hideInputSurface(int displayId) {
-        if (DEBUG_POP_UP) {
-            Slog.d(TAG, "hideInputSurface for display " + displayId);
-        }
-        if (mDisplayContent != null) {
-            mDisplayContent.getInputMonitor().updateInputWindowsLw(true);
-        }
+        mService.mTaskPositioningController.finishTaskPositioning();
     }
 
     private interface Factory {

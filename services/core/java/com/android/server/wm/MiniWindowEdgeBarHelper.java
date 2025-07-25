@@ -106,21 +106,8 @@ class MiniWindowEdgeBarHelper {
                 if (winState != null) {
                     final long ident = Binder.clearCallingIdentity();
                     try {
-                        try {
-                            mTask.mAtmService.mWindowManager.getClass()
-                                    .getMethod("startMovingTask", IWindow.class, float.class, float.class)
-                                    .invoke(mTask.mAtmService.mWindowManager, 
-                                            winState.getIWindow(), e2.getRawX(), e2.getRawY());
-                        } catch (Exception e) {
-                            try {
-                                mTask.mAtmService.mWindowManager.getClass()
-                                        .getMethod("beginTaskPositioning", IWindow.class, float.class, float.class)
-                                        .invoke(mTask.mAtmService.mWindowManager, 
-                                                winState.getIWindow(), e2.getRawX(), e2.getRawY());
-                            } catch (Exception ex) {
-                                Slog.w(TAG, "Unable to start moving task", ex);
-                            }
-                        }
+                        mTask.mAtmService.mWindowManager.mTaskPositioningController.
+                                startMovingTask(winState.getIWindow(), e2.getRawX(), e2.getRawY());
                     } finally {
                         Binder.restoreCallingIdentity(ident);
                     }
@@ -144,19 +131,8 @@ class MiniWindowEdgeBarHelper {
                     }
                     final long ident = Binder.clearCallingIdentity();
                     try {
-                        try {
-                            mTask.mAtmService.mWindowManager.getClass()
-                                    .getMethod("finishTaskPositioning", IWindow.class)
-                                    .invoke(mTask.mAtmService.mWindowManager, winState.getIWindow());
-                        } catch (Exception e) {
-                            try {
-                                mTask.mAtmService.mWindowManager.getClass()
-                                        .getMethod("endTaskPositioning", IWindow.class)
-                                        .invoke(mTask.mAtmService.mWindowManager, winState.getIWindow());
-                            } catch (Exception ex) {
-                                Slog.w(TAG, "Unable to finish task positioning", ex);
-                            }
-                        }
+                        mTask.mAtmService.mWindowManager.mTaskPositioningController.
+                                finishTaskPositioning(winState.getIWindow());
                     } finally {
                         Binder.restoreCallingIdentity(ident);
                     }
