@@ -230,6 +230,7 @@ import android.view.Surface;
 import android.view.Surface.Rotation;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
+import android.view.SurfaceSession;
 import android.view.WindowInsets;
 import android.view.WindowInsets.Type.InsetsType;
 import android.view.WindowManager;
@@ -801,6 +802,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     DisplayWindowPolicyControllerHelper mDwpcHelper;
 
     private final DisplayRotationReversionController mRotationReversionController;
+
+    private final SurfaceSession mSession = new SurfaceSession();
 
     private final Consumer<WindowState> mUpdateWindowsForAnimator = w -> {
         WindowStateAnimator winAnimator = w.mWinAnimator;
@@ -5429,6 +5432,10 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 }
             }
         }
+    }
+
+    SurfaceSession getSession() {
+        return mSession;
     }
 
     @Override
