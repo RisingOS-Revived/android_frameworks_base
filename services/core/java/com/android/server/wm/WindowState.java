@@ -604,6 +604,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     // Input channel and input window handle used by the input dispatcher.
     final InputWindowHandleWrapper mInputWindowHandle;
+    /**
+     * Only populated if flag REMOVE_INPUT_CHANNEL_FROM_WINDOWSTATE is disabled.
+     */
+    private InputChannel mInputChannel;
 
     /**
      * The token will be assigned to {@link InputWindowHandle#token} if this window can receive
@@ -1752,8 +1756,12 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      * Input Manager uses when discarding windows from input consideration.
      */
     boolean isPotentialDragTarget(boolean targetInterceptsGlobalDrag) {
+        if (false) {
+            return (targetInterceptsGlobalDrag || isVisibleNow()) && !mRemoved
+                    && mInputChannelToken != null && mInputWindowHandle != null;
+        }
         return (targetInterceptsGlobalDrag || isVisibleNow()) && !mRemoved
-                && mInputChannelToken != null && mInputWindowHandle != null;
+                && mInputChannel != null && mInputWindowHandle != null;
     }
 
     /**
@@ -2511,13 +2519,25 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         if (mInputChannelToken != null) {
             throw new IllegalStateException("Window already has an input channel token.");
         }
+        if (false) {
+            String name = getName();
+            InputChannel channel = mWmService.mInputManager.createInputChannel(name);
+            mInputChannelToken = channel.getToken();
+            mInputWindowHandle.setToken(mInputChannelToken);
+            mWmService.mInputToWindowMap.put(mInputChannelToken, this);
+            channel.copyTo(outInputChannel);
+            channel.dispose();
+            return;
+        }
+        if (mInputChannel != null) {
+            throw new IllegalStateException("Window already has an input channel.");
+        }
         String name = getName();
-        InputChannel channel = mWmService.mInputManager.createInputChannel(name);
-        mInputChannelToken = channel.getToken();
+        mInputChannel = mWmService.mInputManager.createInputChannel(name);
+        mInputChannelToken = mInputChannel.getToken();
         mInputWindowHandle.setToken(mInputChannelToken);
         mWmService.mInputToWindowMap.put(mInputChannelToken, this);
-        channel.copyTo(outInputChannel);
-        channel.dispose();
+        mInputChannel.copyTo(outInputChannel);
     }
 
     /**
@@ -2540,6 +2560,12 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             mInputChannelToken = null;
         }
 
+        if (true) {
+            if (mInputChannel != null) {
+                mInputChannel.dispose();
+                mInputChannel = null;
+            }
+        }
         mInputWindowHandle.setToken(null);
     }
 
