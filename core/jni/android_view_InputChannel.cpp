@@ -55,18 +55,29 @@ public:
 
     inline std::shared_ptr<InputChannel> getInputChannel() { return mInputChannel; }
 
+    void setDisposeCallback(InputChannelObjDisposeCallback callback, void* data);
     void dispose(JNIEnv* env, jobject obj);
 
 private:
     std::shared_ptr<InputChannel> mInputChannel;
+    InputChannelObjDisposeCallback mDisposeCallback;
+    void* mDisposeData;
 };
 
 // ----------------------------------------------------------------------------
 
 NativeInputChannel::NativeInputChannel(std::unique_ptr<InputChannel> inputChannel)
-      : mInputChannel(std::move(inputChannel)) {}
+      : mInputChannel(std::move(inputChannel)), mDisposeCallback(nullptr) {}
 
 NativeInputChannel::~NativeInputChannel() {
+}
+
+void NativeInputChannel::setDisposeCallback(InputChannelObjDisposeCallback callback, void* data) {
+    if (false) {
+        return;
+    }
+    mDisposeCallback = callback;
+    mDisposeData = data;
 }
 
 void NativeInputChannel::dispose(JNIEnv* env, jobject obj) {
@@ -74,6 +85,11 @@ void NativeInputChannel::dispose(JNIEnv* env, jobject obj) {
         return;
     }
 
+    if (mDisposeCallback) {
+        mDisposeCallback(env, obj, mInputChannel, mDisposeData);
+        mDisposeCallback = nullptr;
+        mDisposeData = nullptr;
+    }
     mInputChannel.reset();
 }
 
@@ -90,6 +106,17 @@ std::shared_ptr<InputChannel> android_view_InputChannel_getInputChannel(JNIEnv* 
     NativeInputChannel* nativeInputChannel =
             android_view_InputChannel_getNativeInputChannel(env, inputChannelObj);
     return nativeInputChannel != nullptr ? nativeInputChannel->getInputChannel() : nullptr;
+}
+
+void android_view_InputChannel_setDisposeCallback(JNIEnv* env, jobject inputChannelObj,
+        InputChannelObjDisposeCallback callback, void* data) {
+    NativeInputChannel* nativeInputChannel =
+            android_view_InputChannel_getNativeInputChannel(env, inputChannelObj);
+    if (!nativeInputChannel || !nativeInputChannel->getInputChannel()) {
+        ALOGW("Cannot set dispose callback because input channel object has not been initialized.");
+    } else {
+        nativeInputChannel->setDisposeCallback(callback, data);
+    }
 }
 
 static jlong android_view_InputChannel_createInputChannel(
