@@ -9911,7 +9911,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 Slog.e(TAG, "Host window not found");
                 return;
             }
-            if (hostWindow.mInputChannelToken == null) {
+            if (hostWindow.mInputChannel == null) {
                 Slog.e(TAG, "Host window does not have an input channel");
                 return;
             }
