@@ -23,6 +23,7 @@ import static com.android.wm.shell.ShellTaskOrganizer.TASK_LISTENER_TYPE_FREEFOR
 import android.app.ActivityManager.RunningTaskInfo;
 import android.content.Context;
 import android.os.Handler;
+import android.provider.Settings;
 import android.util.SparseArray;
 import android.view.SurfaceControl;
 import android.window.DesktopExperienceFlags;
@@ -230,6 +231,13 @@ public class FreeformTaskListener implements ShellTaskOrganizer.TaskListener,
     void onTaskEnteredFreeform(RunningTaskInfo taskInfo) {
         if (taskInfo == null) {
             Log.d(LOG_TAG, "Task entered freeform: taskInfo is null");
+            return;
+        }
+
+        int freeformLaunchMode = Settings.System.getInt(mContext.getContentResolver(), "freeform_launch_mode", 0);
+        if (freeformLaunchMode != 2)
+        {
+            Log.d(LOG_TAG, "Freeform scale disabled, exiting");
             return;
         }
 
