@@ -20,7 +20,7 @@ import android.animation.ArgbEvaluator
 import android.content.Context
 import android.view.ContextThemeWrapper
 import com.android.settingslib.Utils
-import com.android.settingslib.flags.Flags.newStatusBarIcons
+import com.android.settingslib.RuntimeFlags.newStatusBarIcons
 import com.android.systemui.res.R
 
 /**
