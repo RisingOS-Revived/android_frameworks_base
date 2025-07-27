@@ -31,7 +31,7 @@ package com.android.settingslib.mobile;
 
 import com.android.settingslib.R;
 import com.android.settingslib.SignalIcon.MobileIconGroup;
-import com.android.settingslib.flags.Flags;
+import com.android.settingslib.RuntimeFlags;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -96,7 +96,7 @@ public class TelephonyIcons {
 
     /** Make it slightly more obvious which resource we are using */
     private static int flagged(int oldIcon, int newIcon) {
-        if (Flags.newStatusBarIcons()) {
+        if (RuntimeFlags.newStatusBarIcons()) {
             return newIcon;
         }
         return oldIcon;

@@ -17,7 +17,7 @@
 package com.android.systemui.statusbar.pipeline.mobile.ui
 
 import android.content.Context
-import com.android.settingslib.flags.Flags
+import com.android.settingslib.RuntimeFlags
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.kairos.ExperimentalKairosApi
 import com.android.systemui.kairos.KairosNetwork
@@ -60,5 +60,5 @@ constructor(
     }
 
     override val shouldBindIcon: Boolean =
-        Flags.newStatusBarIcons() && StatusBarRootModernization.isEnabled
+        RuntimeFlags.newStatusBarIcons() && StatusBarRootModernization.isEnabled
 }
