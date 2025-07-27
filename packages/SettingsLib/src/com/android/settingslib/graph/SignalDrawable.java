@@ -14,7 +14,7 @@
 
 package com.android.settingslib.graph;
 
-import static com.android.settingslib.flags.Flags.newStatusBarIcons;
+import com.android.settingslib.RuntimeFlags;
 
 import android.animation.ArgbEvaluator;
 import android.annotation.IntRange;
@@ -142,7 +142,7 @@ public class SignalDrawable extends DrawableWrapper {
 
     @Override
     public int getIntrinsicWidth() {
-        if (newStatusBarIcons()) {
+        if (RuntimeFlags.newStatusBarIcons()) {
             return super.getIntrinsicWidth();
         } else {
             return mIntrinsicSize;
@@ -151,7 +151,7 @@ public class SignalDrawable extends DrawableWrapper {
 
     @Override
     public int getIntrinsicHeight() {
-        if (newStatusBarIcons()) {
+        if (RuntimeFlags.newStatusBarIcons()) {
             return super.getIntrinsicHeight();
         } else {
             return mIntrinsicSize;
@@ -184,7 +184,7 @@ public class SignalDrawable extends DrawableWrapper {
         int levelOffset = numBins == (CellSignalStrength.getNumSignalStrengthLevels() + 1) ? 10 : 0;
         int level = (packedState & LEVEL_MASK);
 
-        if (newStatusBarIcons()) {
+        if (RuntimeFlags.newStatusBarIcons()) {
             if (isInState(STATE_CUT)) {
                 cutOutOffset = 20;
             }
@@ -255,7 +255,7 @@ public class SignalDrawable extends DrawableWrapper {
             drawDotAndPadding(x - dotSpacing * 2, y, dotPadding, dotSize, 0);
             canvas.drawPath(mCutoutPath, mTransparentPaint);
             canvas.drawPath(mForegroundPath, mForegroundPaint);
-        } else if (!newStatusBarIcons() && isInState(STATE_CUT_AND_R)) {
+        } else if (!RuntimeFlags.newStatusBarIcons() && isInState(STATE_CUT_AND_R)) {
             // Roaming
             float cutWidth = mRCutoutWidthFraction;
             float cutHeight = mRCutoutHeightFraction;
@@ -288,7 +288,7 @@ public class SignalDrawable extends DrawableWrapper {
             mCutoutPath.rLineTo(0, cutY);
             canvas.drawPath(mCutoutPath, mTransparentPaint);
             canvas.drawPath(mScaledAttributionPath, mForegroundPaint);
-        } else if (!newStatusBarIcons() && (isInState(STATE_CUT) || isInState(STATE_R))) {
+        } else if (!RuntimeFlags.newStatusBarIcons() && (isInState(STATE_CUT) || isInState(STATE_R))) {
             boolean isRoaming = isInState(STATE_R);
             float cutWidth = isRoaming ? mRCutoutWidthFraction : mCutoutWidthFraction;
             float cutHeight = isRoaming ? mRCutoutHeightFraction : mCutoutHeightFraction;
@@ -394,7 +394,7 @@ public class SignalDrawable extends DrawableWrapper {
     }
 
     private static int getIconRes() {
-        if (newStatusBarIcons()) {
+        if (RuntimeFlags.newStatusBarIcons()) {
             return R.drawable.ic_mobile_level_list;
         } else {
             return com.android.internal.R.drawable.ic_signal_cellular;

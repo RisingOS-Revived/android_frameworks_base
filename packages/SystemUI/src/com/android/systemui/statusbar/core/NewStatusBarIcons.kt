@@ -16,14 +16,14 @@
 
 package com.android.systemui.statusbar.core
 
-import com.android.settingslib.flags.Flags
+import com.android.settingslib.RuntimeFlags
 import com.android.systemui.flags.FlagToken
 import com.android.systemui.flags.RefactorFlagUtils
 
 /** Helper for reading and using the status bar simple fragment flag state */
 object NewStatusBarIcons {
     /** Aconfig flag for new status bar icons */
-    const val FLAG_NAME = Flags.FLAG_NEW_STATUS_BAR_ICONS
+    const val FLAG_NAME = "new_status_bar_icons_enabled"
 
     /** A token used for dependency declaration */
     val token: FlagToken
@@ -32,7 +32,7 @@ object NewStatusBarIcons {
     /** Is the refactor enabled. Dependency on [StatusBarRootModernization] */
     @JvmStatic
     inline val isEnabled
-        get() = Flags.newStatusBarIcons() && StatusBarRootModernization.isEnabled
+        get() = RuntimeFlags.newStatusBarIcons() && StatusBarRootModernization.isEnabled
 
     /**
      * Called to ensure code is only run when the flag is enabled. This protects users from the
