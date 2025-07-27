@@ -12,7 +12,7 @@ import android.util.ArraySet;
 public class PopUpViewManager {
 
     public static final boolean FEATURE_SUPPORTED = SystemProperties.getBoolean(
-        "ro.rising.feature.pop_up_view", false
+        "ro.rising.feature.pop_up_view", true
     );
 
     /** TODO: Get rid of these dirty blacklist stuff. Maybe move them to local config file. */
