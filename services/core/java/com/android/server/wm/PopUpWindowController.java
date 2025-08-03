@@ -37,6 +37,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.os.Vibrator;
+import android.os.VibrationEffect;
 import android.util.ArraySet;
 import android.util.Slog;
 import android.view.IWindow;
@@ -692,7 +693,12 @@ public class PopUpWindowController {
     void triggerVibrate() {
         mHandler.post(() -> {
             if (mVibrator != null) {
-                mVibrator.vibrate(android.os.VibrationEffect.createOneShot(50, android.os.VibrationEffect.DEFAULT_AMPLITUDE));
+                // Create a predefined click effect
+                VibrationEffect effect = VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK);
+                // Apply STRONG effect strength to increase intensity
+                effect = effect.applyEffectStrength(VibrationEffect.EFFECT_STRENGTH_STRONG);
+                // Vibrate with the strengthened effect
+                mVibrator.vibrate(effect);
             }
         });
     }
