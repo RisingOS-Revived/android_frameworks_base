@@ -209,6 +209,10 @@ class WindowPositioner implements IBinder.DeathRecipient {
             final boolean wasResizing = mResizing;
             endDragLocked();
             mTask.getDimBounds(mTmpRect);
+            if (mDisplayContent == null) {
+                Slog.w(TAG, "mDisplayContent is null! Skipping onInputEvent.");
+                return true;
+            }
             mDisplayContent.getBounds(mTmpRect2);
             if (wasResizing) {
                 if (mLastMiniWindowDragScaleType == MINI_WINDOW_DRAG_SCALE_TYPE_NONE) {
