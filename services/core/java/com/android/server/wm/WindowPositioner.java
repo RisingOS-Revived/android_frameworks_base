@@ -556,7 +556,12 @@ class WindowPositioner implements IBinder.DeathRecipient {
         if (DEBUG_POP_UP) {
             Slog.d(TAG, "notifyMoveLocked: {" + x + "," + y + "}");
         }
-        mDisplayContent.getStableRect(mTmpRect);
+        if (mDisplayContent != null) {
+            mDisplayContent.getStableRect(mTmpRect);
+        } else {
+            Slog.w(TAG, "DisplayContent is null in notifyMoveLocked");
+            return false;
+        }
         if (rootTask != null && rootTask.getParent() != null && rootTask.getParent().getBounds() != null) {
             mTmpRect.intersect(mTask.getRootTask().getParent().getBounds());
         }
