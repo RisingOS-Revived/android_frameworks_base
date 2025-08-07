@@ -613,9 +613,24 @@ static void nativeSetRelativeLayer(JNIEnv* env, jclass clazz, jlong transactionO
 
 static void nativeSetPosition(JNIEnv* env, jclass clazz, jlong transactionObj,
         jlong nativeObject, jfloat x, jfloat y) {
-    auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
+    if (nativeObject == 0) {
+        ALOGE("nativeSetPosition called with invalid SurfaceControl: %llx", (long long)nativeObject);
+        return;
+    }
 
-    SurfaceControl* const ctrl = reinterpret_cast<SurfaceControl *>(nativeObject);
+    auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
+    if (!transaction) {
+        ALOGE("nativeSetPosition called with null transaction");
+        return;
+    }
+
+    SurfaceControl* const ctrl = reinterpret_cast<SurfaceControl*>(nativeObject);
+    // Extra safety check after cast
+    if (!ctrl) {
+        ALOGE("nativeSetPosition: SurfaceControl pointer is null after conversion");
+        return;
+    }
+
     transaction->setPosition(ctrl, x, y);
 }
 
