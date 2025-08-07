@@ -221,23 +221,31 @@ sp<gui::WindowInfoHandle> android_view_InputWindowHandle_getHandle(JNIEnv* env, 
 }
 
 jobject android_view_InputWindowHandle_fromWindowInfo(JNIEnv* env,
-                                                      const gui::WindowInfo& windowInfo) {
+                                                     const gui::WindowInfo& windowInfo) {
     ScopedLocalRef<jobject>
             applicationHandle(env,
-                              android_view_InputApplicationHandle_fromInputApplicationInfo(
-                                      env, windowInfo.applicationInfo));
+                             android_view_InputApplicationHandle_fromInputApplicationInfo(
+                                     env, windowInfo.applicationInfo));
 
     jobject inputWindowHandle =
             env->NewObject(gInputWindowHandleClassInfo.clazz, gInputWindowHandleClassInfo.ctor,
-                           applicationHandle.get(), windowInfo.displayId);
+                          applicationHandle.get(), windowInfo.displayId);
     if (env->ExceptionCheck()) {
         LOGE_EX(env);
         env->ExceptionClear();
     }
     LOG_ALWAYS_FATAL_IF(inputWindowHandle == nullptr,
-                        "Failed to create new InputWindowHandle object.");
-    env->SetObjectField(inputWindowHandle, gInputWindowHandleClassInfo.token,
-                        javaObjectForIBinder(env, windowInfo.token));
+                       "Failed to create new InputWindowHandle object.");
+
+    // Add null check for token
+    if (windowInfo.token) {
+        env->SetObjectField(inputWindowHandle, gInputWindowHandleClassInfo.token,
+                           javaObjectForIBinder(env, windowInfo.token));
+    } else {
+        // Set null for the token field when the IBinder is null
+        env->SetObjectField(inputWindowHandle, gInputWindowHandleClassInfo.token, nullptr);
+    }
+
     ScopedLocalRef<jstring> name(env, env->NewStringUTF(windowInfo.name.data()));
     env->SetObjectField(inputWindowHandle, gInputWindowHandleClassInfo.name, name.get());
     env->SetIntField(inputWindowHandle, gInputWindowHandleClassInfo.layoutParamsFlags,
@@ -291,8 +299,14 @@ jobject android_view_InputWindowHandle_fromWindowInfo(JNIEnv* env,
     ScopedLocalRef<jobject> matrixObj(env, AMatrix_newInstance(env, transformVals));
     env->SetObjectField(inputWindowHandle, gInputWindowHandleClassInfo.transform, matrixObj.get());
 
-    env->SetObjectField(inputWindowHandle, gInputWindowHandleClassInfo.windowToken,
-                        javaObjectForIBinder(env, windowInfo.windowToken));
+    // Add null check for windowToken
+    if (windowInfo.windowToken) {
+        env->SetObjectField(inputWindowHandle, gInputWindowHandleClassInfo.windowToken,
+                           javaObjectForIBinder(env, windowInfo.windowToken));
+    } else {
+        // Set null for the windowToken field when the IBinder is null
+        env->SetObjectField(inputWindowHandle, gInputWindowHandleClassInfo.windowToken, nullptr);
+    }
 
     env->SetFloatField(inputWindowHandle, gInputWindowHandleClassInfo.alpha, windowInfo.alpha);
     env->SetBooleanField(inputWindowHandle, gInputWindowHandleClassInfo.canOccludePresentation,
