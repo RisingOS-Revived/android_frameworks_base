@@ -16,6 +16,7 @@
 
 package com.android.systemui.qs.footer.ui.compose
 
+import com.android.compose.theme.PlatformTheme
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
@@ -27,6 +28,7 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.indication
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
@@ -57,6 +59,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -115,7 +118,7 @@ fun ContentScope.FooterActionsWithAnimatedVisibility(
             ) + fadeOut(tween(customizingAnimationDuration)),
         modifier = modifier.fillMaxWidth(),
     ) {
-        QuickSettingsTheme {
+        PlatformTheme(isDarkTheme = isSystemInDarkTheme()) {
             // This view has its own horizontal padding
             // TODO(b/321716470) This should use a lifecycle tied to the scene.
             Element(QuickSettings.Elements.FooterActions, Modifier) {
@@ -167,7 +170,8 @@ fun FooterActions(
         }
     }
 
-    val backgroundColor = Color.Transparent
+    val backgroundColor =
+        if (!notificationShadeBlur()) MaterialTheme.colorScheme.surfaceVariant else Color.Transparent
     val backgroundAlphaValue = if (!notificationShadeBlur()) backgroundAlpha::value else ({ 0f })
     val contentColor = MaterialTheme.colorScheme.onSurface
     val backgroundTopRadius = dimensionResource(R.dimen.qs_corner_radius)
@@ -306,7 +310,11 @@ fun IconButton(
     modifier: Modifier = Modifier,
 ) {
     Expandable(
-        color = colorAttr(model.backgroundColor),
+        color = if (isSystemInDarkTheme()) {
+            colorResource(id = android.R.color.system_neutral1_800)
+        } else {
+            colorResource(id = android.R.color.system_neutral1_0)
+        },
         shape = CircleShape,
         onClick = model.onClick,
         modifier =
@@ -316,7 +324,7 @@ fun IconButton(
             ),
         useModifierBasedImplementation = useModifierBasedExpandable,
     ) {
-        val tint = model.iconTint?.let { Color(it) } ?: Color.Unspecified
+        val tint = model.iconTint?.let { MaterialTheme.colorScheme.onSurface } ?: Color.Unspecified
         Icon(model.icon, tint = tint, modifier = Modifier.size(20.dp))
     }
 }
@@ -339,7 +347,7 @@ private fun NumberButton(
     val interactionSource = remember { MutableInteractionSource() }
 
     Expandable(
-        color = colorAttr(R.attr.shadeInactive),
+        color = MaterialTheme.colorScheme.outlineVariant,
         shape = CircleShape,
         onClick = onClick,
         interactionSource = interactionSource,
@@ -363,7 +371,7 @@ private fun NumberButton(
                             this.contentDescription = contentDescription
                         },
                     style = MaterialTheme.typography.bodyLarge,
-                    color = colorAttr(R.attr.onShadeInactiveVariant),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     // TODO(b/242040009): This should only use a standard text style instead and
                     // should not override the text size.
                     fontSize = 18.sp,
@@ -401,9 +409,13 @@ private fun TextButton(
 ) {
     Expandable(
         shape = CircleShape,
-        color = Color.Transparent,
+        color = if (isSystemInDarkTheme()) {
+            colorResource(id = android.R.color.system_neutral1_800)
+        } else {
+            colorResource(id = android.R.color.system_neutral1_0)
+        },
         contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
-        borderStroke = BorderStroke(1.dp, colorAttr(R.attr.shadeInactive)),
+        borderStroke = BorderStroke(0.dp, MaterialTheme.colorScheme.outlineVariant),
         modifier =
             modifier
                 .padding(horizontal = 4.dp)
@@ -418,7 +430,7 @@ private fun TextButton(
             Icon(
                 icon,
                 Modifier.padding(end = 12.dp).size(20.dp),
-                colorAttr(R.attr.onShadeInactiveVariant),
+                tint = MaterialTheme.colorScheme.onSurface,
             )
 
             Text(
@@ -431,7 +443,7 @@ private fun TextButton(
                         MaterialTheme.typography.bodyMedium
                     },
                 letterSpacing = if (QsInCompose.isEnabled) 0.em else 0.01.em,
-                color = colorAttr(R.attr.onShadeInactiveVariant),
+                color = MaterialTheme.colorScheme.onSurface,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
@@ -445,7 +457,7 @@ private fun TextButton(
                     painterResource(com.android.internal.R.drawable.ic_chevron_end),
                     contentDescription = null,
                     Modifier.padding(start = 8.dp).size(20.dp),
-                    colorAttr(R.attr.onShadeInactiveVariant),
+                    tint = MaterialTheme.colorScheme.onSurface,
                 )
             }
         }
