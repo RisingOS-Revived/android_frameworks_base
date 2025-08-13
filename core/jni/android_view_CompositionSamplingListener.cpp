@@ -46,17 +46,22 @@ struct CompositionSamplingListener : public gui::BnRegionSamplingListener {
 
     binder::Status onSampleCollected(float medianLuma) override {
         JNIEnv* env = AndroidRuntime::getJNIEnv();
-        LOG_ALWAYS_FATAL_IF(env == nullptr, "Unable to retrieve JNIEnv in onSampleCollected.");
+        if (env == nullptr) {
+            ALOGE("Unable to retrieve JNIEnv in onSampleCollected.");
+            return binder::Status::ok();
+        }
 
-        jobject listener = env->NewGlobalRef(mListener);
+        jobject listener = env->NewLocalRef(mListener);
         if (listener == NULL) {
             // Weak reference went out of scope
             return binder::Status::ok();
         }
+
         env->CallStaticVoidMethod(gListenerClassInfo.mClass,
                 gListenerClassInfo.mDispatchOnSampleCollected, listener,
                 static_cast<jfloat>(medianLuma));
-        env->DeleteGlobalRef(listener);
+
+        env->DeleteLocalRef(listener);
 
         if (env->ExceptionCheck()) {
             ALOGE("CompositionSamplingListener.onSampleCollected() failed.");
@@ -70,7 +75,9 @@ struct CompositionSamplingListener : public gui::BnRegionSamplingListener {
 protected:
     virtual ~CompositionSamplingListener() {
         JNIEnv* env = AndroidRuntime::getJNIEnv();
-        env->DeleteWeakGlobalRef(mListener);
+        if (env != nullptr) {
+            env->DeleteWeakGlobalRef(mListener);
+        }
     }
 
 private:
@@ -78,36 +85,81 @@ private:
 };
 
 jlong nativeCreate(JNIEnv* env, jclass clazz, jobject obj) {
+    if (obj == nullptr) {
+        ALOGE("nativeCreate: null listener object");
+        return 0;
+    }
+
     CompositionSamplingListener* listener = new CompositionSamplingListener(env, obj);
+    if (listener == nullptr) {
+        ALOGE("nativeCreate: failed to create native listener");
+        return 0;
+    }
+
     listener->incStrong((void*)nativeCreate);
     return reinterpret_cast<jlong>(listener);
 }
 
 void nativeDestroy(JNIEnv* env, jclass clazz, jlong ptr) {
+    if (ptr == 0) {
+        ALOGW("nativeDestroy: null pointer");
+        return;
+    }
+
     CompositionSamplingListener* listener = reinterpret_cast<CompositionSamplingListener*>(ptr);
     listener->decStrong((void*)nativeCreate);
 }
 
 void nativeRegister(JNIEnv* env, jclass clazz, jlong ptr, jlong stopLayerObj,
         jint left, jint top, jint right, jint bottom) {
+    if (ptr == 0) {
+        ALOGE("nativeRegister: null listener pointer");
+        jniThrowRuntimeException(env, "Invalid listener pointer");
+        return;
+    }
+
     sp<CompositionSamplingListener> listener = reinterpret_cast<CompositionSamplingListener*>(ptr);
     auto stopLayer = reinterpret_cast<SurfaceControl*>(stopLayerObj);
     sp<IBinder> stopLayerHandle = stopLayer != nullptr ? stopLayer->getHandle() : nullptr;
-    if (SurfaceComposerClient::addRegionSamplingListener(
-            Rect(left, top, right, bottom), stopLayerHandle, listener) != OK) {
-        constexpr auto error_msg = "Couldn't addRegionSamplingListener";
-        ALOGE(error_msg);
-        jniThrowRuntimeException(env, error_msg);
+
+    if (left >= right || top >= bottom) {
+        ALOGW("nativeRegister: invalid sampling area (%d,%d,%d,%d)", left, top, right, bottom);
+        return;
+    }
+
+    status_t result = SurfaceComposerClient::addRegionSamplingListener(
+            Rect(left, top, right, bottom), stopLayerHandle, listener);
+
+    if (result != OK) {
+        ALOGE("addRegionSamplingListener failed with status: %d", result);
+
+        if (result != INVALID_OPERATION && result != UNKNOWN_ERROR) {
+            constexpr auto error_msg = "Couldn't addRegionSamplingListener";
+            jniThrowRuntimeException(env, error_msg);
+        } else {
+            ALOGW("Region sampling not supported on this device (status: %d)", result);
+        }
     }
 }
 
 void nativeUnregister(JNIEnv* env, jclass clazz, jlong ptr) {
+    if (ptr == 0) {
+        ALOGW("nativeUnregister: null pointer");
+        return;
+    }
+
     sp<CompositionSamplingListener> listener = reinterpret_cast<CompositionSamplingListener*>(ptr);
 
-    if (SurfaceComposerClient::removeRegionSamplingListener(listener) != OK) {
-        constexpr auto error_msg = "Couldn't removeRegionSamplingListener";
-        ALOGE(error_msg);
-        jniThrowRuntimeException(env, error_msg);
+    status_t result = SurfaceComposerClient::removeRegionSamplingListener(listener);
+    if (result != OK) {
+        ALOGE("removeRegionSamplingListener failed with status: %d", result);
+
+        if (result != INVALID_OPERATION && result != UNKNOWN_ERROR) {
+            constexpr auto error_msg = "Couldn't removeRegionSamplingListener";
+            jniThrowRuntimeException(env, error_msg);
+        } else {
+            ALOGW("Region sampling removal not supported on this device (status: %d)", result);
+        }
     }
 }
 
@@ -128,12 +180,26 @@ const JNINativeMethod gMethods[] = {
 int register_android_view_CompositionSamplingListener(JNIEnv* env) {
     int res = jniRegisterNativeMethods(env, "android/view/CompositionSamplingListener",
             gMethods, NELEM(gMethods));
-    LOG_ALWAYS_FATAL_IF(res < 0, "Unable to register native methods.");
+    if (res < 0) {
+        ALOGE("Unable to register native methods for CompositionSamplingListener");
+        return res;
+    }
 
     jclass clazz = env->FindClass("android/view/CompositionSamplingListener");
+    if (clazz == nullptr) {
+        ALOGE("Unable to find CompositionSamplingListener class");
+        return -1;
+    }
+
     gListenerClassInfo.mClass = MakeGlobalRefOrDie(env, clazz);
     gListenerClassInfo.mDispatchOnSampleCollected = env->GetStaticMethodID(
             clazz, "dispatchOnSampleCollected", "(Landroid/view/CompositionSamplingListener;F)V");
+
+    if (gListenerClassInfo.mDispatchOnSampleCollected == nullptr) {
+        ALOGE("Unable to find dispatchOnSampleCollected method");
+        return -1;
+    }
+
     return 0;
 }
 
