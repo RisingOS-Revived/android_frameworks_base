@@ -17,6 +17,7 @@
 package android.view;
 
 import android.graphics.Rect;
+import android.util.Log;
 
 import com.android.internal.util.Preconditions;
 
@@ -27,6 +28,9 @@ import java.util.concurrent.Executor;
  * {@hide}
  */
 public abstract class CompositionSamplingListener {
+
+    private static final String TAG = "CompositionSamplingListener";
+    private static final boolean DEBUG = false;
 
     private long mNativeListener;
     private final Executor mExecutor;
@@ -65,13 +69,25 @@ public abstract class CompositionSamplingListener {
     public static void register(CompositionSamplingListener listener,
             int displayId, SurfaceControl stopLayer, Rect samplingArea) {
         if (listener.mNativeListener == 0) {
+            if (DEBUG) Log.w(TAG, "Native listener is null, cannot register");
             return;
         }
+
         Preconditions.checkArgument(displayId == Display.DEFAULT_DISPLAY,
                 "default display only for now");
-        long nativeStopLayerObject = stopLayer != null ? stopLayer.mNativeObject : 0;
-        nativeRegister(listener.mNativeListener, nativeStopLayerObject, samplingArea.left,
-                samplingArea.top, samplingArea.right, samplingArea.bottom);
+
+        try {
+            long nativeStopLayerObject = stopLayer != null ? stopLayer.mNativeObject : 0;
+            nativeRegister(listener.mNativeListener, nativeStopLayerObject, samplingArea.left,
+                    samplingArea.top, samplingArea.right, samplingArea.bottom);
+        } catch (RuntimeException e) {
+            Log.w(TAG, "Failed to register composition sampling listener: " + e.getMessage());
+            if (DEBUG) {
+                Log.w(TAG, "Stack trace:", e);
+            }
+        } catch (UnsatisfiedLinkError e) {
+            Log.w(TAG, "Native composition sampling not available: " + e.getMessage());
+        }
     }
 
     /**
@@ -81,7 +97,17 @@ public abstract class CompositionSamplingListener {
         if (listener.mNativeListener == 0) {
             return;
         }
-        nativeUnregister(listener.mNativeListener);
+
+        try {
+            nativeUnregister(listener.mNativeListener);
+        } catch (RuntimeException e) {
+            Log.w(TAG, "Failed to unregister composition sampling listener: " + e.getMessage());
+            if (DEBUG) {
+                Log.w(TAG, "Stack trace:", e);
+            }
+        } catch (UnsatisfiedLinkError e) {
+            Log.w(TAG, "Native composition sampling not available for unregister: " + e.getMessage());
+        }
     }
 
     /**
@@ -91,7 +117,13 @@ public abstract class CompositionSamplingListener {
      */
     private static void dispatchOnSampleCollected(CompositionSamplingListener listener,
             float medianLuma) {
-        listener.mExecutor.execute(() -> listener.onSampleCollected(medianLuma));
+        if (listener != null && listener.mExecutor != null) {
+            try {
+                listener.mExecutor.execute(() -> listener.onSampleCollected(medianLuma));
+            } catch (Exception e) {
+                Log.w(TAG, "Error dispatching sample collection: " + e.getMessage());
+            }
+        }
     }
 
     private static native long nativeCreate(CompositionSamplingListener thiz);
