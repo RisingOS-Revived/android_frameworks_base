@@ -350,7 +350,11 @@ public class InternetDialogDelegateLegacy implements
         mInternetDialogTitle.setText(getDialogTitleText());
         mInternetDialogTitle.setGravity(Gravity.START | Gravity.CENTER_VERTICAL);
         mBackgroundOff = context.getDrawable(R.drawable.internet_dialog_selected_effect);
-        mSecondaryBackgroundOn = mBackgroundOn.getConstantState().newDrawable().mutate();
+        if (mBackgroundOn != null && mBackgroundOn.getConstantState() != null) {
+            mSecondaryBackgroundOn = mBackgroundOn.getConstantState().newDrawable().mutate();
+        } else {
+            mSecondaryBackgroundOn = mBackgroundOn;
+        }
         setOnClickListener(dialog);
         setHotspotLayout();
         mTurnWifiOnLayout.setBackground(null);
