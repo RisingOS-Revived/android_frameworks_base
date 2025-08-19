@@ -42,4 +42,8 @@
     <dimen name="pinned_window_dismiss_gradient_bg_height">140dp</dimen>
     <dimen name="pinned_window_menu_corner_radius_large">8dp</dimen>
     <dimen name="pinned_window_menu_corner_radius_small">8dp</dimen>
+
+    <!-- Blur radius used by SystemUI -->
+    <dimen name="min_window_blur_radius">1px</dimen>
+    <dimen name="max_window_blur_radius">17.5dp</dimen>
 </resources>
