@@ -783,6 +783,9 @@ public class ImsConfig {
         public static final int WIFI_ONLY = 0;
         public static final int CELLULAR_PREFERRED = 1;
         public static final int WIFI_PREFERRED = 2;
+// QTI_BEGIN: 2019-12-31: Telephony: Ims: Add suppport for "Ims Preferred" WFC Preference
+        public static final int IMS_PREFERRED = 10;
+// QTI_END: 2019-12-31: Telephony: Ims: Add suppport for "Ims Preferred" WFC Preference
     }
 
     public ImsConfig(IImsConfig iconfig) {

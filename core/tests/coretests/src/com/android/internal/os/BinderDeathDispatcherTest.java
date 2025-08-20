@@ -17,7 +17,6 @@ package com.android.internal.os;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
@@ -34,15 +33,15 @@ import android.os.ShellCallback;
 import android.platform.test.annotations.DisabledOnRavenwood;
 import android.platform.test.ravenwood.RavenwoodRule;
 
-import androidx.test.ext.junit.runners.AndroidJUnit4;
-import androidx.test.filters.SmallTest;
-
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.io.FileDescriptor;
 import java.util.concurrent.Executor;
+
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
@@ -138,7 +137,7 @@ public class BinderDeathDispatcherTest {
         public void die() {
             isAlive = false;
             if (mRecipient != null) {
-                mRecipient.binderDied(this);
+                mRecipient.binderDied();
             }
             mRecipient = null;
         }
@@ -246,33 +245,33 @@ public class BinderDeathDispatcherTest {
         // Kill the targets.
 
         t1.die();
-        verify(r1, times(1)).binderDied(t1);
-        verify(r2, times(1)).binderDied(t1);
-        verify(r3, times(1)).binderDied(t1);
-        verify(r4, times(0)).binderDied(any());
-        verify(r5, times(0)).binderDied(any());
+        verify(r1, times(1)).binderDied();
+        verify(r2, times(1)).binderDied();
+        verify(r3, times(1)).binderDied();
+        verify(r4, times(0)).binderDied();
+        verify(r5, times(0)).binderDied();
 
         assertThat(d.getTargetsForTest().size()).isEqualTo(2);
 
         reset(r1, r2, r3, r4, r5);
 
         t2.die();
-        verify(r1, times(1)).binderDied(t2);
-        verify(r2, times(0)).binderDied(any());
-        verify(r3, times(0)).binderDied(any());
-        verify(r4, times(0)).binderDied(any());
-        verify(r5, times(0)).binderDied(any());
+        verify(r1, times(1)).binderDied();
+        verify(r2, times(0)).binderDied();
+        verify(r3, times(0)).binderDied();
+        verify(r4, times(0)).binderDied();
+        verify(r5, times(0)).binderDied();
 
         assertThat(d.getTargetsForTest().size()).isEqualTo(1);
 
         reset(r1, r2, r3, r4, r5);
 
         t3.die();
-        verify(r1, times(0)).binderDied(any());
-        verify(r2, times(0)).binderDied(any());
-        verify(r3, times(1)).binderDied(t3);
-        verify(r4, times(0)).binderDied(any());
-        verify(r5, times(1)).binderDied(t3);
+        verify(r1, times(0)).binderDied();
+        verify(r2, times(0)).binderDied();
+        verify(r3, times(1)).binderDied();
+        verify(r4, times(0)).binderDied();
+        verify(r5, times(1)).binderDied();
 
         assertThat(d.getTargetsForTest().size()).isEqualTo(0);
 
@@ -280,29 +279,5 @@ public class BinderDeathDispatcherTest {
         assertThat(d.linkToDeath(t1, r1)).isEqualTo(-1);
 
         assertThat(d.getTargetsForTest().size()).isEqualTo(0);
-    }
-
-    @Test
-    @DisabledOnRavenwood(reason = "b/324433654 -- depends on unsupported classes")
-    public void duplicateRegistrations() {
-        BinderDeathDispatcher<MyTarget> d = new BinderDeathDispatcher<>();
-
-        MyTarget t1 = new MyTarget();
-
-        DeathRecipient r1 = mock(DeathRecipient.class);
-        DeathRecipient r2 = mock(DeathRecipient.class);
-
-        for (int i = 0; i < 5; i++) {
-            assertThat(d.linkToDeath(t1, r1)).isEqualTo(1);
-        }
-        assertThat(d.linkToDeath(t1, r2)).isEqualTo(2);
-
-        t1.die();
-        verify(r1, times(1)).binderDied(t1);
-        verify(r2, times(1)).binderDied(t1);
-
-        d.unlinkToDeath(t1, r1);
-        d.unlinkToDeath(t1, r2);
-        assertThat(d.getTargetsForTest()).isEmpty();
     }
 }

@@ -83,5 +83,8 @@
     <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS" />
     <uses-permission android:name="android.permission.INJECT_EVENTS" />
     <uses-permission android:name="android.permission.DEVICE_POWER" />
+<!-- QTI_BEGIN: 2021-07-19: WLAN: Allow ConnectivityManagerTest to access Manage Test Network-->
+<!-- QTI_END: 2021-07-19: WLAN: Allow ConnectivityManagerTest to access Manage Test Network-->
+    <uses-permission android:name="android.permission.MANAGE_TEST_NETWORKS" />
 
 </manifest>

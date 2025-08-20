@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2018 The Android Open Source Project
+// QTI_BEGIN: 2017-12-06: Video: IMS: Add support for STK CC feature
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -11,6 +12,7 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
+// QTI_END: 2017-12-06: Video: IMS: Add support for STK CC feature
  * limitations under the License
  */
 package android.telephony.ims;
@@ -19,8 +21,10 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+// QTI_BEGIN: 2017-12-06: Video: IMS: Add support for STK CC feature
 import android.os.Parcel;
 import android.os.Parcelable;
+// QTI_END: 2017-12-06: Video: IMS: Add support for STK CC feature
 
 import com.android.telephony.Rlog;
 
@@ -32,9 +36,11 @@ import java.util.List;
 
 /**
  * Provides STK Call Control Supplementary Service information.
+// QTI_BEGIN: 2017-12-06: Video: IMS: Add support for STK CC feature
  *
  * {@hide}
  */
+// QTI_END: 2017-12-06: Video: IMS: Add support for STK CC feature
 @SystemApi
 public final class ImsSsData implements Parcelable {
 
@@ -42,6 +48,7 @@ public final class ImsSsData implements Parcelable {
 
     // Supplementary Service Type
     // Call Forwarding
+// QTI_BEGIN: 2017-12-06: Video: IMS: Add support for STK CC feature
     public static final int SS_CFU = 0;
     public static final int SS_CF_BUSY = 1;
     public static final int SS_CF_NO_REPLY = 2;
@@ -49,16 +56,24 @@ public final class ImsSsData implements Parcelable {
     public static final int SS_CF_ALL = 4;
     public static final int SS_CF_ALL_CONDITIONAL = 5;
     public static final int SS_CFUT = 6;
+// QTI_END: 2017-12-06: Video: IMS: Add support for STK CC feature
     // Called Line Presentation
+// QTI_BEGIN: 2017-12-06: Video: IMS: Add support for STK CC feature
     public static final int SS_CLIP = 7;
     public static final int SS_CLIR = 8;
     public static final int SS_COLP = 9;
     public static final int SS_COLR = 10;
+// QTI_END: 2017-12-06: Video: IMS: Add support for STK CC feature
     // Calling Name Presentation
+// QTI_BEGIN: 2017-12-06: Video: IMS: Add support for STK CC feature
     public static final int SS_CNAP = 11;
+// QTI_END: 2017-12-06: Video: IMS: Add support for STK CC feature
     // Call Waiting
+// QTI_BEGIN: 2017-12-06: Video: IMS: Add support for STK CC feature
     public static final int SS_WAIT = 12;
+// QTI_END: 2017-12-06: Video: IMS: Add support for STK CC feature
     // Call Barring
+// QTI_BEGIN: 2017-12-06: Video: IMS: Add support for STK CC feature
     public static final int SS_BAOC = 13;
     public static final int SS_BAOIC = 14;
     public static final int SS_BAOIC_EXC_HOME = 15;
@@ -70,6 +85,7 @@ public final class ImsSsData implements Parcelable {
     public static final int SS_INCOMING_BARRING_DN = 21;
     public static final int SS_INCOMING_BARRING_ANONYMOUS = 22;
 
+// QTI_END: 2017-12-06: Video: IMS: Add support for STK CC feature
 
     /**@hide*/
     @IntDef(prefix = {"SS_"}, value = {
@@ -82,12 +98,14 @@ public final class ImsSsData implements Parcelable {
     public @interface RequestType{}
 
     //Supplementary Service Request Types
+// QTI_BEGIN: 2017-12-06: Video: IMS: Add support for STK CC feature
     public static final int SS_ACTIVATION = 0;
     public static final int SS_DEACTIVATION = 1;
     public static final int SS_INTERROGATION = 2;
     public static final int SS_REGISTRATION = 3;
     public static final int SS_ERASURE = 4;
 
+// QTI_END: 2017-12-06: Video: IMS: Add support for STK CC feature
     /**@hide*/
     @IntDef(prefix = {"SS_"}, value = {
             SS_ALL_TELE_AND_BEARER_SERVICES,
@@ -100,6 +118,7 @@ public final class ImsSsData implements Parcelable {
     public @interface TeleserviceType{}
 
     // Supplementary Service Teleservice Type
+// QTI_BEGIN: 2017-12-06: Video: IMS: Add support for STK CC feature
     public static final int SS_ALL_TELE_AND_BEARER_SERVICES = 0;
     public static final int SS_ALL_TELESEVICES = 1;
     public static final int SS_TELEPHONY = 2;
@@ -107,6 +126,7 @@ public final class ImsSsData implements Parcelable {
     public static final int SS_SMS_SERVICES = 4;
     public static final int SS_ALL_TELESERVICES_EXCEPT_SMS = 5;
 
+// QTI_END: 2017-12-06: Video: IMS: Add support for STK CC feature
     /**
      * No call forwarding service class defined.
      *
@@ -367,9 +387,12 @@ public final class ImsSsData implements Parcelable {
         mSsInfo = in.createIntArray();
         mCfInfo = in.readParcelableList(new ArrayList<>(), this.getClass().getClassLoader(), android.telephony.ims.ImsCallForwardInfo.class);
         mImsSsInfo = in.readParcelableList(new ArrayList<>(), this.getClass().getClassLoader(), android.telephony.ims.ImsSsInfo.class);
+// QTI_BEGIN: 2017-12-06: Video: IMS: Add support for STK CC feature
     }
 
+// QTI_END: 2017-12-06: Video: IMS: Add support for STK CC feature
     public static final @android.annotation.NonNull Creator<ImsSsData> CREATOR = new Creator<ImsSsData>() {
+// QTI_BEGIN: 2017-12-06: Video: IMS: Add support for STK CC feature
         @Override
         public ImsSsData createFromParcel(Parcel in) {
             return new ImsSsData(in);
@@ -383,6 +406,7 @@ public final class ImsSsData implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel out, int flags) {
+// QTI_END: 2017-12-06: Video: IMS: Add support for STK CC feature
         out.writeInt(getServiceType());
         out.writeInt(getRequestType());
         out.writeInt(getTeleserviceType());
@@ -391,6 +415,7 @@ public final class ImsSsData implements Parcelable {
         out.writeIntArray(mSsInfo);
         out.writeParcelableList(mCfInfo, 0);
         out.writeParcelableList(mImsSsInfo, 0);
+// QTI_BEGIN: 2017-12-06: Video: IMS: Add support for STK CC feature
     }
 
     @Override
@@ -398,66 +423,93 @@ public final class ImsSsData implements Parcelable {
         return 0;
     }
 
+// QTI_END: 2017-12-06: Video: IMS: Add support for STK CC feature
     /**
      * Old method, kept for compatibility. See {@link #isTypeCf()}
      * @hide
      */
+// QTI_BEGIN: 2017-12-06: Video: IMS: Add support for STK CC feature
     public boolean isTypeCF() {
+// QTI_END: 2017-12-06: Video: IMS: Add support for STK CC feature
         return (getServiceType() == SS_CFU || getServiceType() == SS_CF_BUSY
                 || getServiceType() == SS_CF_NO_REPLY || getServiceType() == SS_CF_NOT_REACHABLE
                 || getServiceType() == SS_CF_ALL || getServiceType() == SS_CF_ALL_CONDITIONAL);
+// QTI_BEGIN: 2017-12-06: Video: IMS: Add support for STK CC feature
     }
 
+// QTI_END: 2017-12-06: Video: IMS: Add support for STK CC feature
     public boolean isTypeCf() {
         return isTypeCF();
     }
 
+// QTI_BEGIN: 2017-12-06: Video: IMS: Add support for STK CC feature
     public boolean isTypeUnConditional() {
+// QTI_END: 2017-12-06: Video: IMS: Add support for STK CC feature
         return (getServiceType() == SS_CFU || getServiceType() == SS_CF_ALL);
+// QTI_BEGIN: 2017-12-06: Video: IMS: Add support for STK CC feature
     }
 
+// QTI_END: 2017-12-06: Video: IMS: Add support for STK CC feature
     /**
      * Old method, kept for compatibility. See {@link #isTypeCf()}
      * @hide
      */
+// QTI_BEGIN: 2017-12-06: Video: IMS: Add support for STK CC feature
     public boolean isTypeCW() {
+// QTI_END: 2017-12-06: Video: IMS: Add support for STK CC feature
         return (getServiceType() == SS_WAIT);
+// QTI_BEGIN: 2017-12-06: Video: IMS: Add support for STK CC feature
     }
 
+// QTI_END: 2017-12-06: Video: IMS: Add support for STK CC feature
     public boolean isTypeCw() {
         return isTypeCW();
     }
 
+// QTI_BEGIN: 2017-12-06: Video: IMS: Add support for STK CC feature
     public boolean isTypeClip() {
+// QTI_END: 2017-12-06: Video: IMS: Add support for STK CC feature
         return (getServiceType() == SS_CLIP);
+// QTI_BEGIN: 2017-12-06: Video: IMS: Add support for STK CC feature
     }
 
     public boolean isTypeColr() {
+// QTI_END: 2017-12-06: Video: IMS: Add support for STK CC feature
         return (getServiceType() == SS_COLR);
+// QTI_BEGIN: 2017-12-06: Video: IMS: Add support for STK CC feature
     }
 
     public boolean isTypeColp() {
+// QTI_END: 2017-12-06: Video: IMS: Add support for STK CC feature
         return (getServiceType() == SS_COLP);
+// QTI_BEGIN: 2017-12-06: Video: IMS: Add support for STK CC feature
     }
 
     public boolean isTypeClir() {
+// QTI_END: 2017-12-06: Video: IMS: Add support for STK CC feature
         return (getServiceType() == SS_CLIR);
+// QTI_BEGIN: 2017-12-06: Video: IMS: Add support for STK CC feature
     }
 
     public boolean isTypeIcb() {
+// QTI_END: 2017-12-06: Video: IMS: Add support for STK CC feature
         return (getServiceType() == SS_INCOMING_BARRING_DN
                 || getServiceType() == SS_INCOMING_BARRING_ANONYMOUS);
+// QTI_BEGIN: 2017-12-06: Video: IMS: Add support for STK CC feature
     }
 
     public boolean isTypeBarring() {
+// QTI_END: 2017-12-06: Video: IMS: Add support for STK CC feature
         return (getServiceType() == SS_BAOC || getServiceType() == SS_BAOIC
                 || getServiceType() == SS_BAOIC_EXC_HOME || getServiceType() == SS_BAIC
                 || getServiceType() == SS_BAIC_ROAMING || getServiceType() == SS_ALL_BARRING
                 || getServiceType() == SS_OUTGOING_BARRING
                 || getServiceType() == SS_INCOMING_BARRING);
+// QTI_BEGIN: 2017-12-06: Video: IMS: Add support for STK CC feature
     }
 
     public boolean isTypeInterrogation() {
+// QTI_END: 2017-12-06: Video: IMS: Add support for STK CC feature
         return (getRequestType() == SS_INTERROGATION);
     }
 
@@ -569,15 +621,21 @@ public final class ImsSsData implements Parcelable {
      **/
     public @Nullable List<ImsCallForwardInfo> getCallForwardInfo() {
         return mCfInfo;
+// QTI_BEGIN: 2017-12-06: Video: IMS: Add support for STK CC feature
     }
 
+// QTI_END: 2017-12-06: Video: IMS: Add support for STK CC feature
     @NonNull
     @Override
+// QTI_BEGIN: 2017-12-06: Video: IMS: Add support for STK CC feature
     public String toString() {
+// QTI_END: 2017-12-06: Video: IMS: Add support for STK CC feature
         return "[ImsSsData] " + "ServiceType: " + getServiceType()
             + " RequestType: " + getRequestType()
             + " TeleserviceType: " + getTeleserviceType()
             + " ServiceClass: " + getServiceClass()
             + " Result: " + getResult();
+// QTI_BEGIN: 2017-12-06: Video: IMS: Add support for STK CC feature
     }
 }
+// QTI_END: 2017-12-06: Video: IMS: Add support for STK CC feature

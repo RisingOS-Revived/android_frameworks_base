@@ -809,4 +809,5 @@ final class ContentRecorder implements WindowContainerListener {
         return mContentRecordingSession != null
                 && mContentRecordingSession.getContentToRecord() == RECORD_CONTENT_TASK;
     }
+
 }

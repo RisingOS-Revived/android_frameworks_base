@@ -155,6 +155,10 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
 
     private static final String USB_STATE_MATCH =
             "DEVPATH=/devices/virtual/android_usb/android0";
+// QTI_BEGIN: 2018-08-22: Core: Add support to observe uevents from secondary gadget instance
+    private static final String USB_STATE_MATCH_SEC =
+            "DEVPATH=/devices/virtual/android_usb/android1";
+// QTI_END: 2018-08-22: Core: Add support to observe uevents from secondary gadget instance
     private static final String ACCESSORY_START_MATCH =
             "DEVPATH=/devices/virtual/misc/usb_accessory";
     private static final String UDC_SUBSYS_MATCH =
@@ -454,6 +458,9 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
 
         // Watch for USB configuration changes
         mUEventObserver = new UsbUEventObserver();
+// QTI_BEGIN: 2018-08-22: Core: Add support to observe uevents from secondary gadget instance
+        mUEventObserver.startObserving(USB_STATE_MATCH_SEC);
+// QTI_END: 2018-08-22: Core: Add support to observe uevents from secondary gadget instance
         mUEventObserver.startObserving(ACCESSORY_START_MATCH);
 
         mEnableUdcSysfsUsbStateUpdate =
@@ -1272,6 +1279,7 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
                     boolean prevHostConnected = mHostConnected;
                     UsbPort port = (UsbPort) args.arg1;
                     UsbPortStatus status = (UsbPortStatus) args.arg2;
+// QTI_BEGIN: 2020-05-15: Core: Fix null pointer exception if USBPort is removed
 
                     final boolean isDataForcedOff = status != null && status.getUsbDataStatus()
                             == UsbPortStatus.DATA_STATUS_DISABLED_FORCE;
@@ -1290,19 +1298,23 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
                                 && status.isRoleCombinationSupported(POWER_ROLE_SOURCE,
                                 DATA_ROLE_DEVICE)
                                 && status.isRoleCombinationSupported(POWER_ROLE_SINK, DATA_ROLE_DEVICE);
+// QTI_END: 2020-05-15: Core: Fix null pointer exception if USBPort is removed
 
                         boolean usbDataDisabled =
                                 status.getUsbDataStatus() != UsbPortStatus.DATA_STATUS_ENABLED;
                         mConnectedToDataDisabledPort = status.isConnected() && usbDataDisabled;
                         mPowerBrickConnectionStatus = status.getPowerBrickConnectionStatus();
+// QTI_BEGIN: 2020-05-15: Core: Fix null pointer exception if USBPort is removed
                     } else {
                         mHostConnected = false;
                         mSourcePower = false;
                         mSinkPower = false;
                         mAudioAccessoryConnected = false;
                         mSupportsAllCombinations = false;
+// QTI_END: 2020-05-15: Core: Fix null pointer exception if USBPort is removed
                         mConnectedToDataDisabledPort = false;
                         mPowerBrickConnectionStatus = UsbPortStatus.POWER_BRICK_STATUS_UNKNOWN;
+// QTI_BEGIN: 2020-05-15: Core: Fix null pointer exception if USBPort is removed
                     }
 
                     if (isDataForcedOff) {
@@ -2217,6 +2229,14 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
             mCurrentFunctions = usbFunctions;
             if (functions == null || applyAdbFunction(functions)
                     .equals(UsbManager.USB_FUNCTION_NONE)) {
+// QTI_BEGIN: 2018-02-13: Core: PPR1.180206.003_AOSP_Merge
+                functions = getSystemProperty(getPersistProp(true),
+// QTI_END: 2018-02-13: Core: PPR1.180206.003_AOSP_Merge
+// QTI_BEGIN: 2018-02-08: Core: Fix sys.usb.config problem
+                            UsbManager.USB_FUNCTION_NONE);
+
+                if (functions.equals(UsbManager.USB_FUNCTION_NONE))
+// QTI_END: 2018-02-08: Core: Fix sys.usb.config problem
                 functions = UsbManager.usbFunctionsToString(getChargingFunctions());
             }
             functions = applyAdbFunction(functions);

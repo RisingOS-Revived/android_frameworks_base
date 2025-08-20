@@ -32,7 +32,9 @@ import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Debug;
+// QTI_BEGIN: 2018-03-25: Frameworks: Create a new WD trace file for ease of debugging
 import android.os.FileUtils;
+// QTI_END: 2018-03-25: Frameworks: Create a new WD trace file for ease of debugging
 import android.os.Handler;
 import android.os.IPowerManager;
 import android.os.Looper;
@@ -58,6 +60,9 @@ import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.am.ActivityManagerService;
 import com.android.server.am.StackTracesDumpHelper;
 import com.android.server.am.TraceErrorLogger;
+// QTI_BEGIN: 2021-06-28: Android_UI: Add smart trace module
+import com.android.server.am.trace.SmartTraceUtils;
+// QTI_END: 2021-06-28: Android_UI: Add smart trace module
 import com.android.server.criticalevents.CriticalEventLog;
 import com.android.server.wm.SurfaceAnimationThread;
 
@@ -66,7 +71,13 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
+// QTI_BEGIN: 2018-03-25: Frameworks: Create a new WD trace file for ease of debugging
+import java.io.FileReader;
+// QTI_END: 2018-03-25: Frameworks: Create a new WD trace file for ease of debugging
 import java.io.IOException;
+// QTI_BEGIN: 2018-03-25: Frameworks: Create a new WD trace file for ease of debugging
+import java.io.BufferedReader;
+// QTI_END: 2018-03-25: Frameworks: Create a new WD trace file for ease of debugging
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.time.Clock;
@@ -80,6 +91,10 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
+// QTI_BEGIN: 2018-03-25: Frameworks: Create a new WD trace file for ease of debugging
+import java.util.Date;
+import java.text.SimpleDateFormat;
+// QTI_END: 2018-03-25: Frameworks: Create a new WD trace file for ease of debugging
 
 /**
  * This class calls its monitor every minute. Killing this process if they don't return
@@ -126,6 +141,9 @@ public class Watchdog implements Dumpable {
         "/system/bin/keystore2",
         "/system/bin/mediadrmserver",
         "/system/bin/mediaserver",
+// QTI_BEGIN: 2021-08-24: Core: Add /system/bin/mediaserver64 to native stack dump list
+        "/system/bin/mediaserver64",
+// QTI_END: 2021-08-24: Core: Add /system/bin/mediaserver64 to native stack dump list
         "/system/bin/netd",
         "/system/bin/sdcard",
         "/system/bin/servicemanager",
@@ -172,7 +190,9 @@ public class Watchdog implements Dumpable {
     public static final String[] AIDL_INTERFACE_PREFIXES_OF_INTEREST = new String[] {
             "android.hardware.audio.core.IModule/",
             "android.hardware.audio.core.IConfig/",
+// QTI_BEGIN: 2024-01-15: Audio: base: Add AudioEffect Interface to wishlist for dumping
             "android.hardware.audio.effect.IFactory/",
+// QTI_END: 2024-01-15: Audio: base: Add AudioEffect Interface to wishlist for dumping
             "android.hardware.biometrics.face.IFace/",
             "android.hardware.biometrics.fingerprint.IFingerprint/",
             "android.hardware.bluetooth.IBluetoothHci/",
@@ -211,6 +231,9 @@ public class Watchdog implements Dumpable {
     // We start with DEFAULT_TIMEOUT. This will then be update with the timeout values from Settings
     // once the settings provider is initialized.
     private volatile long mWatchdogTimeoutMillis = DEFAULT_TIMEOUT;
+// QTI_BEGIN: 2019-03-12: Frameworks: Use MM instead of MMM in SimpleDateFormat in trace filename
+    SimpleDateFormat mTraceDateFormat = new SimpleDateFormat("dd_MM_HH_mm_ss.SSS");
+// QTI_END: 2019-03-12: Frameworks: Use MM instead of MMM in SimpleDateFormat in trace filename
     private final List<Integer> mInterestingJavaPids = new ArrayList<>();
     private final TraceErrorLogger mTraceErrorLogger;
 
@@ -812,7 +835,9 @@ public class Watchdog implements Dumpable {
         }
     }
 
-    static ArrayList<Integer> getInterestingNativePids() {
+// QTI_BEGIN: 2019-10-15: Camera: base: Dump traces of HAL_INTERFACES_OF_INTEREST as well when app receives ANR
+    public static ArrayList<Integer> getInterestingNativePids() {
+// QTI_END: 2019-10-15: Camera: base: Dump traces of HAL_INTERFACES_OF_INTEREST as well when app receives ANR
         HashSet<Integer> pids = new HashSet<>();
         addInterestingAidlPids(pids);
         addInterestingHidlPids(pids);
@@ -829,7 +854,6 @@ public class Watchdog implements Dumpable {
 
     private void run() {
         boolean waitedHalf = false;
-
         while (true) {
             List<HandlerChecker> blockedCheckers = Collections.emptyList();
             String subject = "";
@@ -913,15 +937,27 @@ public class Watchdog implements Dumpable {
             // First collect stack traces from all threads of the system process.
             //
             // Then, if we reached the full timeout, kill this process so that the system will
-            // restart. If we reached pre-watchdog timeout, just log some information and continue.
+            // restart. If we reached half of the timeout, just log some information and continue.
+// QTI_BEGIN: 2021-06-28: Android_UI: Add smart trace module
+            long dueTime = 0;
+            if(SmartTraceUtils.isPerfettoDumpEnabled()){
+// QTI_END: 2021-06-28: Android_UI: Add smart trace module
+                SmartTraceUtils.traceStart();
+                //delay 30s to make sure perfetto trace dumped completely
+                dueTime = SystemClock.uptimeMillis() + 30000;
+// QTI_BEGIN: 2018-03-25: Frameworks: Create a new WD trace file for ease of debugging
+            }
+// QTI_END: 2018-03-25: Frameworks: Create a new WD trace file for ease of debugging
             logWatchog(doWaitedPreDump, subject, pids);
 
             if (doWaitedPreDump) {
                 // We have waited for only pre-watchdog timeout, we continue to wait for the
                 // duration of the full timeout before killing the process.
                 continue;
+// QTI_BEGIN: 2018-03-25: Frameworks: Create a new WD trace file for ease of debugging
             }
 
+// QTI_END: 2018-03-25: Frameworks: Create a new WD trace file for ease of debugging
             IActivityController controller;
             synchronized (mLock) {
                 controller = mController;
@@ -955,6 +991,15 @@ public class Watchdog implements Dumpable {
                 Slog.w(TAG, "*** WATCHDOG KILLING SYSTEM PROCESS: " + subject);
                 WatchdogDiagnostics.diagnoseCheckers(blockedCheckers);
                 Slog.w(TAG, "*** GOODBYE!");
+// QTI_BEGIN: 2021-06-28: Android_UI: Add smart trace module
+                if(SmartTraceUtils.isPerfettoDumpEnabled() && dueTime > SystemClock.uptimeMillis()){
+                    long timeDelta = dueTime - SystemClock.uptimeMillis();
+                    // wait until perfetto log to be dumped completely
+                    Slog.i(TAG,"Sleep "+ timeDelta
+                            +" ms to make sure perfetto log to be dumped completely");
+                    SystemClock.sleep(timeDelta);
+                }
+// QTI_END: 2021-06-28: Android_UI: Add smart trace module
                 if (!Build.IS_USER && isCrashLoopFound()
                         && !WatchdogProperties.should_ignore_fatal_count().orElse(false)) {
                     breakCrashLoop();
@@ -968,7 +1013,9 @@ public class Watchdog implements Dumpable {
     }
 
     private void logWatchog(boolean preWatchdog, String subject, ArrayList<Integer> pids) {
-        // Get critical event log before logging the pre-watchdog so that it doesn't
+        File initialStack = null;
+        ArrayList<Integer> nativePids = getInterestingNativePids();
+        // Get critical event log before logging the half watchdog so that it doesn't
         // occur in the log.
         String criticalEvents =
                 CriticalEventLog.getInstance().logLinesForSystemServerTraceFile();
@@ -983,6 +1030,15 @@ public class Watchdog implements Dumpable {
         if (preWatchdog) {
             dropboxTag = "pre_watchdog";
             CriticalEventLog.getInstance().logHalfWatchdog(subject);
+            // We've waited half the deadlock-detection interval.  Pull a stack
+            // trace and wait another half.
+            initialStack = StackTracesDumpHelper.dumpStackTraces(pids, null, null,
+                    CompletableFuture.completedFuture(nativePids), null, subject,
+                    criticalEvents, /* extraHeaders */null, Runnable::run,/* latencyTracker= */null);
+            if (initialStack != null){
+                SmartTraceUtils.dumpStackTraces(Process.myPid(), pids,
+                    nativePids, initialStack);
+            }
             FrameworkStatsLog.write(FrameworkStatsLog.SYSTEM_SERVER_PRE_WATCHDOG_OCCURRED);
         } else {
             dropboxTag = "watchdog";
@@ -1002,18 +1058,73 @@ public class Watchdog implements Dumpable {
         report.append(ResourcePressureUtil.currentPsiState());
         ProcessCpuTracker processCpuTracker = new ProcessCpuTracker(false);
         StringWriter tracesFileException = new StringWriter();
-        final File stack = StackTracesDumpHelper.dumpStackTraces(
+        final File finalStack = StackTracesDumpHelper.dumpStackTraces(
                 pids, processCpuTracker, new SparseBooleanArray(),
                 CompletableFuture.completedFuture(getInterestingNativePids()),
                 tracesFileException, subject, criticalEvents, headersMap,
                 Runnable::run, /* latencyTracker= */null);
+        if (finalStack != null){
+            SmartTraceUtils.dumpStackTraces(Process.myPid(), pids, nativePids, finalStack);
+        }
+        //Collect Binder State logs to get status of all the transactions
+        if (Build.IS_DEBUGGABLE) {
+            binderStateRead();
+        }
+
         // Give some extra time to make sure the stack traces get written.
         // The system's been hanging for a whlie, another second or two won't hurt much.
         SystemClock.sleep(5000);
         processCpuTracker.update();
         report.append(processCpuTracker.printCurrentState(anrTime, 10));
         report.append(tracesFileException.getBuffer());
+        File watchdogTraces;
+        String newTracesPath = "traces_SystemServer_WDT"
+                + mTraceDateFormat.format(new Date()) + "_pid"
+                + String.valueOf(Process.myPid());
+        File tracesDir = new File(StackTracesDumpHelper.ANR_TRACE_DIR);
+        watchdogTraces = new File(tracesDir, newTracesPath);
+        try {
+            if (watchdogTraces.createNewFile()) {
+                FileUtils.setPermissions(watchdogTraces.getAbsolutePath(),
+                        0600, -1, -1); // -rw------- permissions
 
+                // Append both traces from the first and second half
+                // to a new file, making it easier to debug Watchdog timeouts
+                // dumpStackTraces() can return a null instance, so check the same
+                if (initialStack != null) {
+                    // check the last-modified time of this file.
+                    // we are interested in this only it was written to in the
+                    // last 5 minutes or so
+                    final long age = System.currentTimeMillis()
+                            - initialStack.lastModified();
+                    final long FIVE_MINUTES_IN_MILLIS = 1000 * 60 * 5;
+                    if (age < FIVE_MINUTES_IN_MILLIS) {
+                        Slog.e(TAG, "First set of traces taken from "
+                                + initialStack.getAbsolutePath());
+                        appendFile(watchdogTraces, initialStack);
+                    } else {
+                        Slog.e(TAG, "First set of traces were collected more than "
+                                + "5 minutes ago, ignoring ...");
+                    }
+                } else {
+                    Slog.e(TAG, "First set of traces are empty!");
+                }
+
+                if (finalStack != null) {
+                    Slog.e(TAG, "Second set of traces taken from "
+                            + finalStack.getAbsolutePath());
+                    appendFile(watchdogTraces, finalStack);
+                } else {
+                    Slog.e(TAG, "Second set of traces are empty!");
+                }
+            } else {
+                    Slog.w(TAG, "Unable to create Watchdog dump file: createNewFile failed");
+            }
+        } catch (Exception e) {
+                // catch any exception that happens here;
+                // why kill the system when it is going to die anyways?
+                Slog.e(TAG, "Exception creating Watchdog dump file:", e);
+        }
         if (!preWatchdog) {
             // Trigger the kernel to dump all blocked threads, and backtraces on all CPUs to the
             // kernel log
@@ -1032,7 +1143,7 @@ public class Watchdog implements Dumpable {
                     if (mActivity != null) {
                         mActivity.addErrorToDropBox(
                                 dropboxTag, null, "system_server", null, null, null,
-                                null, report.toString(), stack, null, null, null,
+                                null, report.toString(), finalStack, null, null, null,
                                 errorId, null);
                     }
                 }
@@ -1041,6 +1152,23 @@ public class Watchdog implements Dumpable {
         try {
             dropboxThread.join(2000);  // wait up to 2 seconds for it to return.
         } catch (InterruptedException ignored) { }
+        // At times, when user space watchdog traces don't give an indication on
+        // which component held a lock, because of which other threads are blocked,
+        // (thereby causing Watchdog), trigger kernel panic
+        boolean crashOnWatchdog = SystemProperties
+                                    .getBoolean("persist.sys.crashOnWatchdog", false);
+        if (crashOnWatchdog) {
+            // Trigger the kernel to dump all blocked threads, and backtraces
+            // on all CPUs to the kernel log
+            Slog.e(TAG, "Triggering SysRq for system_server watchdog,s");
+            doSysRq('w');
+            doSysRq('l');
+
+            // wait until the above blocked threads be dumped into kernel log
+            SystemClock.sleep(3000);
+
+            doSysRq('c');
+        }
     }
 
     private void doSysRq(char c) {
@@ -1161,4 +1289,69 @@ public class Watchdog implements Dumpable {
         pw.print("WatchdogTimeoutMillis=");
         pw.println(mWatchdogTimeoutMillis);
     }
+
+// QTI_BEGIN: 2018-03-25: Frameworks: Create a new WD trace file for ease of debugging
+    private void appendFile (File writeTo, File copyFrom) {
+        try {
+            BufferedReader in = new BufferedReader(new FileReader(copyFrom));
+            FileWriter out = new FileWriter(writeTo, true);
+            String line = null;
+
+            // Write line-by-line from "copyFrom" to "writeTo"
+            while ((line = in.readLine()) != null) {
+                out.write(line);
+                out.write('\n');
+            }
+            in.close();
+            out.close();
+        } catch (IOException e) {
+            Slog.e(TAG, "Exception while writing watchdog traces to new file!");
+            e.printStackTrace();
+        }
+    }
+
+    private void binderStateRead() {
+        try {
+// QTI_END: 2018-03-25: Frameworks: Create a new WD trace file for ease of debugging
+// QTI_BEGIN: 2021-03-04: Frameworks: Collect binder stat info from binderfs else from debugfs
+            boolean binderfsNodePresent = false;
+            BufferedReader in = null;
+// QTI_END: 2021-03-04: Frameworks: Collect binder stat info from binderfs else from debugfs
+// QTI_BEGIN: 2018-03-25: Frameworks: Create a new WD trace file for ease of debugging
+            Slog.i(TAG,"Collecting Binder Transaction Status Information");
+// QTI_END: 2018-03-25: Frameworks: Create a new WD trace file for ease of debugging
+// QTI_BEGIN: 2021-03-04: Frameworks: Collect binder stat info from binderfs else from debugfs
+            try {
+                in = new BufferedReader(new FileReader("/dev/binderfs/binder_logs/state"));
+                Slog.i(TAG, "Collecting Binder state file from binderfs");
+                binderfsNodePresent = true;
+            } catch(IOException e) {
+                Slog.i(TAG, "Binderfs node not found, Trying to collect it from debugfs", e);
+            }
+            try {
+                if (binderfsNodePresent == false) {
+                    in = new BufferedReader(new FileReader("/sys/kernel/debug/binder/state"));
+                    Slog.i(TAG, "Collecting Binder state file from debugfs");
+                }
+            } catch(IOException e) {
+                Slog.i(TAG, "Debugfs node not found", e);
+            }
+// QTI_END: 2021-03-04: Frameworks: Collect binder stat info from binderfs else from debugfs
+// QTI_BEGIN: 2018-03-25: Frameworks: Create a new WD trace file for ease of debugging
+            FileWriter out = new FileWriter("/data/anr/BinderTraces_pid" +
+                    String.valueOf(Process.myPid()) + ".txt");
+            String line = null;
+
+            // Write line-by-line
+            while ((line = in.readLine()) != null) {
+                out.write(line);
+                out.write('\n');
+            }
+            in.close();
+            out.close();
+        } catch (IOException e) {
+            Slog.w(TAG, "Failed to collect state file", e);
+        }
+    }
+// QTI_END: 2018-03-25: Frameworks: Create a new WD trace file for ease of debugging
 }

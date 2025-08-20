@@ -865,6 +865,19 @@ public class LockPatternUtils {
         return true;
     }
 
+// QTI_BEGIN: 2018-05-29: SecureSystems: frameworks: base: Port password retention feature
+    /**
+     * clears stored password.
+     */
+    public void sanitizePassword() {
+        try {
+            getLockSettings().sanitizePassword();
+        } catch (RemoteException re) {
+            Log.e(TAG, "Couldn't sanitize password" + re);
+        }
+    }
+
+// QTI_END: 2018-05-29: SecureSystems: frameworks: base: Port password retention feature
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void setOwnerInfo(String info, int userId) {
         setString(LOCK_SCREEN_OWNER_INFO, info, userId);

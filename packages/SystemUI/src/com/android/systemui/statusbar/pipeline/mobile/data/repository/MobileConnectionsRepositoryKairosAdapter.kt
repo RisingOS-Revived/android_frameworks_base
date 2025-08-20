@@ -44,6 +44,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
+import com.android.systemui.kairos.*
 
 @ExperimentalKairosApi
 @SysUISingleton
@@ -68,17 +69,17 @@ constructor(
             .toColdConflatedFlow(kairosNetwork)
             .stateIn(scope, SharingStarted.WhileSubscribed(), null)
 
-    private val reposBySubIdK = buildIncremental {
+    private val reposBySubIdK: Incremental<Int, MobileConnectionRepositoryKairosAdapter> = buildIncremental {
         kairosRepo.mobileConnectionsBySubId
-            .mapValues { (subId, repo) ->
-                buildSpec {
+            .mapValues<Int, MobileConnectionRepositoryKairos, BuildSpec<MobileConnectionRepositoryKairosAdapter>> { (subId, repo) ->
+                buildSpec<MobileConnectionRepositoryKairosAdapter> {
                     MobileConnectionRepositoryKairosAdapter(
                         kairosRepo = repo,
                         carrierConfig = carrierConfigRepo.getOrCreateConfigForSubId(subId),
                     )
                 }
             }
-            .applyLatestSpecForKey()
+            .applyLatestSpecForKey<Int, MobileConnectionRepositoryKairosAdapter>()
     }
 
     private val reposBySubId =

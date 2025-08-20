@@ -61,6 +61,7 @@ public class BiometricActionDisabledByAdminController extends BaseActionDisabled
             final Intent intent = new Intent(Settings.ACTION_MANAGE_SUPERVISOR_RESTRICTED_SETTING)
                     .putExtra(Settings.EXTRA_SUPERVISOR_RESTRICTED_SETTING_KEY,
                             Settings.SUPERVISOR_VERIFICATION_SETTING_BIOMETRICS)
+                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                     .setData(new Uri.Builder()
                             .scheme("policy")
                             .appendPath("biometric")

@@ -27,6 +27,7 @@ import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
  */
 public class NotificationMediaTemplateViewWrapper extends NotificationTemplateViewWrapper {
 
+    private static final long PROGRESS_UPDATE_INTERVAL = 1000; // 1s
     private View mActions;
 
     protected NotificationMediaTemplateViewWrapper(Context ctx, View view,

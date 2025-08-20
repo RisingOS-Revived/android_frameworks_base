@@ -242,6 +242,9 @@ public class Browser {
      */
     public static final Cursor getAllBookmarks(ContentResolver cr) throws
             IllegalStateException {
+// QTI_BEGIN: 2018-04-09: Secure Systems: SEEMP: framework instrumentation and AppProtect features
+        android.util.SeempLog.record(32);
+// QTI_END: 2018-04-09: Secure Systems: SEEMP: framework instrumentation and AppProtect features
         return new MatrixCursor(new String[]{Bookmarks.URL}, 0);
     }
 
@@ -254,6 +257,9 @@ public class Browser {
      */
     public static final Cursor getAllVisitedUrls(ContentResolver cr) throws
             IllegalStateException {
+// QTI_BEGIN: 2018-04-09: Secure Systems: SEEMP: framework instrumentation and AppProtect features
+        android.util.SeempLog.record(33);
+// QTI_END: 2018-04-09: Secure Systems: SEEMP: framework instrumentation and AppProtect features
         return new MatrixCursor(new String[]{Combined.URL}, 0);
     }
 
@@ -262,6 +268,9 @@ public class Browser {
     }
 
     private static final Cursor getVisitedLike(ContentResolver cr, String url) {
+// QTI_BEGIN: 2018-04-09: Secure Systems: SEEMP: framework instrumentation and AppProtect features
+        android.util.SeempLog.record(34);
+// QTI_END: 2018-04-09: Secure Systems: SEEMP: framework instrumentation and AppProtect features
         boolean secure = false;
         String compareString = url;
         if (compareString.startsWith("http://")) {
@@ -323,6 +332,9 @@ public class Browser {
     @Deprecated
     @UnsupportedAppUsage
     public static final String[] getVisitedHistory(ContentResolver cr) {
+// QTI_BEGIN: 2018-04-09: Secure Systems: SEEMP: framework instrumentation and AppProtect features
+        android.util.SeempLog.record(35);
+// QTI_END: 2018-04-09: Secure Systems: SEEMP: framework instrumentation and AppProtect features
         return new String[0];
     }
 
@@ -358,6 +370,9 @@ public class Browser {
      *  @removed
      */
     public static final void clearHistory(ContentResolver cr) {
+// QTI_BEGIN: 2018-04-09: Secure Systems: SEEMP: framework instrumentation and AppProtect features
+    android.util.SeempLog.record(37);
+// QTI_END: 2018-04-09: Secure Systems: SEEMP: framework instrumentation and AppProtect features
 
     }
 
@@ -419,6 +434,9 @@ public class Browser {
      */
     public static final void requestAllIcons(ContentResolver cr, String where,
             WebIconDatabase.IconListener listener) {
+// QTI_BEGIN: 2018-04-09: Secure Systems: SEEMP: framework instrumentation and AppProtect features
+        android.util.SeempLog.record(36);
+// QTI_END: 2018-04-09: Secure Systems: SEEMP: framework instrumentation and AppProtect features
         // Do nothing: this is no longer used.
     }
 

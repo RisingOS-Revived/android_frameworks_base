@@ -99,6 +99,14 @@ public interface DarkIconDispatcher {
      * @return true if more than half of the view's area is in any of the given area Rects, false
      *         otherwise
      */
+    static float getDarkIntensity(Rect tintArea, View view, float intensity) {
+        if (isInArea(tintArea, view)) {
+            return intensity;
+        } else {
+            return 0f;
+        }
+    }
+
     static boolean isInAreas(Collection<Rect> areas, View view) {
         if (areas.isEmpty()) {
             return true;

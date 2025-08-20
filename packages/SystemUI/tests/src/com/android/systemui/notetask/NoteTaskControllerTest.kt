@@ -248,6 +248,7 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
     // endregion
 
     // region showNoteTask
+    @Test
     fun showNoteTaskAsUser_keyguardIsLocked_shouldStartActivityWithExpectedUserAndLogUiEvent() {
         val user10 = UserHandle.of(/* userId= */ 10)
         val expectedInfo =

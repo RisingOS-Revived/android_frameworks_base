@@ -78,9 +78,14 @@ public class CsipDeviceManager {
             }
 
             for (Map.Entry<Integer, ParcelUuid> entry : groupIdMap.entrySet()) {
-                if (entry.getValue().equals(BluetoothUuid.CAP)) {
+// QTI_BEGIN: 2022-04-23: Bluetooth: Csip: Add below enhancements
+                // Based on Spec CAP UUID is not mandatory, also we see failures with PTS
+                //if (entry.getValue().equals(BluetoothUuid.CAP)) {
+// QTI_END: 2022-04-23: Bluetooth: Csip: Add below enhancements
                     return entry.getKey();
-                }
+// QTI_BEGIN: 2022-04-23: Bluetooth: Csip: Add below enhancements
+                //}
+// QTI_END: 2022-04-23: Bluetooth: Csip: Add below enhancements
             }
         }
         return BluetoothCsipSetCoordinator.GROUP_ID_INVALID;

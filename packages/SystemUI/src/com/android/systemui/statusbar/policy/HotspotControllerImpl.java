@@ -22,6 +22,9 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.TetheringManager;
 import android.net.TetheringManager.TetheringRequest;
+// QTI_BEGIN: 2020-04-22: WLAN: wifi: refactor Wi-Fi generation UI enhancements
+import android.net.wifi.ScanResult;
+// QTI_END: 2020-04-22: WLAN: wifi: refactor Wi-Fi generation UI enhancements
 import android.net.wifi.WifiClient;
 import android.net.wifi.WifiManager;
 import android.os.Handler;
@@ -173,7 +176,10 @@ public class HotspotControllerImpl implements HotspotController, WifiManager.Sof
                     // on the Main Handler. In order to always update the callback on added, we
                     // make this call when adding callbacks after the first.
                     mMainHandler.post(() ->
-                            callback.onHotspotChanged(isHotspotEnabled(), mNumConnectedDevices));
+// QTI_BEGIN: 2020-04-22: WLAN: wifi: refactor Wi-Fi generation UI enhancements
+                            callback.onHotspotChanged(isHotspotEnabled(), mNumConnectedDevices,
+                                                          getHotspotWifiStandard()));
+// QTI_END: 2020-04-22: WLAN: wifi: refactor Wi-Fi generation UI enhancements
                 }
             }
         }
@@ -196,6 +202,12 @@ public class HotspotControllerImpl implements HotspotController, WifiManager.Sof
         return mHotspotState == WifiManager.WIFI_AP_STATE_ENABLED;
     }
 
+// QTI_BEGIN: 2020-04-22: WLAN: wifi: refactor Wi-Fi generation UI enhancements
+    public int getHotspotWifiStandard() {
+        return ScanResult.WIFI_STANDARD_LEGACY;
+    }
+
+// QTI_END: 2020-04-22: WLAN: wifi: refactor Wi-Fi generation UI enhancements
     @Override
     public boolean isHotspotTransient() {
         return mWaitingForTerminalState || (mHotspotState == WifiManager.WIFI_AP_STATE_ENABLING);
@@ -242,7 +254,10 @@ public class HotspotControllerImpl implements HotspotController, WifiManager.Sof
             list = new ArrayList<>(mCallbacks);
         }
         for (Callback callback : list) {
-            callback.onHotspotChanged(isHotspotEnabled(), mNumConnectedDevices);
+// QTI_BEGIN: 2020-04-22: WLAN: wifi: refactor Wi-Fi generation UI enhancements
+            callback.onHotspotChanged(isHotspotEnabled(), mNumConnectedDevices,
+                                          getHotspotWifiStandard());
+// QTI_END: 2020-04-22: WLAN: wifi: refactor Wi-Fi generation UI enhancements
         }
     }
 
@@ -296,7 +311,9 @@ public class HotspotControllerImpl implements HotspotController, WifiManager.Sof
 
     @Override
     public void onConnectedClientsChanged(List<WifiClient> clients) {
+// QTI_BEGIN: 2020-04-08: WLAN: wifi: Deprecate vendor notification for Hotspot client connect/disconnect
         mNumConnectedDevices = clients.size();
+// QTI_END: 2020-04-08: WLAN: wifi: Deprecate vendor notification for Hotspot client connect/disconnect
         fireHotspotChangedCallback();
     }
 }

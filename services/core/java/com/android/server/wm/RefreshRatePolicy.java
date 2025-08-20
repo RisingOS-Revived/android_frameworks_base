@@ -64,6 +64,9 @@ class RefreshRatePolicy {
     private final WindowManagerService mWmService;
     private float mMinSupportedRefreshRate;
     private float mMaxSupportedRefreshRate;
+// QTI_BEGIN: 2020-09-25: Android_UI: Fix the deadlock when device bootup
+    private final ForceRefreshRatePackageList mForceList;
+// QTI_END: 2020-09-25: Android_UI: Fix the deadlock when device bootup
 
     /**
      * The following constants represent priority of the window. SF uses this information when
@@ -92,6 +95,9 @@ class RefreshRatePolicy {
         mLowRefreshRateMode = findLowRefreshRateMode(displayInfo);
         mHighRefreshRateDenylist = denylist;
         mWmService = wmService;
+// QTI_BEGIN: 2020-09-25: Android_UI: Fix the deadlock when device bootup
+        mForceList = new ForceRefreshRatePackageList(mWmService, displayInfo);
+// QTI_END: 2020-09-25: Android_UI: Fix the deadlock when device bootup
     }
 
     /**
@@ -132,6 +138,19 @@ class RefreshRatePolicy {
             // Unspecified, use default mode.
             return 0;
         }
+
+// QTI_BEGIN: 2022-03-21: Android_UI: Enable force app refresh rate for frame rate override
+        // If app is forced to specified refresh rate, return the corresponding mode id.
+// QTI_END: 2022-03-21: Android_UI: Enable force app refresh rate for frame rate override
+// QTI_BEGIN: 2020-09-25: Android_UI: Fix the deadlock when device bootup
+        int forceRefreshRateId = mForceList.getForceRefreshRateId(w.getOwningPackage());
+// QTI_END: 2020-09-25: Android_UI: Fix the deadlock when device bootup
+// QTI_BEGIN: 2020-08-13: Android_UI: Implement force app refresh rate policy in window manager
+        if(forceRefreshRateId > 0) {
+            return forceRefreshRateId;
+        }
+
+// QTI_END: 2020-08-13: Android_UI: Implement force app refresh rate policy in window manager
         return preferredDisplayModeId;
     }
 
@@ -234,6 +253,18 @@ class RefreshRatePolicy {
             return w.mFrameRateVote.reset();
         }
 
+// QTI_BEGIN: 2022-03-21: Android_UI: Enable force app refresh rate for frame rate override
+        // If app is forced to specified refresh rate, return the specified refresh rate.
+        float forceRefreshRate = mForceList.getForceRefreshRate(w.getOwningPackage());
+        if(forceRefreshRate > 0) {
+// QTI_END: 2022-03-21: Android_UI: Enable force app refresh rate for frame rate override
+            return w.mFrameRateVote.update(forceRefreshRate,
+                    Surface.FRAME_RATE_COMPATIBILITY_EXACT,
+                    SurfaceControl.FRAME_RATE_SELECTION_STRATEGY_OVERRIDE_CHILDREN);
+// QTI_BEGIN: 2022-03-21: Android_UI: Enable force app refresh rate for frame rate override
+        }
+
+// QTI_END: 2022-03-21: Android_UI: Enable force app refresh rate for frame rate override
         // If insets animation is running, do not convey the preferred app refresh rate to let VRI
         // to control the refresh rate.
         if (w.isInsetsAnimationRunning()) {

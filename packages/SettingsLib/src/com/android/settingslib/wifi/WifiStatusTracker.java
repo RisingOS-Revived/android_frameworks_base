@@ -170,6 +170,9 @@ public class WifiStatusTracker {
     public int rssi;
     public int level;
     public String statusLabel;
+// QTI_BEGIN: 2020-04-22: WLAN: wifi: refactor Wi-Fi generation UI enhancements
+    public int wifiStandard;
+// QTI_END: 2020-04-22: WLAN: wifi: refactor Wi-Fi generation UI enhancements
 
     public WifiStatusTracker(Context context, WifiManager wifiManager,
             NetworkScoreManager networkScoreManager, ConnectivityManager connectivityManager,
@@ -274,6 +277,9 @@ public class WifiStatusTracker {
             } else {
                 ssid = getValidSsid(mWifiInfo);
             }
+            updateRssi(mWifiInfo.getRssi());
+            maybeRequestNetworkScore();
+            wifiStandard = mWifiInfo.getWifiStandard();
             isCarrierMerged = mWifiInfo.isCarrierMerged();
             subId = mWifiInfo.getSubscriptionId();
             updateRssi(mWifiInfo.getRssi());

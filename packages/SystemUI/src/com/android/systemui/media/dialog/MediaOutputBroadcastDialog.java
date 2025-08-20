@@ -52,6 +52,10 @@ import com.android.systemui.statusbar.phone.SystemUIDialog;
 
 import com.google.zxing.WriterException;
 
+// QTI_BEGIN: 2024-01-17: Bluetooth: [LE Broadcast] improve broadcast code and name rule checking
+import java.nio.charset.StandardCharsets;
+
+// QTI_END: 2024-01-17: Bluetooth: [LE Broadcast] improve broadcast code and name rule checking
 import java.util.concurrent.Executor;
 
 /**
@@ -106,10 +110,17 @@ public class MediaOutputBroadcastDialog extends MediaOutputBaseDialog {
             if (mAlertDialog == null || mBroadcastErrorMessage == null) {
                 return;
             }
+// QTI_BEGIN: 2024-01-17: Bluetooth: [LE Broadcast] improve broadcast code and name rule checking
+            byte[] code = s.toString().getBytes(StandardCharsets.UTF_8);
+// QTI_END: 2024-01-17: Bluetooth: [LE Broadcast] improve broadcast code and name rule checking
             boolean breakBroadcastCodeRuleTextLengthLessThanMin =
-                    s.length() > 0 && s.length() < BROADCAST_CODE_MIN_LENGTH;
+// QTI_BEGIN: 2024-01-17: Bluetooth: [LE Broadcast] improve broadcast code and name rule checking
+                    code.length > 0 && code.length < BROADCAST_CODE_MIN_LENGTH;
+// QTI_END: 2024-01-17: Bluetooth: [LE Broadcast] improve broadcast code and name rule checking
             boolean breakBroadcastCodeRuleTextLengthMoreThanMax =
-                    s.length() > BROADCAST_CODE_MAX_LENGTH;
+// QTI_BEGIN: 2024-01-17: Bluetooth: [LE Broadcast] improve broadcast code and name rule checking
+                    code.length > BROADCAST_CODE_MAX_LENGTH;
+// QTI_END: 2024-01-17: Bluetooth: [LE Broadcast] improve broadcast code and name rule checking
             boolean breakRule = breakBroadcastCodeRuleTextLengthLessThanMin
                     || breakBroadcastCodeRuleTextLengthMoreThanMax;
 
@@ -147,9 +158,14 @@ public class MediaOutputBroadcastDialog extends MediaOutputBaseDialog {
             if (mAlertDialog == null || mBroadcastErrorMessage == null) {
                 return;
             }
+// QTI_BEGIN: 2024-01-17: Bluetooth: [LE Broadcast] improve broadcast code and name rule checking
+            byte[] name = s.toString().getBytes(StandardCharsets.UTF_8);
+// QTI_END: 2024-01-17: Bluetooth: [LE Broadcast] improve broadcast code and name rule checking
             boolean breakBroadcastNameRuleTextLengthMoreThanMax =
-                    s.length() > BROADCAST_NAME_MAX_LENGTH;
-            boolean breakRule = breakBroadcastNameRuleTextLengthMoreThanMax || (s.length() == 0);
+// QTI_BEGIN: 2024-01-17: Bluetooth: [LE Broadcast] improve broadcast code and name rule checking
+                    name.length > BROADCAST_NAME_MAX_LENGTH;
+            boolean breakRule = breakBroadcastNameRuleTextLengthMoreThanMax || (name.length == 0);
+// QTI_END: 2024-01-17: Bluetooth: [LE Broadcast] improve broadcast code and name rule checking
 
             if (breakBroadcastNameRuleTextLengthMoreThanMax) {
                 mBroadcastErrorMessage.setText(
@@ -268,6 +284,7 @@ public class MediaOutputBroadcastDialog extends MediaOutputBaseDialog {
     @Override
     public void start() {
         super.start();
+        refreshUi();
         if (!mIsLeBroadcastAssistantCallbackRegistered) {
             mIsLeBroadcastAssistantCallbackRegistered = true;
             mMediaSwitchingController.registerLeBroadcastAssistantServiceCallback(
@@ -417,9 +434,13 @@ public class MediaOutputBroadcastDialog extends MediaOutputBaseDialog {
             Log.d(TAG, "The broadcastMetadata broadcastId: " + broadcastMetadata.getBroadcastId()
                     + ", the device: " + sink.getAnonymizedAddress());
 
-            if (mMediaSwitchingController.isThereAnyBroadcastSourceIntoSinkDevice(sink)) {
-                Log.d(TAG, "The sink device has the broadcast source now.");
-                return;
+            if (mMediaSwitchingController.isReceiverReceivingBroadcast(sink)) {
+// QTI_BEGIN: 2024-07-19: Bluetooth: le_audio: Force add local source when the sink isn't receiving broadcast streaming
+                Log.d(TAG, "The sink device is receiving broadcast streaming");
+// QTI_END: 2024-07-19: Bluetooth: le_audio: Force add local source when the sink isn't receiving broadcast streaming
+// QTI_BEGIN: 2024-06-30: Bluetooth: LE Broadcast: add source for other sink while one sink has source
+                continue;
+// QTI_END: 2024-06-30: Bluetooth: LE Broadcast: add source for other sink while one sink has source
             }
             if (!mMediaSwitchingController.addSourceIntoSinkDeviceWithBluetoothLeAssistant(
                     sink, broadcastMetadata, /* isGroupOp= */ false)) {
@@ -499,14 +520,7 @@ public class MediaOutputBroadcastDialog extends MediaOutputBaseDialog {
     @Override
     public boolean isBroadcastSupported() {
         if (!legacyLeAudioSharing()) return false;
-        boolean isBluetoothLeDevice = false;
-        if (mMediaSwitchingController.getCurrentConnectedMediaDevice() != null) {
-            isBluetoothLeDevice =
-                    mMediaSwitchingController.isBluetoothLeDevice(
-                            mMediaSwitchingController.getCurrentConnectedMediaDevice());
-        }
-
-        return mMediaSwitchingController.isBroadcastSupported() && isBluetoothLeDevice;
+        return mMediaSwitchingController.isBroadcastSupported();
     }
 
     @Override
@@ -530,6 +544,9 @@ public class MediaOutputBroadcastDialog extends MediaOutputBaseDialog {
     public void handleLeBroadcastMetadataChanged() {
         Log.d(TAG, "handleLeBroadcastMetadataChanged:");
         refreshUi();
+// QTI_BEGIN: 2024-01-07: Bluetooth: [LE Broadcast] Add local source while broadcast metadata changed
+        startBroadcastWithConnectedDevices();
+// QTI_END: 2024-01-07: Bluetooth: [LE Broadcast] Add local source while broadcast metadata changed
     }
 
     @Override
@@ -577,7 +594,9 @@ public class MediaOutputBroadcastDialog extends MediaOutputBaseDialog {
         if (mAlertDialog == null) {
             Log.d(TAG, "handleUpdateFailedUi: mAlertDialog is null");
             return;
+// QTI_BEGIN: 2022-11-22: Bluetooth: Broadcast UI: Fix NPE after enabling/disabling broadcast multiple times
         }
+// QTI_END: 2022-11-22: Bluetooth: Broadcast UI: Fix NPE after enabling/disabling broadcast multiple times
         int errorMessageStringId = -1;
         boolean enablePositiveBtn = false;
         if (mRetryCount < MAX_BROADCAST_INFO_UPDATE) {

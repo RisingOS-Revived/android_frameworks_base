@@ -411,7 +411,11 @@ public class WebChromeClient {
      *                 origin.
      */
     public void onGeolocationPermissionsShowPrompt(String origin,
-            GeolocationPermissions.Callback callback) {}
+// QTI_BEGIN: 2018-04-09: Secure Systems: SEEMP: framework instrumentation and AppProtect features
+            GeolocationPermissions.Callback callback) {
+            android.util.SeempLog.record(54);
+            }
+// QTI_END: 2018-04-09: Secure Systems: SEEMP: framework instrumentation and AppProtect features
 
     /**
      * Notify the host application that a request for Geolocation permissions,

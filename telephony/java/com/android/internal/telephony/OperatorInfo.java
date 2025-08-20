@@ -14,6 +14,15 @@
  * limitations under the License.
  */
 
+// QTI_BEGIN: 2022-09-11: Telephony: CAG and SNPN feature
+/*
+ * Changes from Qualcomm Innovation Center are provided under the following license:
+ *
+ * Copyright (c) 2022 Qualcomm Innovation Center, Inc. All rights reserved.
+ * SPDX-License-Identifier: BSD-3-Clause-Clear
+ */
+
+// QTI_END: 2022-09-11: Telephony: CAG and SNPN feature
 package com.android.internal.telephony;
 
 import android.compat.annotation.UnsupportedAppUsage;
@@ -21,11 +30,29 @@ import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.telephony.AccessNetworkConstants.AccessNetworkType;
+// QTI_BEGIN: 2022-09-11: Telephony: CAG and SNPN feature
+import android.telephony.CagInfo;
+import android.telephony.SnpnInfo;
+// QTI_END: 2022-09-11: Telephony: CAG and SNPN feature
 
 /**
  * @hide
  */
 public class OperatorInfo implements Parcelable {
+// QTI_BEGIN: 2022-09-11: Telephony: CAG and SNPN feature
+    /** Invalid access mode */
+    /** @hide */
+    public static final int ACCESS_MODE_INVALID = 0;
+
+    /** PLMN access mode */
+    /** @hide */
+    public static final int ACCESS_MODE_PLMN = 1;
+
+    /** SNPN access mode */
+    /** @hide */
+    public static final int ACCESS_MODE_SNPN = 2;
+
+// QTI_END: 2022-09-11: Telephony: CAG and SNPN feature
     public enum State {
         UNKNOWN,
         AVAILABLE,
@@ -45,6 +72,18 @@ public class OperatorInfo implements Parcelable {
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private State mState = State.UNKNOWN;
     private int mRan = AccessNetworkType.UNKNOWN;
+// QTI_BEGIN: 2022-09-11: Telephony: CAG and SNPN feature
+    /**
+     * Describes the access mode
+     */
+    private int mAccessMode = ACCESS_MODE_PLMN;
+
+    /** Defines the CAG information. */
+    private CagInfo mCagInfo;
+
+    /** Defines the SNPN information. */
+    private SnpnInfo mSnpnInfo;
+// QTI_END: 2022-09-11: Telephony: CAG and SNPN feature
 
 
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
@@ -75,6 +114,30 @@ public class OperatorInfo implements Parcelable {
         return mRan;
     }
 
+// QTI_BEGIN: 2022-09-11: Telephony: CAG and SNPN feature
+    /** Returns the access mode */
+    /** @hide */
+    public int getAccessMode() {
+        return mAccessMode;
+    }
+
+    /**
+     * Returns the CAG information.
+     * @hide
+     */
+    public CagInfo getCagInfo() {
+        return mCagInfo;
+    }
+
+    /**
+     * Returns the SNPN information.
+     * @hide
+     */
+    public SnpnInfo getSnpnInfo() {
+        return mSnpnInfo;
+    }
+
+// QTI_END: 2022-09-11: Telephony: CAG and SNPN feature
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     OperatorInfo(String operatorAlphaLong,
                 String operatorAlphaShort,
@@ -121,6 +184,50 @@ public class OperatorInfo implements Parcelable {
         this(operatorAlphaLong, operatorAlphaShort, operatorNumeric, State.UNKNOWN);
     }
 
+// QTI_BEGIN: 2022-09-11: Telephony: CAG and SNPN feature
+    /** @hide */
+    public OperatorInfo(String operatorAlphaLong,
+                String operatorAlphaShort,
+                String operatorNumeric,
+                int ran, int accessMode,
+                CagInfo cagInfo, SnpnInfo snpnInfo) {
+        this(operatorAlphaLong, operatorAlphaShort, operatorNumeric, ran);
+        mAccessMode = accessMode;
+        mCagInfo = cagInfo;
+        mSnpnInfo = snpnInfo;
+    }
+
+    /** @hide */
+    public OperatorInfo(String operatorAlphaLong,
+                String operatorAlphaShort,
+                String operatorNumeric,
+                State state,
+                int ran, int accessMode,
+                CagInfo cagInfo, SnpnInfo snpnInfo) {
+        this (operatorAlphaLong, operatorAlphaShort, operatorNumeric, state, ran);
+        mAccessMode = accessMode;
+        mCagInfo = cagInfo;
+        mSnpnInfo = snpnInfo;
+    }
+
+    /**
+     * Construct a SnpnInfo object from the given parcel.
+     * @hide
+     */
+    private OperatorInfo(Parcel in) {
+        mOperatorAlphaLong = in.readString();
+        mOperatorAlphaShort = in.readString();
+        mOperatorNumeric = in.readString();
+        mState = (State) in.readSerializable(
+                com.android.internal.telephony.OperatorInfo.State.class.getClassLoader(),
+                com.android.internal.telephony.OperatorInfo.State.class);
+        mRan = in.readInt();
+        mAccessMode = in.readInt();
+        mCagInfo = in.readParcelable(CagInfo.class.getClassLoader(), CagInfo.class);
+        mSnpnInfo = in.readParcelable(SnpnInfo.class.getClassLoader(), SnpnInfo.class);
+    }
+
+// QTI_END: 2022-09-11: Telephony: CAG and SNPN feature
     /**
      * See state strings defined in ril.h RIL_REQUEST_QUERY_AVAILABLE_NETWORKS
      */
@@ -147,7 +254,12 @@ public class OperatorInfo implements Parcelable {
                 + "/" + mOperatorAlphaShort
                 + "/" + mOperatorNumeric
                 + "/" + mState
-                + "/" + mRan;
+// QTI_BEGIN: 2022-09-11: Telephony: CAG and SNPN feature
+                + "/" + mRan
+                + "/" + mAccessMode
+                + "/" + mCagInfo
+                + "/" + mSnpnInfo;
+// QTI_END: 2022-09-11: Telephony: CAG and SNPN feature
     }
 
     /**
@@ -174,6 +286,11 @@ public class OperatorInfo implements Parcelable {
         dest.writeString(mOperatorNumeric);
         dest.writeSerializable(mState);
         dest.writeInt(mRan);
+// QTI_BEGIN: 2022-09-11: Telephony: CAG and SNPN feature
+        dest.writeInt(mAccessMode);
+        dest.writeParcelable(mCagInfo, 0);
+        dest.writeParcelable(mSnpnInfo, 0);
+// QTI_END: 2022-09-11: Telephony: CAG and SNPN feature
     }
 
     /**
@@ -185,13 +302,9 @@ public class OperatorInfo implements Parcelable {
             new Creator<OperatorInfo>() {
                 @Override
                 public OperatorInfo createFromParcel(Parcel in) {
-                    OperatorInfo opInfo = new OperatorInfo(
-                            in.readString(), /*operatorAlphaLong*/
-                            in.readString(), /*operatorAlphaShort*/
-                            in.readString(), /*operatorNumeric*/
-                            (State) in.readSerializable(com.android.internal.telephony.OperatorInfo.State.class.getClassLoader(), com.android.internal.telephony.OperatorInfo.State.class), /*state*/
-                            in.readInt()); /*ran*/
-                    return opInfo;
+// QTI_BEGIN: 2022-09-11: Telephony: CAG and SNPN feature
+                    return new OperatorInfo(in);
+// QTI_END: 2022-09-11: Telephony: CAG and SNPN feature
                 }
 
                 @Override

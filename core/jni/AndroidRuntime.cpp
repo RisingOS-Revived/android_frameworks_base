@@ -110,6 +110,9 @@ extern int register_android_media_audio_common_AidlConversion(JNIEnv* env);
 extern int register_android_media_midi(JNIEnv *env);
 
 namespace android {
+// QTI_BEGIN: 2018-04-09: Secure Systems: SEEMP: framework instrumentation and AppProtect features
+extern int register_android_util_SeempLog(JNIEnv* env);
+// QTI_END: 2018-04-09: Secure Systems: SEEMP: framework instrumentation and AppProtect features
 
 /*
  * JNI-based registration functions.  Note these are properly contained in
@@ -230,6 +233,9 @@ extern int register_com_android_internal_util_VirtualRefBasePtr(JNIEnv *env);
 extern int register_android_window_WindowInfosListener(JNIEnv* env);
 extern int register_android_window_ScreenCapture(JNIEnv* env);
 extern int register_jni_common(JNIEnv* env);
+// QTI_BEGIN: 2018-02-20: Performance: Activity Trigger frameworks support
+extern int register_com_android_internal_app_ActivityTrigger(JNIEnv *env);
+// QTI_END: 2018-02-20: Performance: Activity Trigger frameworks support
 extern int register_android_tracing_PerfettoDataSource(JNIEnv* env);
 extern int register_android_tracing_PerfettoDataSourceInstance(JNIEnv* env);
 extern int register_android_tracing_PerfettoProducer(JNIEnv* env);
@@ -1535,6 +1541,7 @@ static int register_jni_procs(const RegJNIRec array[], size_t count, JNIEnv* env
 }
 
 static const RegJNIRec gRegJNI[] = {
+        REG_JNI(register_android_util_SeempLog),
         REG_JNI(register_com_android_internal_os_ApplicationSharedMemory),
         REG_JNI(register_com_android_internal_os_RuntimeInit),
         REG_JNI(register_com_android_internal_os_ZygoteInit_nativeZygoteInit),
@@ -1702,16 +1709,16 @@ static const RegJNIRec gRegJNI[] = {
         REG_JNI(register_com_android_internal_os_KernelCpuBpfTracking),
         REG_JNI(register_com_android_internal_os_KernelCpuTotalBpfMapReader),
         REG_JNI(register_com_android_internal_os_KernelCpuUidBpfMapReader),
-        REG_JNI(register_com_android_internal_os_KernelSingleProcessCpuThreadReader),
         REG_JNI(register_com_android_internal_os_KernelSingleUidTimeReader),
 
         REG_JNI(register_android_window_WindowInfosListener),
         REG_JNI(register_android_window_ScreenCapture),
         REG_JNI(register_jni_common),
-
         REG_JNI(register_android_tracing_PerfettoDataSource),
         REG_JNI(register_android_tracing_PerfettoDataSourceInstance),
         REG_JNI(register_android_tracing_PerfettoProducer),
+        REG_JNI(register_com_android_internal_app_ActivityTrigger),
+        REG_JNI(register_com_android_internal_os_KernelSingleProcessCpuThreadReader),
         REG_JNI(register_android_window_InputTransferToken),
         REG_JNI(register_android_view_WindowManagerGlobal),
 };

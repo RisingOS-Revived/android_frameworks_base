@@ -84,7 +84,7 @@
     <string translatable="false" name="status_bar_tty">tty</string>
     <string translatable="false" name="status_bar_speakerphone">speakerphone</string>
     <string translatable="false" name="status_bar_zen">zen</string>
-    <string translatable="false" name="status_bar_mute">mute</string>
+    <string translatable="false" name="status_bar_mute">status_bar_mute</string>
     <string translatable="false" name="status_bar_volume">volume</string>
     <string translatable="false" name="status_bar_wifi">wifi</string>
     <string translatable="false" name="status_bar_cdma_eri">cdma_eri</string>
@@ -2292,6 +2292,9 @@
     <!-- Integer to set a max latency the accelerometer will batch sensor requests with. -->
     <integer name="config_flipToScreenOffMaxLatencyMicros">2000000</integer>
 
+    <!-- Component name of the combo network location provider. -->
+    <string name="config_comboNetworkLocationProvider" translatable="false">com.qualcomm.location</string>
+
     <!-- Note: This config is deprecated
           Boolean indicating if current platform supports bluetooth SCO for off call
           use cases
@@ -3926,6 +3929,9 @@
     <!-- Flag indicating which package name can access DeviceConfig table -->
     <string name="config_deviceConfiguratorPackageName" translatable="false"></string>
 
+    <!--  Define optional package verifier name -->
+    <string name="config_optionalPackageVerifierName" translatable="false"></string>
+
     <!-- Flag indicating apps will skip sending hold request before merge. In this case
         IMS service implementation will do both.i.e.hold followed by merge. -->
     <bool name="skipHoldBeforeMerge">true</bool>
@@ -3973,6 +3979,9 @@
     <!-- Boolean indicating USSD over IMS is allowed.
      If it is not supported due to modem limitations, USSD send over the CS pipe instead.-->
     <bool name="config_allow_ussd_over_ims">false</bool>
+
+    <!-- Flag specifying whether AOSP DSDA WLAN behavior is available on device -->
+    <bool name="config_enable_aosp_wlan_dsda_logic">false</bool>
 
     <!-- String array containing numbers that shouldn't be logged. Country-specific. -->
     <string-array name="unloggable_phone_numbers" />
@@ -5347,6 +5356,15 @@
     <!-- Package name for ManagedProvisioning which is responsible for provisioning work profiles. -->
     <string name="config_managed_provisioning_package" translatable="false">com.android.managedprovisioning</string>
 
+    <!-- The duration (in milliseconds) for the outgoing sms authorization request to timeout.-->
+    <integer name="config_sms_authorization_timeout_ms">0</integer>
+
+    <!-- Enable sms authorization framework-->
+    <bool name="config_sms_authorization_enabled">false</bool>
+
+    <!-- whether to enable primarycard -->
+    <bool name="config_primarycard">false</bool>
+
     <!-- Whether or not swipe up gesture's opt-in setting is available on this device -->
     <bool name="config_swipe_up_gesture_setting_available">true</bool>
 
@@ -5374,6 +5392,10 @@
 
     <!-- Whether or not the "SMS app service" feature is enabled -->
     <bool name="config_useSmsAppService">true</bool>
+
+    <!-- List of names that represent dual SoftAp interfaces. -->
+    <string-array translatable="false" name="config_wifi_dual_sap_interfaces">
+    </string-array>
 
     <!-- Class name for the InputEvent compatibility processor override.
          Empty string means use the default compatibility processor
@@ -7239,11 +7261,16 @@
         <item>@string/config_secondaryDisplayShape</item>
     </string-array>
 
+    <!-- Maximum time in millisecs for telephony should wait to deactivate data call
+         when user turned off mobile data or data roaming during CIWLAN -->
+    <integer name="config_maximumDelayTimeToDeactivateDataCall">7000</integer>
+
     <!-- Certificate digests for trusted apps that will be allowed to obtain the knownSigner
          permission for staging HealthConnect's remote data. The digest should be computed over the
          DER encoding of the trusted certificate using the SHA-256 digest algorithm. -->
     <string-array name="config_healthConnectRestoreKnownSigners">
     </string-array>
+
     <!-- Certificate digests for trusted apps that will be allowed to obtain the knownSigner Health
         Connect Migration permissions. The digest should be computed over the DER encoding of the
         trusted certificate using the SHA-256 digest algorithm. -->

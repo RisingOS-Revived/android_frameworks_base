@@ -45,6 +45,7 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
 import android.util.Slog;
+import android.os.storage.DiskInfo;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.pm.pkg.parsing.ParsingPackageUtils;
@@ -182,7 +183,7 @@ public final class StorageEventHelper extends StorageEventListener {
         StorageManagerInternal smInternal = mPm.mInjector.getLocalService(
                 StorageManagerInternal.class);
         for (UserInfo user : mPm.mUserManager.getUsers(false /* includeDying */)) {
-            final int flags;
+            int flags;
             if (StorageManager.isCeStorageUnlocked(user.id)
                     && smInternal.isCeStoragePrepared(user.id)) {
                 flags = StorageManager.FLAG_STORAGE_DE | StorageManager.FLAG_STORAGE_CE;
@@ -191,9 +192,12 @@ public final class StorageEventHelper extends StorageEventListener {
             } else {
                 continue;
             }
-
+            if ((vol.disk.flags & DiskInfo.FLAG_UFS_CARD) == DiskInfo.FLAG_UFS_CARD) {
+                flags = flags | DiskInfo.FLAG_UFS_CARD;
+            }
+            final int pflags = flags;
             try {
-                sm.prepareUserStorage(volumeUuid, user.id, flags);
+                sm.prepareUserStorage(volumeUuid, user.id, pflags);
                 try (PackageManagerTracedLock installLock = mPm.mInstallLock.acquireLock()) {
                     appDataHelper.reconcileAppsDataLI(volumeUuid, user.id, flags,
                             true /* migrateAppData */);

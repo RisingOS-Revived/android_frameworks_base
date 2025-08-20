@@ -1678,6 +1678,9 @@ public final class ContactsContract {
          *            {@link #CONTENT_LOOKUP_URI} to attempt refreshing.
          */
         public static Uri getLookupUri(ContentResolver resolver, Uri contactUri) {
+// QTI_BEGIN: 2018-04-09: Secure Systems: SEEMP: framework instrumentation and AppProtect features
+            android.util.SeempLog.record(86);
+// QTI_END: 2018-04-09: Secure Systems: SEEMP: framework instrumentation and AppProtect features
             final Cursor c = resolver.query(contactUri, new String[] {
                     Contacts.LOOKUP_KEY, Contacts._ID
             }, null, null, null);
@@ -1705,6 +1708,9 @@ public final class ContactsContract {
          * provided parameters.
          */
         public static Uri getLookupUri(long contactId, String lookupKey) {
+// QTI_BEGIN: 2018-04-09: Secure Systems: SEEMP: framework instrumentation and AppProtect features
+            android.util.SeempLog.record(86);
+// QTI_END: 2018-04-09: Secure Systems: SEEMP: framework instrumentation and AppProtect features
             if (TextUtils.isEmpty(lookupKey)) {
                 return null;
             }
@@ -1718,6 +1724,9 @@ public final class ContactsContract {
          * Returns null if the contact cannot be found.
          */
         public static Uri lookupContact(ContentResolver resolver, Uri lookupUri) {
+// QTI_BEGIN: 2018-04-09: Secure Systems: SEEMP: framework instrumentation and AppProtect features
+            android.util.SeempLog.record(87);
+// QTI_END: 2018-04-09: Secure Systems: SEEMP: framework instrumentation and AppProtect features
             if (lookupUri == null) {
                 return null;
             }
@@ -2211,6 +2220,9 @@ public final class ContactsContract {
          */
         public static InputStream openContactPhotoInputStream(ContentResolver cr, Uri contactUri,
                 boolean preferHighres) {
+// QTI_BEGIN: 2018-04-09: Secure Systems: SEEMP: framework instrumentation and AppProtect features
+            android.util.SeempLog.record(88);
+// QTI_END: 2018-04-09: Secure Systems: SEEMP: framework instrumentation and AppProtect features
             if (preferHighres) {
                 final Uri displayPhotoUri = Uri.withAppendedPath(contactUri,
                         Contacts.Photo.DISPLAY_PHOTO);
@@ -2259,6 +2271,9 @@ public final class ContactsContract {
          * of the thumbnail the high-res picture is preferred
          */
         public static InputStream openContactPhotoInputStream(ContentResolver cr, Uri contactUri) {
+// QTI_BEGIN: 2018-04-09: Secure Systems: SEEMP: framework instrumentation and AppProtect features
+            android.util.SeempLog.record(88);
+// QTI_END: 2018-04-09: Secure Systems: SEEMP: framework instrumentation and AppProtect features
             return openContactPhotoInputStream(cr, contactUri, false);
         }
 
@@ -2961,6 +2976,9 @@ public final class ContactsContract {
          * entry of the given {@link RawContacts} entry.
          */
         public static Uri getContactLookupUri(ContentResolver resolver, Uri rawContactUri) {
+// QTI_BEGIN: 2018-04-09: Secure Systems: SEEMP: framework instrumentation and AppProtect features
+            android.util.SeempLog.record(89);
+// QTI_END: 2018-04-09: Secure Systems: SEEMP: framework instrumentation and AppProtect features
             // TODO: use a lighter query by joining rawcontacts with contacts in provider
             final Uri dataUri = Uri.withAppendedPath(rawContactUri, Data.CONTENT_DIRECTORY);
             final Cursor cursor = resolver.query(dataUri, new String[] {
@@ -5565,6 +5583,9 @@ public final class ContactsContract {
          * </p>
          */
         public static Uri getContactLookupUri(ContentResolver resolver, Uri dataUri) {
+// QTI_BEGIN: 2018-04-09: Secure Systems: SEEMP: framework instrumentation and AppProtect features
+            android.util.SeempLog.record(89);
+// QTI_END: 2018-04-09: Secure Systems: SEEMP: framework instrumentation and AppProtect features
             final Cursor cursor = resolver.query(dataUri, new String[] {
                     RawContacts.CONTACT_ID, Contacts.LOOKUP_KEY
             }, null, null, null);

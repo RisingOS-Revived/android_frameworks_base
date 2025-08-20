@@ -830,6 +830,7 @@ public class SoundTriggerService extends SystemService {
             try (SafeCloseable ignored = ClearCallingIdentityContext.create()) {
                 enforceCallingPermission(Manifest.permission.MANAGE_SOUND_TRIGGER);
 
+
                 synchronized (mLock) {
                     SoundModel soundModel = mLoadedModels.get(soundModelId.getUuid());
                     if (soundModel == null) {

@@ -14,6 +14,14 @@
  * limitations under the License.
  */
 
+// QTI_BEGIN: 2025-02-09: Android_UI: SystemUI: Refactor Emergency button on keyguard
+/*
+ * Changes from Qualcomm Innovation Center, Inc. are provided under the following license:
+ * Copyright (c) 2025 Qualcomm Innovation Center, Inc. All rights reserved.
+ * SPDX-License-Identifier: BSD-3-Clause-Clear
+ */
+
+// QTI_END: 2025-02-09: Android_UI: SystemUI: Refactor Emergency button on keyguard
 package com.android.systemui.keyguard.data.repository
 
 import android.content.applicationContext
@@ -70,6 +78,9 @@ val Kosmos.defaultKeyguardBlueprint by
             keyguardSliceViewSection = mock(),
             udfpsAccessibilityOverlaySection = mock(),
             accessibilityActionsSection = mock(),
+// QTI_BEGIN: 2025-02-09: Android_UI: SystemUI: Refactor Emergency button on keyguard
+            defaultEmergencyButtonSection = mock(),
+// QTI_END: 2025-02-09: Android_UI: SystemUI: Refactor Emergency button on keyguard
         )
     }
 

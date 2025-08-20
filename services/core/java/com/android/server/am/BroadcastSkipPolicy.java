@@ -16,6 +16,7 @@
 
 package com.android.server.am;
 
+import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_BACKGROUND_CHECK;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_PERMISSIONS_REVIEW;
 import static com.android.server.am.ActivityManagerService.checkComponentPermission;
 import static com.android.server.am.BroadcastQueue.TAG;
@@ -41,11 +42,15 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.permission.IPermissionManager;
 import android.permission.PermissionManager;
+import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.Slog;
 
 import com.android.internal.util.ArrayUtils;
+import com.android.server.SystemConfig;
 
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * Policy logic that decides if delivery of a particular {@link BroadcastRecord}
@@ -59,8 +64,21 @@ public class BroadcastSkipPolicy {
     @Nullable
     private PermissionManager mPermissionManager;
 
+    /**
+    * Map of Restricted Implicit Broadcast actions to list of packages
+    * which can receive broadcast
+    */
+    private ArrayMap<String, Set<String>> mQtiBackgroundLaunchBroadcasts;
+
     public BroadcastSkipPolicy(@NonNull ActivityManagerService service) {
         mService = Objects.requireNonNull(service);
+    }
+
+    private ArrayMap<String, Set<String>> getQtiBackgroundLaunchBroadcasts() {
+        if (mQtiBackgroundLaunchBroadcasts == null) {
+            mQtiBackgroundLaunchBroadcasts = SystemConfig.getInstance().getQtiAllowImplicitBroadcasts();
+        }
+        return mQtiBackgroundLaunchBroadcasts;
     }
 
     /**
@@ -230,6 +248,32 @@ public class BroadcastSkipPolicy {
                 info.activityInfo.applicationInfo.uid, info.activityInfo.packageName,
                 info.activityInfo.applicationInfo.targetSdkVersion, -1, true, false, false);
         if (allowed != ActivityManager.APP_START_MODE_NORMAL) {
+            // Allow this broadcast receiver to be launched only if the intent action is
+            // defined in the qti_broadcast_whitelist.xml configuration. This XML maps
+            // restricted implicit broadcast intent actions to a set of package names that
+            // are explicitly permitted to receive them—even if the corresponding app is
+            // currently running in the background or has not yet been started.If the
+            // current intent's action is listed and the target package is included in the
+            // associated set, the broadcast is allowed to proceed.
+            if (getQtiBackgroundLaunchBroadcasts() != null &&
+                getQtiBackgroundLaunchBroadcasts().containsKey(r.intent.getAction())) {
+                Set<String> nonSkipPackages = getQtiBackgroundLaunchBroadcasts().get(
+                        r.intent.getAction());
+                if(DEBUG_BACKGROUND_CHECK) {
+                    Slog.i(TAG, "Restricted Intent : " + r.intent.getAction()
+                                + " Package Name : " + info.activityInfo.packageName);
+                }
+                if (nonSkipPackages != null &&
+                    nonSkipPackages.contains(info.activityInfo.packageName)) {
+                    if(DEBUG_BACKGROUND_CHECK) {
+                        Slog.i(TAG, "QtiBackground execution allowed: receiving "
+                                     + r.intent + " to "
+                                     + info.activityInfo.packageName);
+                    }
+                    return null;
+                }
+            }
+
             // We won't allow this receiver to be launched if the app has been
             // completely disabled from launches, or it was not explicitly sent
             // to it and the app is in a state that should not receive it

@@ -55,4 +55,8 @@ android_test {
         "android.test.base.stubs.system",
     ],
     test_suites: ["device-tests"],
+    visibility: [
+        "//frameworks/base/tests/Input",
+        "//frameworks/native/services/inputflinger",
+    ],
 }

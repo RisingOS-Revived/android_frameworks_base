@@ -14,6 +14,19 @@
  * limitations under the License.
  */
 
+// QTI_BEGIN: 2023-12-17: Data: SystemUI: Enhanced 5g icon
+/*
+  Changes from Qualcomm Innovation Center are provided under the following license:
+
+// QTI_END: 2023-12-17: Data: SystemUI: Enhanced 5g icon
+// QTI_BEGIN: 2024-05-21: Android_UI: SystemUI: Add 6Rx icons support for NrIcons
+  Copyright (c) 2023-2024 Qualcomm Innovation Center, Inc. All rights reserved.
+// QTI_END: 2024-05-21: Android_UI: SystemUI: Add 6Rx icons support for NrIcons
+// QTI_BEGIN: 2023-12-17: Data: SystemUI: Enhanced 5g icon
+  SPDX-License-Identifier: BSD-3-Clause-Clear
+*/
+
+// QTI_END: 2023-12-17: Data: SystemUI: Enhanced 5g icon
 package com.android.settingslib.mobile;
 
 import com.android.settingslib.R;
@@ -65,6 +78,21 @@ public class TelephonyIcons {
             flagged(R.drawable.ic_5g_plus_mobiledata, R.drawable.ic_5g_plus_mobiledata_updated);
     public static final int ICON_CWF =
             flagged(R.drawable.ic_carrier_wifi, R.drawable.ic_carrier_wifi_updated);
+    public static final int ICON_5G_BASIC = R.drawable.ic_5g_mobiledata;
+    public static final int ICON_5G_UWB = R.drawable.ic_5g_uwb_mobiledata;
+// QTI_BEGIN: 2023-12-17: Data: SystemUI: Enhanced 5g icon
+    public static final int ICON_5G_PLUS_PLUS = R.drawable.ic_5g_plus_plus_mobiledata;
+// QTI_END: 2023-12-17: Data: SystemUI: Enhanced 5g icon
+// QTI_BEGIN: 2024-05-22: Android_UI: SystemUI: Display 5GA icon for 3CC
+    public static final int ICON_5G_A = R.drawable.ic_5g_a_mobiledata;
+// QTI_END: 2024-05-22: Android_UI: SystemUI: Display 5GA icon for 3CC
+    public static final int ICON_VOWIFI = R.drawable.ic_vowifi;
+    public static final int ICON_VOWIFI_CALLING = R.drawable.ic_vowifi_calling;
+// QTI_BEGIN: 2024-05-21: Android_UI: SystemUI: Add 6Rx icons support for NrIcons
+    public static final int ICON_5G_BASIC_6RX = R.drawable.ic_5g_6rx_mobiledata;
+    public static final int ICON_5G_UWB_6RX = R.drawable.ic_5g_uwb_6rx_mobiledata;
+    public static final int ICON_5G_PLUS_PLUS_6RX = R.drawable.ic_5g_plus_plus_6rx_mobiledata;
+// QTI_END: 2024-05-21: Android_UI: SystemUI: Add 6Rx icons support for NrIcons
 
     /** Make it slightly more obvious which resource we are using */
     private static int flagged(int oldIcon, int newIcon) {
@@ -133,7 +161,9 @@ public class TelephonyIcons {
     );
 
     public static final MobileIconGroup FOUR_G_PLUS = new MobileIconGroup(
+// QTI_BEGIN: 2016-06-23: Telephony: Add support for LTE CarrierAgregation
             "4G+",
+// QTI_END: 2016-06-23: Telephony: Add support for LTE CarrierAgregation
             R.string.data_connection_4g_plus,
             TelephonyIcons.ICON_4G_PLUS
     );
@@ -205,7 +235,80 @@ public class TelephonyIcons {
 
     // When adding a new MobileIconGroup, check if the dataContentDescription has to be filtered
     // in QSCarrier#hasValidTypeContentDescription
+    //
+    public static final MobileIconGroup FIVE_G = new MobileIconGroup(
+// QTI_BEGIN: 2018-12-18: Android_UI: SystemUI: Use same URI format for SSSS and DSDS
+            "5G",
+            R.string.data_connection_5g,
+// QTI_END: 2018-12-18: Android_UI: SystemUI: Use same URI format for SSSS and DSDS
+            TelephonyIcons.ICON_5G);
 
+    public static final MobileIconGroup FIVE_G_BASIC = new MobileIconGroup(
+// QTI_BEGIN: 2018-12-18: Android_UI: SystemUI: Display 5G Basic or 5G UWB icon per 5G service state
+            "5GBasic",
+            R.string.data_connection_5g_basic,
+// QTI_END: 2018-12-18: Android_UI: SystemUI: Display 5G Basic or 5G UWB icon per 5G service state
+            TelephonyIcons.ICON_5G_BASIC);
+
+    public static final MobileIconGroup FIVE_G_UWB = new MobileIconGroup(
+// QTI_BEGIN: 2018-12-18: Android_UI: SystemUI: Display 5G Basic or 5G UWB icon per 5G service state
+            "5GUWB",
+            R.string.data_connection_5g_uwb,
+// QTI_END: 2018-12-18: Android_UI: SystemUI: Display 5G Basic or 5G UWB icon per 5G service state
+            TelephonyIcons.ICON_5G_UWB);
+
+// QTI_BEGIN: 2024-05-22: Android_UI: SystemUI: Display 5GA icon for 3CC
+    public static final MobileIconGroup FIVE_G_A = new MobileIconGroup(
+            "5GA",
+            R.string.data_connection_5g_a,
+            TelephonyIcons.ICON_5G_A);
+
+// QTI_END: 2024-05-22: Android_UI: SystemUI: Display 5GA icon for 3CC
+// QTI_BEGIN: 2023-12-17: Data: SystemUI: Enhanced 5g icon
+    public static final MobileIconGroup FIVE_G_PLUS_PLUS = new MobileIconGroup(
+            "5G_PLUS_PLUS",
+            R.string.data_connection_5g_plus_plus,
+            TelephonyIcons.ICON_5G_PLUS_PLUS);
+
+// QTI_END: 2023-12-17: Data: SystemUI: Enhanced 5g icon
+    public static final MobileIconGroup FIVE_G_SA = new MobileIconGroup(
+// QTI_BEGIN: 2018-12-18: Android_UI: SystemUI: Use same URI format for SSSS and DSDS
+            "5GSA",
+            R.string.data_connection_5g_sa,
+// QTI_END: 2018-12-18: Android_UI: SystemUI: Use same URI format for SSSS and DSDS
+            TelephonyIcons.ICON_5G_SA);
+
+    public static final MobileIconGroup VOWIFI = new MobileIconGroup(
+// QTI_BEGIN: 2020-06-01: Android_UI: SystemUI: support VoWIFI icons
+            "VoWIFI",
+            0,
+// QTI_END: 2020-06-01: Android_UI: SystemUI: support VoWIFI icons
+            TelephonyIcons.ICON_VOWIFI);
+
+    public static final MobileIconGroup VOWIFI_CALLING = new MobileIconGroup(
+// QTI_BEGIN: 2020-06-01: Android_UI: SystemUI: support VoWIFI icons
+            "VoWIFICall",
+            0,
+// QTI_END: 2020-06-01: Android_UI: SystemUI: support VoWIFI icons
+            TelephonyIcons.ICON_VOWIFI_CALLING);
+
+// QTI_BEGIN: 2024-05-21: Android_UI: SystemUI: Add 6Rx icons support for NrIcons
+    public static final MobileIconGroup FIVE_G_BASIC_6RX = new MobileIconGroup(
+            "5GBasic_6Rx",
+            R.string.data_connection_5g_basic,
+            TelephonyIcons.ICON_5G_BASIC_6RX);
+
+    public static final MobileIconGroup FIVE_G_UWB_6RX = new MobileIconGroup(
+            "5GUWB_6Rx",
+            R.string.data_connection_5g_uwb,
+            TelephonyIcons.ICON_5G_UWB_6RX);
+
+    public static final MobileIconGroup FIVE_G_PLUS_PLUS_6RX = new MobileIconGroup(
+            "5G_PLUS_PLUS_6Rx",
+            R.string.data_connection_5g_plus_plus,
+            TelephonyIcons.ICON_5G_PLUS_PLUS_6RX);
+
+// QTI_END: 2024-05-21: Android_UI: SystemUI: Add 6Rx icons support for NrIcons
     /** Mapping icon name(lower case) to the icon object. */
     public static final Map<String, MobileIconGroup> ICON_NAME_TO_ICON;
     static {
@@ -229,8 +332,17 @@ public class TelephonyIcons {
         ICON_NAME_TO_ICON.put("5g", NR_5G);
         ICON_NAME_TO_ICON.put("5gsa", NR_5G_SA);
         ICON_NAME_TO_ICON.put("5g_plus", NR_5G_PLUS);
+// QTI_BEGIN: 2019-07-19: RIL: Show 5GUWB icon for mmWave using AOSP interface
+        ICON_NAME_TO_ICON.put("5guwb", FIVE_G_UWB);
+// QTI_END: 2019-07-19: RIL: Show 5GUWB icon for mmWave using AOSP interface
+// QTI_BEGIN: 2023-12-17: Data: SystemUI: Enhanced 5g icon
+        ICON_NAME_TO_ICON.put("5g_plus_plus", FIVE_G_PLUS_PLUS);
+// QTI_END: 2023-12-17: Data: SystemUI: Enhanced 5g icon
         ICON_NAME_TO_ICON.put("datadisable", DATA_DISABLED);
         ICON_NAME_TO_ICON.put("notdefaultdata", NOT_DEFAULT_DATA);
+// QTI_BEGIN: 2024-05-22: Android_UI: SystemUI: Display 5GA icon for 3CC
+        ICON_NAME_TO_ICON.put("5ga", FIVE_G_A);
+// QTI_END: 2024-05-22: Android_UI: SystemUI: Display 5GA icon for 3CC
     }
 
     public static final int[] MOBILE_CALL_STRENGTH_ICONS = {

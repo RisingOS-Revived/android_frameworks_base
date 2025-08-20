@@ -105,12 +105,19 @@ public class SystemConfig {
     // property for runtime configuration differentiation
     private static final String SKU_PROPERTY = "ro.boot.product.hardware.sku";
 
+// QTI_BEGIN: 2020-03-09: Core: SystemConfig: Allow runtime differentiation of vendor configurations
     // property for runtime configuration differentiation in vendor
     private static final String VENDOR_SKU_PROPERTY = "ro.boot.product.vendor.sku";
 
+// QTI_END: 2020-03-09: Core: SystemConfig: Allow runtime differentiation of vendor configurations
     // property for runtime configuration differentation in product
     private static final String PRODUCT_SKU_PROPERTY = "ro.boot.hardware.sku";
 
+// QTI_BEGIN: 2024-11-13: Telephony: Allow runtime configurations based on the baseband
+    // property for runtime configuration differentiation based on baseband type
+    private static final String NO_RIL_PROPERTY = "ro.radio.noril";
+
+// QTI_END: 2024-11-13: Telephony: Allow runtime configurations based on the baseband
     private static final ArrayMap<String, ArraySet<String>> EMPTY_PERMISSIONS =
             new ArrayMap<>();
 
@@ -360,6 +367,9 @@ public class SystemConfig {
     private ArrayMap<String, Set<String>> mPackageToUserTypeWhitelist = new ArrayMap<>();
     private ArrayMap<String, Set<String>> mPackageToUserTypeBlacklist = new ArrayMap<>();
 
+    // Map of intent actions to the list of packages that want to receive those broadcast actions
+    private ArrayMap<String, Set<String>> mQtiAllowImplicitBroadcasts = new ArrayMap<>();
+
     private final ArraySet<String> mRollbackWhitelistedPackages = new ArraySet<>();
     private final ArraySet<String> mWhitelistedStagedInstallers = new ArraySet<>();
     // A map from package name of vendor APEXes that can be updated to an installer package name
@@ -577,6 +587,15 @@ public class SystemConfig {
     }
 
     /**
+     * Gets map of intents to list of packages that want to receive those broadcast actions
+     */
+    public ArrayMap<String, Set<String>> getQtiAllowImplicitBroadcasts() {
+        ArrayMap<String, Set<String>> r = mQtiAllowImplicitBroadcasts;
+        mQtiAllowImplicitBroadcasts = new ArrayMap<>(0);
+        return r;
+    }
+
+    /**
      * Gets map of packagesNames to userTypes, dictating on which user types each package should NOT
      * be initially installed, even if they are whitelisted, and then removes this map from
      * SystemConfig.
@@ -704,17 +723,36 @@ public class SystemConfig {
         readPermissions(parser, Environment.buildPath(
                 Environment.getVendorDirectory(), "etc", "permissions"), vendorPermissionFlag);
 
+// QTI_BEGIN: 2020-03-09: Core: SystemConfig: Allow runtime differentiation of vendor configurations
         String vendorSkuProperty = SystemProperties.get(VENDOR_SKU_PROPERTY, "");
         if (!vendorSkuProperty.isEmpty()) {
             String vendorSkuDir = "sku_" + vendorSkuProperty;
+// QTI_END: 2020-03-09: Core: SystemConfig: Allow runtime differentiation of vendor configurations
             readPermissions(parser, Environment.buildPath(
+// QTI_BEGIN: 2020-03-09: Core: SystemConfig: Allow runtime differentiation of vendor configurations
                     Environment.getVendorDirectory(), "etc", "sysconfig", vendorSkuDir),
                     vendorPermissionFlag);
+// QTI_END: 2020-03-09: Core: SystemConfig: Allow runtime differentiation of vendor configurations
             readPermissions(parser, Environment.buildPath(
+// QTI_BEGIN: 2020-03-09: Core: SystemConfig: Allow runtime differentiation of vendor configurations
                     Environment.getVendorDirectory(), "etc", "permissions", vendorSkuDir),
                     vendorPermissionFlag);
         }
 
+// QTI_END: 2020-03-09: Core: SystemConfig: Allow runtime differentiation of vendor configurations
+// QTI_BEGIN: 2024-11-13: Telephony: Allow runtime configurations based on the baseband
+        boolean noRilSupport = SystemProperties.getBoolean(NO_RIL_PROPERTY, false);
+        if (noRilSupport) {
+            String noRilDir = "noRil";
+            readPermissions(parser, Environment.buildPath(
+                    Environment.getVendorDirectory(), "etc", "sysconfig", noRilDir),
+                    vendorPermissionFlag);
+            readPermissions(parser, Environment.buildPath(
+                    Environment.getVendorDirectory(), "etc", "permissions", noRilDir),
+                    vendorPermissionFlag);
+        }
+
+// QTI_END: 2024-11-13: Telephony: Allow runtime configurations based on the baseband
         // Allow ODM to customize system configs as much as Vendor, because /odm is another
         // vendor partition other than /vendor.
         int odmPermissionFlag = vendorPermissionFlag;
@@ -1514,6 +1552,10 @@ public class SystemConfig {
                         readInstallInUserType(parser,
                                 mPackageToUserTypeWhitelist, mPackageToUserTypeBlacklist);
                     } break;
+                    case "qti-allow-implicit-broadcast": {
+                        MapOfImplicitBroadcastToPackageNames(parser,
+                                mQtiAllowImplicitBroadcasts);
+                    } break;
                     case "named-actor": {
                         String namespace = TextUtils.safeIntern(
                                 parser.getAttributeValue(null, "namespace"));
@@ -1968,6 +2010,39 @@ public class SystemConfig {
                 userTypesNo.add(userType);
             } else {
                 Slog.w(TAG, "unrecognized tag in <install-in-user-type> in "
+                        + parser.getPositionDescription());
+            }
+        }
+    }
+
+    private void MapOfImplicitBroadcastToPackageNames(XmlPullParser parser,
+            Map<String, Set<String>> broadcastPackagesMap)
+            throws IOException, XmlPullParserException {
+        final String actionName = parser.getAttributeValue(null, "action");
+        if (TextUtils.isEmpty(actionName)) {
+            Slog.w(TAG, "actionName is required for <qti-allow-implicit-broadcast> in "
+                    + parser.getPositionDescription());
+            return;
+        }
+
+        Set<String> actionInSet = broadcastPackagesMap.get(actionName);
+        final int depth = parser.getDepth();
+        while (XmlUtils.nextElementWithin(parser, depth)) {
+            final String name = parser.getName();
+            if ("package-name".equals(name)) {
+                final String realPackageName = parser.getAttributeValue(null, "packagename");
+                if (TextUtils.isEmpty(realPackageName)) {
+                    Slog.w(TAG, "package-name is required for <qti-allow-implicit-broadcast> in "
+                            + parser.getPositionDescription());
+                    continue;
+                }
+                if (actionInSet == null) {
+                    actionInSet = new ArraySet<>();
+                    broadcastPackagesMap.put(actionName, actionInSet);
+                }
+                actionInSet.add(realPackageName);
+            } else {
+                Slog.w(TAG, "unrecognized tag in <qti-allow-implicit-broadcast> in "
                         + parser.getPositionDescription());
             }
         }

@@ -20,6 +20,9 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.hardware.radio.AccessNetwork;
+// QTI_BEGIN: 2020-04-08: Telephony: Add API to convert RAN to ANT
+import android.hardware.radio.V1_5.RadioAccessNetworks;
+// QTI_END: 2020-04-08: Telephony: Add API to convert RAN to ANT
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -127,6 +130,30 @@ public final class AccessNetworkConstants {
                     throw new IllegalArgumentException("Invalid access network type " + str);
             }
         }
+
+// QTI_BEGIN: 2020-04-08: Telephony: Add API to convert RAN to ANT
+        /**
+         * Converts from RadioAccessNetworks in HAL to AccessNetworkType in frameworks.
+         * @hide
+         */
+        public static int convertRanToAnt(int ran) {
+            switch (ran) {
+                case RadioAccessNetworks.GERAN:
+                    return AccessNetworkType.GERAN;
+                case RadioAccessNetworks.UTRAN:
+                    return AccessNetworkType.UTRAN;
+                case RadioAccessNetworks.EUTRAN:
+                    return AccessNetworkType.EUTRAN;
+                case RadioAccessNetworks.NGRAN:
+                    return AccessNetworkType.NGRAN;
+                case RadioAccessNetworks.CDMA2000:
+                    return AccessNetworkType.CDMA2000;
+                case RadioAccessNetworks.UNKNOWN:
+                default:
+                    return AccessNetworkType.UNKNOWN;
+           }
+        }
+// QTI_END: 2020-04-08: Telephony: Add API to convert RAN to ANT
     }
 
     /**

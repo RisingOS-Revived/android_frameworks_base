@@ -241,4 +241,12 @@ public interface TelephonyProperties
      * Type: int
      */
     static final String PROPERTY_MAX_ACTIVE_MODEMS = "telephony.active_modems.max_count";
+// QTI_BEGIN: 2021-07-13: Telephony: IMS: Define new property for multi sim voice capability
+
+    /**
+     * Property to store multi sim voice capability configuration.
+     * Type: int posssible values are @link TelephonyManager#MultiSimVoiceCapability.
+     */
+    static final String PROPERTY_MULTISIM_VOICE_CAPABILITY = "ril.multisim.voice_capability";
+// QTI_END: 2021-07-13: Telephony: IMS: Define new property for multi sim voice capability
 }

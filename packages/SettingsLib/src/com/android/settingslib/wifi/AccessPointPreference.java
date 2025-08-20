@@ -74,6 +74,9 @@ public class AccessPointPreference extends Preference {
     private AccessPoint mAccessPoint;
     private Drawable mBadge;
     private int mLevel;
+// QTI_BEGIN: 2020-04-22: WLAN: wifi: refactor Wi-Fi generation UI enhancements
+    private int mWifiStandard;
+// QTI_END: 2020-04-22: WLAN: wifi: refactor Wi-Fi generation UI enhancements
     private CharSequence mContentDescription;
     private int mDefaultIconResId;
     private int mWifiSpeed = Speed.NONE;
@@ -181,14 +184,14 @@ public class AccessPointPreference extends Preference {
         notifyChanged();
     }
 
-    protected void updateIcon(int level, Context context) {
+    protected void updateIcon(int level, int standard, Context context) {
         if (level == -1) {
             safeSetDefaultIcon();
             return;
         }
         TronUtils.logWifiSettingsSpeed(context, mWifiSpeed);
 
-        Drawable drawable = mIconInjector.getIcon(level);
+        Drawable drawable = mIconInjector.getIcon(level, standard);
         if (!mForSavedNetworks && drawable != null) {
             drawable.setTintList(Utils.getColorAttr(context, android.R.attr.colorControlNormal));
             setIcon(drawable);
@@ -243,17 +246,46 @@ public class AccessPointPreference extends Preference {
         final Context context = getContext();
         int level = mAccessPoint.getLevel();
         int wifiSpeed = mAccessPoint.getSpeed();
-        if (level != mLevel || wifiSpeed != mWifiSpeed) {
+// QTI_BEGIN: 2020-04-22: WLAN: wifi: refactor Wi-Fi generation UI enhancements
+        int wifiStandard = mAccessPoint.getWifiStandard();
+// QTI_END: 2020-04-22: WLAN: wifi: refactor Wi-Fi generation UI enhancements
+// QTI_BEGIN: 2019-04-03: WLAN: wifi: Wifi generation and WPA3 UI enhancements for Access points.
+
+        if (level != mLevel ||
+            wifiSpeed != mWifiSpeed ||
+// QTI_END: 2019-04-03: WLAN: wifi: Wifi generation and WPA3 UI enhancements for Access points.
+            wifiStandard != mWifiStandard) {
             mLevel = level;
             mWifiSpeed = wifiSpeed;
-            updateIcon(mLevel, context);
+// QTI_BEGIN: 2020-04-22: WLAN: wifi: refactor Wi-Fi generation UI enhancements
+            mWifiStandard = wifiStandard;
+// QTI_END: 2020-04-22: WLAN: wifi: refactor Wi-Fi generation UI enhancements
+            updateIcon(mLevel, mWifiStandard, context);
             notifyChanged();
         }
 
         updateBadge(context);
 
-        setSummary(mForSavedNetworks ? mAccessPoint.getSavedNetworkSummary()
-                : mAccessPoint.getSettingsSummary());
+// QTI_BEGIN: 2019-04-03: WLAN: wifi: Wifi generation and WPA3 UI enhancements for Access points.
+        String summary = mForSavedNetworks ? mAccessPoint.getSavedNetworkSummary()
+                                           : mAccessPoint.getSettingsSummary();
+
+// QTI_END: 2019-04-03: WLAN: wifi: Wifi generation and WPA3 UI enhancements for Access points.
+// QTI_BEGIN: 2020-04-22: WLAN: wifi: refactor Wi-Fi generation UI enhancements
+        if (mAccessPoint.isPskSaeTransitionMode()) {
+           summary = "WPA3(SAE Transition Mode) " + summary;
+        } else if (mAccessPoint.isOweTransitionMode()) {
+           summary = "WPA3(OWE Transition Mode) " + summary;
+        } else if (mAccessPoint.getSecurity() == AccessPoint.SECURITY_SAE) {
+// QTI_END: 2020-04-22: WLAN: wifi: refactor Wi-Fi generation UI enhancements
+// QTI_BEGIN: 2019-04-03: WLAN: wifi: Wifi generation and WPA3 UI enhancements for Access points.
+           summary = "WPA3(SAE) " + summary;
+        } else if (mAccessPoint.getSecurity() == AccessPoint.SECURITY_OWE) {
+           summary = "WPA3(OWE) " + summary;
+        }
+
+        setSummary(summary);
+// QTI_END: 2019-04-03: WLAN: wifi: Wifi generation and WPA3 UI enhancements for Access points.
 
         mContentDescription = buildContentDescription(getContext(), this /* pref */, mAccessPoint);
     }
@@ -337,8 +369,14 @@ public class AccessPointPreference extends Preference {
             mContext = context;
         }
 
+// QTI_BEGIN: 2020-04-22: WLAN: wifi: refactor Wi-Fi generation UI enhancements
         public Drawable getIcon(int level) {
             return mContext.getDrawable(Utils.getWifiIconResource(level));
+        }
+
+// QTI_END: 2020-04-22: WLAN: wifi: refactor Wi-Fi generation UI enhancements
+        public Drawable getIcon(int level, int standard) {
+            return mContext.getDrawable(Utils.getWifiIconResource(level, standard));
         }
     }
 }

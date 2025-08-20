@@ -323,6 +323,7 @@ public class MobileSignalController extends SignalController<MobileState, Mobile
                 qsInfo.ratTypeIcon,
                 mCurrentState.hasActivityIn(),
                 mCurrentState.hasActivityOut(),
+	        0,
                 dataContentDescription,
                 dataContentDescriptionHtml,
                 qsInfo.description,

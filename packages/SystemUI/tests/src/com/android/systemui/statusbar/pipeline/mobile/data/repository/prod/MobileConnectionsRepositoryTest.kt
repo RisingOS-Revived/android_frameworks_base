@@ -72,6 +72,9 @@ import com.android.systemui.statusbar.pipeline.wifi.data.repository.prod.WifiRep
 import com.android.systemui.testKosmos
 import com.android.systemui.user.data.repository.fakeUserRepository
 import com.android.systemui.util.concurrency.FakeExecutor
+// QTI_BEGIN: 2023-03-02: Android_UI: SystemUI: Support side car 5G icon
+import com.android.systemui.statusbar.policy.FiveGServiceClient
+// QTI_END: 2023-03-02: Android_UI: SystemUI: Support side car 5G icon
 import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.capture
 import com.android.systemui.util.mockito.eq
@@ -423,6 +426,10 @@ abstract class MobileConnectionsRepositoryTest<T : MobileConnectionsRepository> 
     protected val testDispatcher = StandardTestDispatcher()
     protected val testScope = TestScope(testDispatcher)
 
+// QTI_BEGIN: 2023-03-02: Android_UI: SystemUI: Support side car 5G icon
+    private val fiveGServiceClient = FiveGServiceClient(mContext)
+
+// QTI_END: 2023-03-02: Android_UI: SystemUI: Support side car 5G icon
     protected lateinit var underTest: T
 
     @Before
@@ -492,7 +499,9 @@ abstract class MobileConnectionsRepositoryTest<T : MobileConnectionsRepository> 
 
         connectionFactory =
             MobileConnectionRepositoryImpl.Factory(
+// QTI_BEGIN: 2023-04-20: Android_UI: SystemUI: Fix force close issue in UKQ1.230414.002 / UP1A.230406.001
                 context,
+// QTI_END: 2023-04-20: Android_UI: SystemUI: Fix force close issue in UKQ1.230414.002 / UP1A.230406.001
                 fakeBroadcastDispatcher,
                 connectivityManager,
                 telephonyManager = telephonyManager,
@@ -502,6 +511,9 @@ abstract class MobileConnectionsRepositoryTest<T : MobileConnectionsRepository> 
                 scope = testScope.backgroundScope,
                 flags = flags,
                 carrierConfigRepository = carrierConfigRepository,
+// QTI_BEGIN: 2023-03-02: Android_UI: SystemUI: Support side car 5G icon
+                fiveGServiceClient = fiveGServiceClient,
+// QTI_END: 2023-03-02: Android_UI: SystemUI: Support side car 5G icon
             )
         carrierMergedFactory =
             CarrierMergedConnectionRepository.Factory(

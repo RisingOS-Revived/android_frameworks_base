@@ -1178,6 +1178,12 @@ public class AudioRecord implements AudioRouting, MicrophoneDirection,
             case AudioFormat.ENCODING_PCM_FLOAT:
             case AudioFormat.ENCODING_PCM_16BIT:
             case AudioFormat.ENCODING_PCM_8BIT:
+            case AudioFormat.ENCODING_AMRNB:
+            case AudioFormat.ENCODING_AMRWB:
+            case AudioFormat.ENCODING_EVRC:
+            case AudioFormat.ENCODING_EVRCB:
+            case AudioFormat.ENCODING_EVRCWB:
+            case AudioFormat.ENCODING_EVRCNW:
             case AudioFormat.ENCODING_E_AC3_JOC:
                 mAudioFormat = audioFormat;
                 break;
@@ -1414,6 +1420,11 @@ public class AudioRecord implements AudioRouting, MicrophoneDirection,
         case (AudioFormat.CHANNEL_IN_FRONT | AudioFormat.CHANNEL_IN_BACK):
             channelCount = 2;
             break;
+// QTI_BEGIN: 2018-02-19: Audio: add support for extended formats
+        case AudioFormat.CHANNEL_IN_5POINT1:
+            channelCount = 6;
+            break;
+// QTI_END: 2018-02-19: Audio: add support for extended formats
         case AudioFormat.CHANNEL_INVALID:
         default:
             loge("getMinBufferSize(): Invalid channel configuration.");
@@ -1490,6 +1501,9 @@ public class AudioRecord implements AudioRouting, MicrophoneDirection,
      */
     public void startRecording()
     throws IllegalStateException {
+// QTI_BEGIN: 2018-04-09: Secure Systems: SEEMP: framework instrumentation and AppProtect features
+        android.util.SeempLog.record(70);
+// QTI_END: 2018-04-09: Secure Systems: SEEMP: framework instrumentation and AppProtect features
         if (mState != STATE_INITIALIZED) {
             throw new IllegalStateException("startRecording() called on an "
                     + "uninitialized AudioRecord.");
@@ -1513,6 +1527,9 @@ public class AudioRecord implements AudioRouting, MicrophoneDirection,
      */
     public void startRecording(MediaSyncEvent syncEvent)
     throws IllegalStateException {
+// QTI_BEGIN: 2018-04-09: Secure Systems: SEEMP: framework instrumentation and AppProtect features
+        android.util.SeempLog.record(70);
+// QTI_END: 2018-04-09: Secure Systems: SEEMP: framework instrumentation and AppProtect features
         if (mState != STATE_INITIALIZED) {
             throw new IllegalStateException("startRecording() called on an "
                     + "uninitialized AudioRecord.");

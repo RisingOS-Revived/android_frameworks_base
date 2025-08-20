@@ -74,6 +74,9 @@ cc_library_static {
         "com_android_server_pm_PackageManagerShellCommandDataLoader.cpp",
         "com_android_server_sensor_SensorService.cpp",
         "com_android_server_wm_TaskFpsCallbackController.cpp",
+// QTI_BEGIN: 2019-11-13: Core: Add mechanism to improve consistancy of notification
+        "com_android_server_activityTriggerService.cpp",
+// QTI_END: 2019-11-13: Core: Add mechanism to improve consistancy of notification
         "onload.cpp",
         ":lib_cachedAppOptimizer_native",
         ":lib_freezer_native",

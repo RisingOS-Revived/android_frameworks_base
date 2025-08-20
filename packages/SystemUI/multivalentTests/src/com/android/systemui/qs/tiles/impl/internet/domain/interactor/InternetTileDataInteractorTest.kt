@@ -121,6 +121,7 @@ class InternetTileDataInteractorTest : SysuiTestCase() {
                 testScope.backgroundScope,
                 context,
                 flags,
+                mock(),
             )
 
         context.orCreateTestableResources.apply {

@@ -3,7 +3,7 @@ container: "system"
 
 flag {
     name: "use_media_router2_for_info_media_manager"
-    namespace: "media_solutions"
+    namespace: "placeholder_namespace"
     description: "Gates whether to use a MediaRouter2-based implementation of InfoMediaManager, instead of the legacy MediaRouter2Manager-based implementation."
     bug: "192657812"
 }

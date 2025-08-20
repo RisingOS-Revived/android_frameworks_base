@@ -65,6 +65,7 @@ public abstract class KeyguardAbsKeyInputView extends KeyguardInputView {
         return R.string.kg_wrong_password;
     }
 
+
     protected abstract void resetPasswordText(boolean animate, boolean announce);
     protected abstract LockscreenCredential getEnteredCredential();
     protected abstract void setPasswordEntryEnabled(boolean enabled);

@@ -1,4 +1,7 @@
 /*
+ * Copyright (c) 2018, The Linux Foundation. All rights reserved.
+ * Not a Contribution.
+ *
  * Copyright (C) 2013 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -68,7 +71,7 @@ import java.util.regex.Pattern;
 @SystemApi
 @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE)
 public final class ApduServiceInfo implements Parcelable {
-    private static final String TAG = "ApduServiceInfo";
+    static final String TAG = "ApduServiceInfo";
 
     private static final Pattern PLPF_PATTERN =
             Pattern.compile("[0-9A-Fa-f]{2,}[0-9A-Fa-f,\\?,\\*\\.]*");
@@ -101,17 +104,17 @@ public final class ApduServiceInfo implements Parcelable {
     /**
      * The service that implements this
      */
-    private final ResolveInfo mService;
+    final  ResolveInfo mService;
 
     /**
      * Description of the service
      */
-    private final String mDescription;
+    final String mDescription;
 
     /**
      * Whether this service represents AIDs running on the host CPU
      */
-    private final boolean mOnHost;
+    final boolean mOnHost;
 
     /**
      * Offhost reader name.
@@ -128,12 +131,12 @@ public final class ApduServiceInfo implements Parcelable {
     /**
      * Mapping from category to static AID group
      */
-    private final HashMap<String, AidGroup> mStaticAidGroups;
+    final  HashMap<String, AidGroup> mStaticAidGroups;
 
     /**
      * Mapping from category to dynamic AID group
      */
-    private final HashMap<String, AidGroup> mDynamicAidGroups;
+    final  HashMap<String, AidGroup> mDynamicAidGroups;
 
 
     private final Map<String, Boolean> mAutoTransact;
@@ -143,7 +146,7 @@ public final class ApduServiceInfo implements Parcelable {
     /**
      * Whether this service should only be started when the device is unlocked.
      */
-    private final boolean mRequiresDeviceUnlock;
+    final boolean mRequiresDeviceUnlock;
 
     /**
      * Whether this service should only be started when the device is screen on.
@@ -153,17 +156,17 @@ public final class ApduServiceInfo implements Parcelable {
     /**
      * The id of the service banner specified in XML.
      */
-    private final int mBannerResourceId;
+    final int mBannerResourceId;
 
     /**
      * The uid of the package the service belongs to
      */
-    private final int mUid;
+    final int mUid;
 
     /**
      * Settings Activity for this service
      */
-    private final String mSettingsActivityName;
+    final String mSettingsActivityName;
 
     /**
      * State of the service for CATEGORY_OTHER selection

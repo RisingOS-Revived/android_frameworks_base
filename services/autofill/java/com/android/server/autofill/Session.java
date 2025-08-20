@@ -34,7 +34,9 @@ import static android.service.autofill.FillRequest.FLAG_MANUAL_REQUEST;
 import static android.service.autofill.FillRequest.FLAG_PASSWORD_INPUT_TYPE;
 import static android.service.autofill.FillRequest.FLAG_PCC_DETECTION;
 import static android.service.autofill.FillRequest.FLAG_RESET_FILL_DIALOG_STATE;
+// QTI_BEGIN: 2024-12-03: SystemUI: Adding changes for Autofill test cases module.
 import static android.service.autofill.FillRequest.FLAG_SCREEN_HAS_CREDMAN_FIELD;
+// QTI_END: 2024-12-03: SystemUI: Adding changes for Autofill test cases module.
 import static android.service.autofill.FillRequest.FLAG_SUPPORTS_FILL_DIALOG;
 import static android.service.autofill.FillRequest.FLAG_VIEW_NOT_FOCUSED;
 import static android.service.autofill.FillRequest.FLAG_VIEW_REQUESTS_CREDMAN_SERVICE;
@@ -735,11 +737,13 @@ final class Session
         /** Whether the current {@link FillResponse} is expired. */
         private boolean mExpiredResponse;
 
-        /** Whether the fill dialog UI is disabled. */
-        private boolean mFillDialogDisabled;
-
+// QTI_BEGIN: 2024-12-03: SystemUI: Adding changes for Autofill test cases module.
         /** Whether current screen has credman field. */
         private boolean mScreenHasCredmanField;
+
+// QTI_END: 2024-12-03: SystemUI: Adding changes for Autofill test cases module.
+        /** Whether the fill dialog UI is disabled. */
+        private boolean mFillDialogDisabled;
     }
 
     /**
@@ -4195,24 +4199,20 @@ final class Session
         final FillResponse response = getLastResponseLocked("showSaveLocked(%s)");
         final SaveInfo saveInfo = response == null ? null : response.getSaveInfo();
 
+// QTI_BEGIN: 2024-12-03: SystemUI: Adding changes for Autofill test cases module.
         /*
          * Don't show save if the session has credman field
          */
         if (mSessionFlags.mScreenHasCredmanField) {
             if (sVerbose) {
-                Slog.v(
-                        TAG,
-                        "Call to Session#showSaveLocked() rejected - "
-                                + "there is credman field in screen");
+                Slog.v(TAG, "Call to Session#showSaveLocked() rejected - "
+                        + "there is credman field in screen");
             }
-            mSaveEventLogger.maybeSetSaveUiNotShownReason(NO_SAVE_REASON_SCREEN_HAS_CREDMAN_FIELD);
-            mSaveEventLogger.logAndEndEvent();
-            return new SaveResult(
-                    /* logSaveShown= */ false,
-                    /* removeSession= */ true,
+            return new SaveResult(/* logSaveShown= */ false, /* removeSession= */ true,
                     Event.NO_SAVE_UI_REASON_NONE);
         }
 
+// QTI_END: 2024-12-03: SystemUI: Adding changes for Autofill test cases module.
         /*
          * The Save dialog is only shown if all conditions below are met:
          *
@@ -5156,11 +5156,13 @@ final class Session
             return;
         }
 
+// QTI_BEGIN: 2024-12-03: SystemUI: Adding changes for Autofill test cases module.
         if ((flags & FLAG_SCREEN_HAS_CREDMAN_FIELD) != 0) {
             mSessionFlags.mScreenHasCredmanField = true;
         }
 
-        switch (action) {
+// QTI_END: 2024-12-03: SystemUI: Adding changes for Autofill test cases module.
+        switch(action) {
             case ACTION_START_SESSION:
                 // View is triggering autofill.
                 mCurrentViewId = viewState.id;
@@ -5745,7 +5747,9 @@ final class Session
                 mPresentationStatsEventLogger.maybeSetFillDialogNotShownReason(
                         FILL_DIALOG_NOT_SHOWN_REASON_SCREEN_HAS_CREDMAN_FIELD);
             }
+// QTI_BEGIN: 2024-12-03: SystemUI: Adding changes for Autofill test cases module.
             return !mSessionFlags.mFillDialogDisabled && !mSessionFlags.mScreenHasCredmanField;
+// QTI_END: 2024-12-03: SystemUI: Adding changes for Autofill test cases module.
         }
     }
 
