@@ -2031,35 +2031,37 @@ public final class Debug
     /** @hide */
     public static final int MEMINFO_PAGE_TABLES = 13;
     /** @hide */
-    public static final int MEMINFO_KERNEL_STACK = 14;
+    public static final int MEMINFO_SEC_PAGE_TABLES = 14;
+    /** @hide */
+    public static final int MEMINFO_KERNEL_STACK = 15;
     /**
      * Note: MEMINFO_KRECLAIMABLE includes MEMINFO_SLAB_RECLAIMABLE (see KReclaimable field
      * description in kernel documentation).
      * @hide
      */
-    public static final int MEMINFO_KRECLAIMABLE = 15;
+    public static final int MEMINFO_KRECLAIMABLE = 16;
     /** @hide */
-    public static final int MEMINFO_ACTIVE = 16;
+    public static final int MEMINFO_ACTIVE = 17;
     /** @hide */
-    public static final int MEMINFO_INACTIVE = 17;
+    public static final int MEMINFO_INACTIVE = 18;
     /** @hide */
-    public static final int MEMINFO_UNEVICTABLE = 18;
+    public static final int MEMINFO_UNEVICTABLE = 19;
     /** @hide */
-    public static final int MEMINFO_AVAILABLE = 19;
+    public static final int MEMINFO_AVAILABLE = 20;
     /** @hide */
-    public static final int MEMINFO_ACTIVE_ANON = 20;
+    public static final int MEMINFO_ACTIVE_ANON = 21;
     /** @hide */
-    public static final int MEMINFO_INACTIVE_ANON = 21;
+    public static final int MEMINFO_INACTIVE_ANON = 22;
     /** @hide */
-    public static final int MEMINFO_ACTIVE_FILE = 22;
+    public static final int MEMINFO_ACTIVE_FILE = 23;
     /** @hide */
-    public static final int MEMINFO_INACTIVE_FILE = 23;
+    public static final int MEMINFO_INACTIVE_FILE = 24;
     /** @hide */
-    public static final int MEMINFO_CMA_TOTAL = 24;
+    public static final int MEMINFO_CMA_TOTAL = 25;
     /** @hide */
-    public static final int MEMINFO_CMA_FREE = 25;
+    public static final int MEMINFO_CMA_FREE = 26;
     /** @hide */
-    public static final int MEMINFO_COUNT = 26;
+    public static final int MEMINFO_COUNT = 27;
 
     /**
      * Retrieves /proc/meminfo.  outSizes is filled with fields

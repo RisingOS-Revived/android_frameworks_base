@@ -1353,7 +1353,7 @@ public class AppProfiler {
         mAllowLowerMemLevel = allowLowerMemLevel;
     }
 
-   @GuardedBy("mService")
+    @GuardedBy("mService")
     boolean allowLowerMemLevelLocked() {
         return mAllowLowerMemLevel;
     }

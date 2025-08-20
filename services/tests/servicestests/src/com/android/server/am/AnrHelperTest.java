@@ -127,7 +127,7 @@ public class AnrHelperTest {
         final TimeoutRecord timeoutRecord = TimeoutRecord.forInputDispatchWindowUnresponsive(
                 annotation);
         mAnrHelper.appNotResponding(mAnrApp, activityShortComponentName, appInfo,
-                parentShortComponentName, parentProcess, aboveSystem, timeoutRecord,
+                parentShortComponentName, parentProcess, aboveSystem, null, timeoutRecord,
                 /*isContinuousAnr*/ false);
 
         verify(mAnrApp.mErrorState, timeout(TIMEOUT_MS)).appNotResponding(
@@ -153,7 +153,7 @@ public class AnrHelperTest {
                 "annotation");
         final Runnable reportAnr = () -> mAnrHelper.appNotResponding(mAnrApp,
                 "activityShortComponentName", appInfo, "parentShortComponentName",
-                null /* parentProcess */, false /* aboveSystem */, timeoutRecord,
+                null /* parentProcess */, false /* aboveSystem */, null, timeoutRecord,
                 false /*isContinuousAnr*/);
         reportAnr.run();
         // This should be skipped because the pid is pending in queue.

@@ -34,6 +34,10 @@ public final class BLASTBufferQueue {
     private static native long nativeCreate(String name, boolean updateDestinationFrame);
     private static native void nativeDestroy(long ptr);
     private static native Surface nativeGetSurface(long ptr, boolean includeSurfaceControlHandle);
+// QTI_BEGIN: 2021-05-11: Performance: refactor pre-rendering feature for BLASTBufferQueue
+    private static native void nativeSetUndequeuedBufferCount(long ptr, int count);
+    private static native int nativeGetUndequeuedBufferCount(long ptr);
+// QTI_END: 2021-05-11: Performance: refactor pre-rendering feature for BLASTBufferQueue
     private static native boolean nativeSyncNextTransaction(long ptr,
             Consumer<SurfaceControl.Transaction> callback, boolean acquireSingleBuffer);
     private static native void nativeStopContinuousSyncTransaction(long ptr);
@@ -93,6 +97,22 @@ public final class BLASTBufferQueue {
         return nativeGetSurface(mNativeObject, true /* includeSurfaceControlHandle */);
     }
 
+// QTI_BEGIN: 2021-05-11: Performance: refactor pre-rendering feature for BLASTBufferQueue
+    /**
+     * Set undequeued buffer count
+     */
+    public void setUndequeuedBufferCount(int count) {
+        nativeSetUndequeuedBufferCount(mNativeObject, count);
+    }
+
+    /**
+     * @return the count of undequeued buffer
+     */
+    public int getUndequeuedBufferCount() {
+        return nativeGetUndequeuedBufferCount(mNativeObject);
+    }
+
+// QTI_END: 2021-05-11: Performance: refactor pre-rendering feature for BLASTBufferQueue
     /**
      * Send a callback that accepts a transaction to BBQ. BBQ will acquire buffers into the a
      * transaction it created and will eventually send the transaction into the callback

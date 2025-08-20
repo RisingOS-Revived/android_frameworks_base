@@ -18,6 +18,7 @@ package android.util;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.annotation.TestApi;
 
 import java.util.function.Consumer;
@@ -101,6 +102,7 @@ public class SparseArrayMap<K, V> {
     /**
      * Get the value associated with the int-K pair.
      */
+    @SuppressLint("KotlinOperator")
     @Nullable
     public V get(int key, @NonNull K mapKey) {
         ArrayMap<K, V> data = mData.get(key);

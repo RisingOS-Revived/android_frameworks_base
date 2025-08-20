@@ -1,5 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- QTI_BEGIN: 2018-02-18: SystemUI: Customize Signal Cluster-->
+<!-- QTI_END: 2018-02-18: SystemUI: Customize Signal Cluster-->
 <!--
+/*
+ * Copyright (c) 2015-2017 The Linux Foundation. All rights reserved.
+ * Not a Contribution.
+*/
+/*
 **
 ** Copyright 2011, The Android Open Source Project
 **
@@ -59,16 +66,22 @@
         android:layout_width="@dimen/roaming_icon_start_padding"
         android:visibility="gone"
     />
+<!-- QTI_BEGIN: 2018-02-18: SystemUI: Customize Signal Cluster-->
+<!-- QTI_END: 2018-02-18: SystemUI: Customize Signal Cluster-->
     <FrameLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical">
+        >
+<!-- QTI_BEGIN: 2019-08-06: Android_UI: Resubmit commit 934741fde3b74997f63f122344f689b4ed8b7f8d-->
+<!-- QTI_END: 2019-08-06: Android_UI: Resubmit commit 934741fde3b74997f63f122344f689b4ed8b7f8d-->
         <com.android.systemui.statusbar.AnimatedImageView
             android:id="@+id/mobile_signal"
             android:layout_height="@dimen/qs_header_mobile_icon_size"
             android:layout_width="@dimen/qs_header_mobile_icon_size"
             systemui:hasOverlappingRendering="false"
             />
+<!-- QTI_BEGIN: 2019-08-06: Android_UI: Resubmit commit 934741fde3b74997f63f122344f689b4ed8b7f8d-->
+<!-- QTI_END: 2019-08-06: Android_UI: Resubmit commit 934741fde3b74997f63f122344f689b4ed8b7f8d-->
         <ImageView
             android:id="@+id/mobile_roaming"
             android:layout_width="wrap_content"

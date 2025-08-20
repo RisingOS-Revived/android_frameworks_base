@@ -53,6 +53,9 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.UserHandle;
+// QTI_BEGIN: 2021-05-07: AndroidCore: Disable PendingIntent explicit mutability enforcement.
+import android.os.SystemProperties;
+// QTI_END: 2021-05-07: AndroidCore: Disable PendingIntent explicit mutability enforcement.
 import android.util.AndroidException;
 import android.util.ArraySet;
 import android.util.Log;
@@ -169,6 +172,7 @@ public final class PendingIntent implements Parcelable {
     @ChangeId
     @EnabledAfter(targetSdkVersion = android.os.Build.VERSION_CODES.R)
     static final long PENDING_INTENT_EXPLICIT_MUTABILITY_REQUIRED = 160794467L;
+
 
     /** @hide */
     @ChangeId
@@ -443,12 +447,17 @@ public final class PendingIntent implements Parcelable {
         final String packageName = context.getPackageName();
 
         if (isFlagImmutableSet && isFlagMutableSet) {
+// QTI_BEGIN: 2021-06-29: AndroidCore: Revert "Disable PendingIntent explicit mutability enforcement."
             throw new IllegalArgumentException(
                 "Cannot set both FLAG_IMMUTABLE and FLAG_MUTABLE for PendingIntent");
         }
+// QTI_END: 2021-06-29: AndroidCore: Revert "Disable PendingIntent explicit mutability enforcement."
 
+// QTI_BEGIN: 2021-06-29: AndroidCore: Revert "Disable PendingIntent explicit mutability enforcement."
         if (Compatibility.isChangeEnabled(PENDING_INTENT_EXPLICIT_MUTABILITY_REQUIRED)
+// QTI_END: 2021-06-29: AndroidCore: Revert "Disable PendingIntent explicit mutability enforcement."
                 && !isFlagImmutableSet && !isFlagMutableSet) {
+// QTI_BEGIN: 2021-06-29: AndroidCore: Revert "Disable PendingIntent explicit mutability enforcement."
             String msg = packageName + ": Targeting S+ (version " + Build.VERSION_CODES.S
                     + " and above) requires that one of FLAG_IMMUTABLE or FLAG_MUTABLE"
                     + " be specified when creating a PendingIntent.\nStrongly consider"

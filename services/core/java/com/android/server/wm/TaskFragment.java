@@ -92,6 +92,9 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.ArraySet;
+// QTI_BEGIN: 2021-11-22: Performance: perf: Refactor Animation Boost
+import android.util.BoostFramework;
+// QTI_END: 2021-11-22: Performance: perf: Refactor Animation Boost
 import android.util.DisplayMetrics;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
@@ -103,6 +106,9 @@ import android.window.TaskFragmentInfo;
 import android.window.TaskFragmentOrganizerToken;
 
 import com.android.internal.annotations.VisibleForTesting;
+// QTI_BEGIN: 2021-11-22: Performance: perf: Move ActivityResumeTrigger based on refactored code.
+import com.android.internal.app.ActivityTrigger;
+// QTI_END: 2021-11-22: Performance: perf: Move ActivityResumeTrigger based on refactored code.
 import com.android.internal.protolog.ProtoLog;
 import com.android.internal.util.ToBooleanFunction;
 import com.android.server.am.HostingRecord;
@@ -199,6 +205,14 @@ class TaskFragment extends WindowContainer<WindowContainer> {
     final ActivityTaskSupervisor mTaskSupervisor;
     final RootWindowContainer mRootWindowContainer;
     private final TaskFragmentOrganizerController mTaskFragmentOrganizerController;
+
+// QTI_BEGIN: 2021-11-22: Performance: perf: Refactor Animation Boost
+    public BoostFramework mPerf = null;
+// QTI_END: 2021-11-22: Performance: perf: Refactor Animation Boost
+// QTI_BEGIN: 2021-11-22: Performance: perf: Move ActivityResumeTrigger based on refactored code.
+    //ActivityTrigger
+    static final ActivityTrigger mActivityTrigger = new ActivityTrigger();
+// QTI_END: 2021-11-22: Performance: perf: Move ActivityResumeTrigger based on refactored code.
 
     // TODO(b/233177466): Move mMinWidth and mMinHeight to Task and remove usages in TaskFragment
     /**
@@ -1503,9 +1517,23 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         // The activity may be waiting for stop, but that is no longer
         // appropriate for it.
         mTaskSupervisor.mStoppingActivities.remove(next);
+// QTI_BEGIN: 2023-05-22: Performance: DSR: Fix broken DSR
+
+        if (!next.translucentWindowLaunch)
+            next.launching = true;
+// QTI_END: 2023-05-22: Performance: DSR: Fix broken DSR
 
         if (DEBUG_SWITCH) Slog.v(TAG_SWITCH, "Resuming " + next);
 
+// QTI_BEGIN: 2021-11-22: Performance: perf: Move ActivityResumeTrigger based on refactored code.
+        //Trigger Activity Resume
+        if (mActivityTrigger != null) {
+            mActivityTrigger.activityResumeTrigger(next.intent, next.info,
+                                                   next.info.applicationInfo,
+                                                   next.occludesParent());
+        }
+
+// QTI_END: 2021-11-22: Performance: perf: Move ActivityResumeTrigger based on refactored code.
         mTaskSupervisor.setLaunchSource(next.info.applicationInfo.uid);
 
         ActivityRecord lastResumed = null;
@@ -1606,18 +1634,48 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         // to ignore it when computing the desired screen orientation.
         boolean anim = true;
         final DisplayContent dc = taskDisplayArea.mDisplayContent;
+// QTI_BEGIN: 2021-11-22: Performance: perf: Refactor Animation Boost
+
+        if (mPerf == null) {
+            mPerf = new BoostFramework();
+        }
+
+// QTI_END: 2021-11-22: Performance: perf: Refactor Animation Boost
         if (prev != null) {
             if (prev.finishing) {
                 if (mTaskSupervisor.mNoAnimActivities.contains(prev)) {
                     anim = false;
+// QTI_BEGIN: 2021-11-22: Performance: perf: Refactor Animation Boost
+                    if(prev.getTask() != next.getTask() && mPerf != null) {
+                       mPerf.perfHint(BoostFramework.VENDOR_HINT_ANIM_BOOST,
+                           next.packageName);
+                    }
+// QTI_END: 2021-11-22: Performance: perf: Refactor Animation Boost
                 }
                 prev.setVisibility(false);
-            } else if (mTaskSupervisor.mNoAnimActivities.contains(next)) {
-                anim = false;
+            } else {
+                if (mTaskSupervisor.mNoAnimActivities.contains(next)) {
+                    anim = false;
+                } else {
+// QTI_BEGIN: 2021-11-22: Performance: perf: Refactor Animation Boost
+                    if(prev.getTask() != next.getTask() && mPerf != null) {
+                       mPerf.perfHint(BoostFramework.VENDOR_HINT_ANIM_BOOST,
+                           next.packageName);
+                    }
+// QTI_END: 2021-11-22: Performance: perf: Refactor Animation Boost
+                }
             }
-        } else if (mTaskSupervisor.mNoAnimActivities.contains(next)) {
-            anim = false;
-        }
+        } else {
+            if (mTaskSupervisor.mNoAnimActivities.contains(next)) {
+                anim = false;
+// QTI_BEGIN: 2023-10-24: Performance: perf: add exit app animation boost for apps exit.
+                // Exit app animation boost
+                if (next != null && mPerf != null) {
+                    mPerf.perfHint(BoostFramework.VENDOR_HINT_EXIT_ANIM_BOOST, next.packageName);
+                }
+// QTI_END: 2023-10-24: Performance: perf: add exit app animation boost for apps exit.
+            }
+        } 
 
         if (anim) {
             next.applyOptionsAnimation();
@@ -1890,6 +1948,22 @@ class TaskFragment extends WindowContainer<WindowContainer> {
             return false;
         }
 
+// QTI_BEGIN: 2022-03-20: Performance: perf: Move ActivityPauseTrigger based on refactored code.
+        //Trigger Activity Pause
+        if (mActivityTrigger != null) {
+            mActivityTrigger.activityPauseTrigger(prev.intent, prev.info,
+                                                  prev.info.applicationInfo);
+        }
+
+// QTI_END: 2022-03-20: Performance: perf: Move ActivityPauseTrigger based on refactored code.
+// QTI_BEGIN: 2023-06-08: Performance: DSR: Fix DSR when we have toast window
+        if (mAtmService.getToastWindow() == true) {
+            // When we have a toast window, that activity will be translucent.
+            prev.translucentWindowLaunch = true;
+            mAtmService.resetToastWindow();
+        }
+
+// QTI_END: 2023-06-08: Performance: DSR: Fix DSR when we have toast window
         ProtoLog.v(WM_DEBUG_STATES, "Moving to PAUSING: %s", prev);
         mPausingActivity = prev;
         mLastPausedActivity = prev;

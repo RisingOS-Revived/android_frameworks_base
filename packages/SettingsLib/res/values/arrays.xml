@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- QTI_BEGIN: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
+<!-- QTI_END: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
 <!--
 /*
 **
@@ -17,163 +19,366 @@
 ** limitations under the License.
 */
 -->
+<!-- QTI_BEGIN: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
+<!-- QTI_END: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
 
     <!-- Wi-Fi settings -->
 
     <!-- Match this with the order of NetworkInfo.DetailedState. --> <skip />
     <!-- Wi-Fi settings. The status messages when the network is unknown. -->
+<!-- QTI_BEGIN: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
+<!-- QTI_END: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
     <string-array name="wifi_status">
         <!-- Status message of Wi-Fi when it is idle. -->
+<!-- QTI_BEGIN: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
+<!-- QTI_END: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
         <item></item>
         <!-- Status message of Wi-Fi when it is scanning. -->
+<!-- QTI_BEGIN: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
+<!-- QTI_END: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
         <item>Scanning\u2026</item>
         <!-- Status message of Wi-Fi when it is connecting. -->
+<!-- QTI_BEGIN: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
+<!-- QTI_END: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
         <item>Connecting\u2026</item>
         <!-- Status message of Wi-Fi when it is authenticating. -->
+<!-- QTI_BEGIN: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
+<!-- QTI_END: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
         <item>Authenticating\u2026</item>
         <!-- Status message of Wi-Fi when it is obtaining IP address. -->
+<!-- QTI_BEGIN: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
+<!-- QTI_END: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
         <item>Obtaining IP address\u2026</item>
         <!-- Status message of Wi-Fi when it is connected. -->
+<!-- QTI_BEGIN: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
+<!-- QTI_END: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
         <item>Connected</item>
         <!-- Status message of Wi-Fi when it is suspended. -->
+<!-- QTI_BEGIN: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
+<!-- QTI_END: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
         <item>Suspended</item>
         <!-- Status message of Wi-Fi when it is disconnecting. -->
+<!-- QTI_BEGIN: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
+<!-- QTI_END: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
         <item>Disconnecting\u2026</item>
         <!-- Status message of Wi-Fi when it is disconnected. -->
+<!-- QTI_BEGIN: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
+<!-- QTI_END: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
         <item>Disconnected</item>
         <!-- Status message of Wi-Fi when it is a failure. -->
+<!-- QTI_BEGIN: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
+<!-- QTI_END: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
         <item>Unsuccessful</item>
         <!-- Status message of Wi-Fi when it is blocked. -->
+<!-- QTI_BEGIN: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
+<!-- QTI_END: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
         <item>Blocked</item>
         <!-- Status message of Wi-Fi when connectiong is being verified. -->
+<!-- QTI_BEGIN: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
+<!-- QTI_END: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
         <item>Temporarily avoiding poor connection</item>
+<!-- QTI_BEGIN: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
+<!-- QTI_END: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
     </string-array>
 
     <!-- Match this with the order of NetworkInfo.DetailedState. --> <skip />
     <!-- Wi-Fi settings. The status messages when the network is known. -->
+<!-- QTI_BEGIN: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
+<!-- QTI_END: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
     <string-array name="wifi_status_with_ssid">
         <!-- Status message of Wi-Fi when it is idle. -->
+<!-- QTI_BEGIN: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
+<!-- QTI_END: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
         <item></item>
         <!-- Status message of Wi-Fi when it is scanning. -->
+<!-- QTI_BEGIN: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
+<!-- QTI_END: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
         <item>Scanning\u2026</item>
         <!-- Status message of Wi-Fi when it is connecting to a network. -->
+<!-- QTI_BEGIN: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
+<!-- QTI_END: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
         <item>Connecting to <xliff:g id="network_name">%1$s</xliff:g>\u2026</item>
         <!-- Status message of Wi-Fi when it is authenticating with a network. -->
+<!-- QTI_BEGIN: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
+<!-- QTI_END: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
         <item>Authenticating with <xliff:g id="network_name">%1$s</xliff:g>\u2026</item>
         <!-- Status message of Wi-Fi when it is obtaining IP address from a network. -->
+<!-- QTI_BEGIN: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
+<!-- QTI_END: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
         <item>Obtaining IP address from <xliff:g id="network_name">%1$s</xliff:g>\u2026</item>
         <!-- Status message of Wi-Fi when it is connected to a network. -->
+<!-- QTI_BEGIN: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
+<!-- QTI_END: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
         <item>Connected to <xliff:g id="network_name">%1$s</xliff:g></item>
         <!-- Status message of Wi-Fi when it is suspended. -->
+<!-- QTI_BEGIN: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
+<!-- QTI_END: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
         <item>Suspended</item>
         <!-- Status message of Wi-Fi when it is disconnecting from a network. -->
+<!-- QTI_BEGIN: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
+<!-- QTI_END: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
         <item>Disconnecting from <xliff:g id="network_name">%1$s</xliff:g>\u2026</item>
         <!-- Status message of Wi-Fi when it is disconnected. -->
+<!-- QTI_BEGIN: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
+<!-- QTI_END: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
         <item>Disconnected</item>
         <!-- Status message of Wi-Fi when it is a failure. -->
+<!-- QTI_BEGIN: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
+<!-- QTI_END: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
         <item>Unsuccessful</item>
         <!-- Status message of Wi-Fi when it is blocked. -->
+<!-- QTI_BEGIN: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
+<!-- QTI_END: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
         <item>Blocked</item>
         <!-- Status message of Wi-Fi when connectiong is being verified. -->
+<!-- QTI_BEGIN: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
+<!-- QTI_END: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
         <item>Temporarily avoiding poor connection</item>
+<!-- QTI_BEGIN: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
+<!-- QTI_END: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
     </string-array>
 
     <!-- Titles for HDCP checking preference. [CHAR LIMIT=35] -->
+<!-- QTI_BEGIN: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
+<!-- QTI_END: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
     <string-array name="hdcp_checking_titles">
+<!-- QTI_BEGIN: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
+<!-- QTI_END: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
         <item>Never check</item>
+<!-- QTI_BEGIN: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
+<!-- QTI_END: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
         <item>Check for DRM content only</item>
+<!-- QTI_BEGIN: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
+<!-- QTI_END: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
         <item>Always check</item>
+<!-- QTI_BEGIN: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
+<!-- QTI_END: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
     </string-array>
 
     <!-- Values for HDCP checking preference. -->
+<!-- QTI_BEGIN: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
+<!-- QTI_END: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
     <string-array name="hdcp_checking_values" translatable="false" >
+<!-- QTI_BEGIN: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
+<!-- QTI_END: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
         <item>never</item>
+<!-- QTI_BEGIN: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
+<!-- QTI_END: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
         <item>drm-only</item>
+<!-- QTI_BEGIN: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
+<!-- QTI_END: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
         <item>always</item>
+<!-- QTI_BEGIN: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
+<!-- QTI_END: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
     </string-array>
 
     <!-- Summaries for HDCP checking preference. [CHAR LIMIT=100]-->
+<!-- QTI_BEGIN: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
+<!-- QTI_END: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
     <string-array name="hdcp_checking_summaries" >
+<!-- QTI_BEGIN: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
+<!-- QTI_END: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
         <item>Never use HDCP checking</item>
+<!-- QTI_BEGIN: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
+<!-- QTI_END: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
         <item>Use HDCP checking for DRM content only</item>
+<!-- QTI_BEGIN: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
+<!-- QTI_END: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
         <item>Always use HDCP checking</item>
+<!-- QTI_BEGIN: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
+<!-- QTI_END: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
     </string-array>
 
 
     <!-- Bluetooth settings -->
     <!-- Titles for Bluetooth HCI Snoop Logging -->
+<!-- QTI_BEGIN: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
+<!-- QTI_END: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
     <string-array name="bt_hci_snoop_log_entries">
+<!-- QTI_BEGIN: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
+<!-- QTI_END: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
         <item>Disabled</item>
+<!-- QTI_BEGIN: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
+<!-- QTI_END: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
         <item>Enabled Filtered</item>
+<!-- QTI_BEGIN: 2019-10-18: Bluetooth: Change order of BT snoop dev UI options[2/2]-->
+<!-- QTI_END: 2019-10-18: Bluetooth: Change order of BT snoop dev UI options[2/2]-->
+<!-- QTI_BEGIN: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
+<!-- QTI_END: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
         <item>Enabled</item>
+<!-- QTI_BEGIN: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
+<!-- QTI_END: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
+<!-- QTI_BEGIN: 2019-04-01: Bluetooth: Add Filtering for vendor snoop logs (4/4)-->
+<!-- QTI_END: 2019-04-01: Bluetooth: Add Filtering for vendor snoop logs (4/4)-->
+        <item>Enabled Headers Filtered</item>
+<!-- QTI_BEGIN: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
+<!-- QTI_END: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
+<!-- QTI_BEGIN: 2019-04-01: Bluetooth: Add Filtering for vendor snoop logs (4/4)-->
+<!-- QTI_END: 2019-04-01: Bluetooth: Add Filtering for vendor snoop logs (4/4)-->
+        <item>Enabled Media Pkts Filtered</item>
+<!-- QTI_BEGIN: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
+<!-- QTI_END: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
+        <item>Enabled Profiles Filtered</item>
+<!-- QTI_BEGIN: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
+<!-- QTI_END: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
     </string-array>
 
     <!-- Values for Bluetooth HCI Snoop Logging -->
+<!-- QTI_BEGIN: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
+<!-- QTI_END: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
     <string-array name="bt_hci_snoop_log_values" translatable="false">
+<!-- QTI_BEGIN: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
+<!-- QTI_END: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
         <item>disabled</item>
+<!-- QTI_BEGIN: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
+<!-- QTI_END: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
         <item>filtered</item>
+<!-- QTI_BEGIN: 2019-10-18: Bluetooth: Change order of BT snoop dev UI options[2/2]-->
+<!-- QTI_END: 2019-10-18: Bluetooth: Change order of BT snoop dev UI options[2/2]-->
+<!-- QTI_BEGIN: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
+<!-- QTI_END: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
         <item>full</item>
+<!-- QTI_BEGIN: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
+<!-- QTI_END: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
+<!-- QTI_BEGIN: 2019-04-01: Bluetooth: Add Filtering for vendor snoop logs (4/4)-->
+<!-- QTI_END: 2019-04-01: Bluetooth: Add Filtering for vendor snoop logs (4/4)-->
+        <item>snoopheadersfiltered</item>
+<!-- QTI_BEGIN: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
+<!-- QTI_END: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
+<!-- QTI_BEGIN: 2019-04-01: Bluetooth: Add Filtering for vendor snoop logs (4/4)-->
+<!-- QTI_END: 2019-04-01: Bluetooth: Add Filtering for vendor snoop logs (4/4)-->
+        <item>mediapktsfiltered</item>
+<!-- QTI_BEGIN: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
+<!-- QTI_END: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
+        <item>profilesfiltered</item>
+<!-- QTI_BEGIN: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
+<!-- QTI_END: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
     </string-array>
 
     <!-- Titles for Bluetooth HCI Snoop Filtered Logging -->
+<!-- QTI_BEGIN: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
+<!-- QTI_END: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
     <string-array name="bt_hci_snoop_log_filters_entries">
+<!-- QTI_BEGIN: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
+<!-- QTI_END: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
         <item>Leave only ACL headers</item>
+<!-- QTI_BEGIN: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
+<!-- QTI_END: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
         <item>Filter A2DP media packets</item>
+<!-- QTI_BEGIN: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
+<!-- QTI_END: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
         <item>Filter RFCOMM channel</item>
+<!-- QTI_BEGIN: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
+<!-- QTI_END: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
     </string-array>
 
-        <!-- Values for Bluetooth HCI Snoop Filtered Logging -->
+    <!-- Values for Bluetooth HCI Snoop Filtered Logging -->
+<!-- QTI_BEGIN: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
+<!-- QTI_END: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
     <string-array name="bt_hci_snoop_log_filters_values" translatable="false">
+<!-- QTI_BEGIN: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
+<!-- QTI_END: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
         <item>headers</item>
+<!-- QTI_BEGIN: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
+<!-- QTI_END: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
         <item>profiles.a2dp</item>
+<!-- QTI_BEGIN: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
+<!-- QTI_END: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
         <item>profiles.rfcomm</item>
+<!-- QTI_BEGIN: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
+<!-- QTI_END: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
     </string-array>
 
-        <!-- Titles for Bluetooth HCI Snoop Filtered Logging -->
+    <!-- Titles for Bluetooth HCI Snoop Filtered Logging -->
+<!-- QTI_BEGIN: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
+<!-- QTI_END: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
     <string-array name="bt_hci_snoop_log_profile_filter_entries">
+<!-- QTI_BEGIN: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
+<!-- QTI_END: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
         <item>Disable</item>
+<!-- QTI_BEGIN: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
+<!-- QTI_END: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
         <item>Fill with string of characters</item>
+<!-- QTI_BEGIN: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
+<!-- QTI_END: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
         <item>Leave only header</item>
+<!-- QTI_BEGIN: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
+<!-- QTI_END: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
         <item>Fully remove</item>
+<!-- QTI_BEGIN: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
+<!-- QTI_END: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
     </string-array>
 
-        <!-- Values for Bluetooth HCI Snoop Filtered Logging -->
+    <!-- Values for Bluetooth HCI Snoop Filtered Logging -->
+<!-- QTI_BEGIN: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
+<!-- QTI_END: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
     <string-array name="bt_hci_snoop_log_profile_filter_values" translatable="false">
+<!-- QTI_BEGIN: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
+<!-- QTI_END: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
         <item>disabled</item>
+<!-- QTI_BEGIN: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
+<!-- QTI_END: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
         <item>magic</item>
+<!-- QTI_BEGIN: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
+<!-- QTI_END: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
         <item>header</item>
+<!-- QTI_BEGIN: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
+<!-- QTI_END: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
         <item>fullfilter</item>
+<!-- QTI_BEGIN: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
+<!-- QTI_END: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
     </string-array>
+
+<!-- QTI_BEGIN: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
+<!-- QTI_END: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
+    <!-- Values for Bluetooth HCI Snoop Logging Enhanced-->
+<!-- QTI_BEGIN: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
+<!-- QTI_END: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
+    <string-array name="bt_hci_snoop_log_values_enhanced" translatable="false">
+<!-- QTI_BEGIN: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
+<!-- QTI_END: 2022-10-07: Bluetooth: Merge "BT Snoop: Add Adavnce snoop properties (1/4)" into t-keystone-qcom-dev-->
+        <item>snoopheadersfiltered</item>
+        <item>mediapktsfiltered</item>
+        <item>profilesfiltered</item>
+      </string-array>
 
     <!-- Titles for Bluetooth AVRCP Versions -->
     <string-array name="bluetooth_avrcp_versions">
-        <item>AVRCP 1.5 (Default)</item>
+<!-- QTI_BEGIN: 2024-07-16: Bluetooth: BT: Default AVRCP TG version as v1.6 in Dev Options (2/2)-->
+<!-- QTI_END: 2024-07-16: Bluetooth: BT: Default AVRCP TG version as v1.6 in Dev Options (2/2)-->
+        <item>AVRCP 1.6 (Default)</item>
         <item>AVRCP 1.3</item>
         <item>AVRCP 1.4</item>
-        <item>AVRCP 1.6</item>
+<!-- QTI_BEGIN: 2024-07-16: Bluetooth: BT: Default AVRCP TG version as v1.6 in Dev Options (2/2)-->
+<!-- QTI_END: 2024-07-16: Bluetooth: BT: Default AVRCP TG version as v1.6 in Dev Options (2/2)-->
+        <item>AVRCP 1.5</item>
     </string-array>
 
     <!-- Values for Bluetooth AVRCP Versions -->
     <string-array name="bluetooth_avrcp_version_values">
-        <item>avrcp15</item>
+<!-- QTI_BEGIN: 2024-07-16: Bluetooth: BT: Default AVRCP TG version as v1.6 in Dev Options (2/2)-->
+<!-- QTI_END: 2024-07-16: Bluetooth: BT: Default AVRCP TG version as v1.6 in Dev Options (2/2)-->
+        <item>avrcp16</item>
         <item>avrcp13</item>
         <item>avrcp14</item>
-        <item>avrcp16</item>
+<!-- QTI_BEGIN: 2024-07-16: Bluetooth: BT: Default AVRCP TG version as v1.6 in Dev Options (2/2)-->
+<!-- QTI_END: 2024-07-16: Bluetooth: BT: Default AVRCP TG version as v1.6 in Dev Options (2/2)-->
+        <item>avrcp15</item>
     </string-array>
 
     <!-- Titles for Bluetooth MAP Versions -->
     <string-array name="bluetooth_map_versions">
-        <item>MAP 1.2 (Default)</item>
+        <item>MAP 1.4 (Default)</item>
         <item>MAP 1.3</item>
-        <item>MAP 1.4</item>
+        <item>MAP 1.2</item>
     </string-array>
 
     <!-- Values for Bluetooth MAP Versions -->
     <string-array name="bluetooth_map_version_values">
-        <item>map12</item>
-        <item>map13</item>
         <item>map14</item>
+        <item>map13</item>
+        <item>map12</item>
     </string-array>
 
     <!-- Titles for Bluetooth Audio Codec selection preference. [CHAR LIMIT=50] -->
@@ -181,11 +386,21 @@
         <item>Use System Selection (Default)</item>
         <item>SBC</item>
         <item>AAC</item>
+<!-- QTI_BEGIN: 2022-12-01: Bluetooth: A2DP: Match DevUI codec array listing with BluetoothCodecConfig-->
+<!-- QTI_END: 2022-12-01: Bluetooth: A2DP: Match DevUI codec array listing with BluetoothCodecConfig-->
         <item><xliff:g id="qualcomm">Qualcomm®</xliff:g> <xliff:g id="aptx">aptX™</xliff:g> audio</item>
+<!-- QTI_BEGIN: 2022-12-01: Bluetooth: A2DP: Match DevUI codec array listing with BluetoothCodecConfig-->
+<!-- QTI_END: 2022-12-01: Bluetooth: A2DP: Match DevUI codec array listing with BluetoothCodecConfig-->
         <item><xliff:g id="qualcomm">Qualcomm®</xliff:g> <xliff:g id="aptx_hd">aptX™ HD</xliff:g> audio</item>
         <item>LDAC</item>
         <item>LC3</item>
         <item>Opus</item>
+<!-- QTI_BEGIN: 2018-07-17: Bluetooth: BT: Adding aptX-Adaptive codec entry to Framework-->
+<!-- QTI_END: 2018-07-17: Bluetooth: BT: Adding aptX-Adaptive codec entry to Framework-->
+        <item><xliff:g id="qualcomm">Qualcomm®</xliff:g> <xliff:g id="aptx_adaptive">aptX™ Adaptive</xliff:g> audio</item>
+<!-- QTI_BEGIN: 2019-04-04: Bluetooth: TWS-A2DP: Add TWS+ codec to DevUI support-->
+<!-- QTI_END: 2019-04-04: Bluetooth: TWS-A2DP: Add TWS+ codec to DevUI support-->
+        <item><xliff:g id="qualcomm">Qualcomm®</xliff:g> <xliff:g id="aptx_twsp">aptX™ TWS+</xliff:g> audio</item>
     </string-array>
 
     <!-- Summaries for Bluetooth Audio Codec selection preference. [CHAR LIMIT=50]-->
@@ -196,8 +411,18 @@
         <item><xliff:g id="qualcomm">Qualcomm®</xliff:g> <xliff:g id="aptx">aptX™</xliff:g> audio</item>
         <item><xliff:g id="qualcomm">Qualcomm®</xliff:g> <xliff:g id="aptx_hd">aptX™ HD</xliff:g> audio</item>
         <item>LDAC</item>
+<!-- QTI_BEGIN: 2022-12-01: Bluetooth: A2DP: Match DevUI codec array listing with BluetoothCodecConfig-->
+<!-- QTI_END: 2022-12-01: Bluetooth: A2DP: Match DevUI codec array listing with BluetoothCodecConfig-->
         <item>LC3</item>
+<!-- QTI_BEGIN: 2022-12-01: Bluetooth: A2DP: Match DevUI codec array listing with BluetoothCodecConfig-->
+<!-- QTI_END: 2022-12-01: Bluetooth: A2DP: Match DevUI codec array listing with BluetoothCodecConfig-->
         <item>Opus</item>
+<!-- QTI_BEGIN: 2018-07-17: Bluetooth: BT: Adding aptX-Adaptive codec entry to Framework-->
+<!-- QTI_END: 2018-07-17: Bluetooth: BT: Adding aptX-Adaptive codec entry to Framework-->
+        <item><xliff:g id="qualcomm">Qualcomm®</xliff:g> <xliff:g id="aptx_adaptive">aptX™ Adaptive</xliff:g> audio</item>
+<!-- QTI_BEGIN: 2019-04-04: Bluetooth: TWS-A2DP: Add TWS+ codec to DevUI support-->
+<!-- QTI_END: 2019-04-04: Bluetooth: TWS-A2DP: Add TWS+ codec to DevUI support-->
+        <item><xliff:g id="qualcomm">Qualcomm®</xliff:g> <xliff:g id="aptx_twsp">aptX™ TWS+</xliff:g> audio</item>
     </string-array>
 
     <!-- Titles for Bluetooth Audio Codec Sample Rate selection preference. [CHAR LIMIT=50] -->

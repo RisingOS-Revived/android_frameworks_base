@@ -12,6 +12,10 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License
+ *
+ * Changes from Qualcomm Innovation Center, Inc. are provided under the following license:
+ * Copyright (c) 2025 Qualcomm Innovation Center, Inc. All rights reserved.
+ * SPDX-License-Identifier: BSD-3-Clause-Clear
  */
 
 package android.telecom;
@@ -66,7 +70,8 @@ public class VideoProfile implements Parcelable {
             flag = true,
             prefix = { "STATE_" },
             value = {STATE_AUDIO_ONLY, STATE_TX_ENABLED, STATE_RX_ENABLED, STATE_BIDIRECTIONAL,
-                    STATE_PAUSED})
+                    STATE_PAUSED, STATE_ALT_TX_ENABLED, STATE_ALT_RX_ENABLED,
+                    STATE_ALT_BIDIRECTIONAL, STATE_DUAL_BIDIRECTIONAL})
     public @interface VideoState {}
 
     /**
@@ -118,6 +123,31 @@ public class VideoProfile implements Parcelable {
      * Video is paused.
      */
     public static final int STATE_PAUSED = 0x4;
+
+    /**
+     * Video transmission is enabled for alternate stream
+     * @hide
+     */
+    public static final int STATE_ALT_TX_ENABLED = 0x8;
+
+    /**
+     * Video reception is enabled for alternate stream
+     * @hide
+     */
+    public static final int STATE_ALT_RX_ENABLED = 0x10;
+
+    /**
+     * Video signal is bi-directional for alternate stream
+     * @hide
+     */
+    public static final int STATE_ALT_BIDIRECTIONAL = STATE_ALT_TX_ENABLED | STATE_ALT_RX_ENABLED;
+
+    /**
+     * Video signal is bi-directional for main and alternate stream
+     * @hide
+     */
+    public static final int STATE_DUAL_BIDIRECTIONAL =
+            STATE_BIDIRECTIONAL | STATE_ALT_BIDIRECTIONAL;
 
     private final int mVideoState;
 
@@ -251,6 +281,10 @@ public class VideoProfile implements Parcelable {
 
             if (isPaused(videoState)) {
                 sb.append(" Pause");
+            }
+
+            if (videoState == STATE_DUAL_BIDIRECTIONAL) {
+                sb.append(" Dual VT");
             }
         }
 

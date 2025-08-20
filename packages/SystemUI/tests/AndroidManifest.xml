@@ -52,6 +52,9 @@
     <uses-permission android:name="android.permission.NETWORK_SETTINGS" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.REGISTER_WINDOW_MANAGER_LISTENERS" />
+<!-- QTI_BEGIN: 2019-01-24: Android_UI: SystemUI: Add unit test for 5G-->
+<!-- QTI_END: 2019-01-24: Android_UI: SystemUI: Add unit test for 5G-->
+    <uses-permission android:name="android.permission.MODIFY_PHONE_STATE" />
 
     <application android:debuggable="true" android:largeHeap="true" android:testOnly="true"
             android:enableOnBackInvokedCallback="true" >

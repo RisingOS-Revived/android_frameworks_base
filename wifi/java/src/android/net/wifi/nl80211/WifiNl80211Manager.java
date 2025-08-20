@@ -496,18 +496,7 @@ public class WifiNl80211Manager {
 
         @Override
         public void onConnectedClientsChanged(NativeWifiClient client, boolean isConnected) {
-            if (mVerboseLoggingEnabled) {
-                Log.d(TAG, "onConnectedClientsChanged called with "
-                        + client.getMacAddress() + " isConnected: " + isConnected);
-            }
-
-            final long token = Binder.clearCallingIdentity();
-            try {
-                mExecutor.execute(
-                        () -> mSoftApListener.onConnectedClientsChanged(client, isConnected));
-            } finally {
-                Binder.restoreCallingIdentity(token);
-            }
+            // Ignore event from wificond. This is handled from hostapd now.
         }
 
         @Override

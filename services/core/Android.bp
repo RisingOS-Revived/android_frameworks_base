@@ -237,6 +237,15 @@ java_library_static {
         "overlayable_policy_aidl-java",
         "com.android.sysprop.watchdog",
         "securebox",
+// QTI_BEGIN: 2019-06-24: Core: Inform Servicetracker HAL about Service Lifecycle events
+        "vendor.qti.hardware.servicetracker-V1.0-java",
+// QTI_END: 2019-06-24: Core: Inform Servicetracker HAL about Service Lifecycle events
+// QTI_BEGIN: 2020-06-27: Frameworks: Passing every activity state change to Servicetracker HAL.
+        "vendor.qti.hardware.servicetracker-V1.2-java",
+// QTI_END: 2020-06-27: Frameworks: Passing every activity state change to Servicetracker HAL.
+// QTI_BEGIN: 2023-04-06: Frameworks: Add servicetracker AIDl support for service lifecycle event
+        "vendor.qti.hardware.servicetrackeraidl-V1-java",
+// QTI_END: 2023-04-06: Frameworks: Add servicetracker AIDl support for service lifecycle event
         "apache-commons-math",
         "apache-commons-compress",
         "battery_saver_flag_lib",
@@ -275,6 +284,20 @@ java_library_static {
         "-J--add-exports=jdk.compiler/com.sun.tools.javac.model=ALL-UNNAMED",
         "-J--add-exports=jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED",
         "-J--add-exports=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED",
+    ],
+    visibility: [
+      "//frameworks/base/services",
+      "//frameworks/base/tests/Input",
+      "//frameworks/base/tests/InputScreenshotTest",
+      "//packages/modules/AdServices/adservices/apk/unittest",
+      "//packages/modules/AdServices/adservices/tests/unittest/adservices-test-utility",
+      "//packages/modules/AdServices/adservices/tests/unittest/service-core",
+      "//packages/modules/AdServices/adservices/tests/unittest/system-service",
+      "//packages/modules/AdServices/adservices/tests/unittest/ui",
+      "//packages/modules/AdServices/adservices/tests/unittest/service-core/appsearch",
+      "//packages/modules/AdServices/adservices/tests/unittest/service-core/appsetid",
+      "//packages/modules/AdServices/adservices/tests/unittest/service-core/adid",
+      "//packages/modules/AdServices/shared/device-side/tests",
     ],
     lint: {
         baseline_filename: "lint-baseline.xml",

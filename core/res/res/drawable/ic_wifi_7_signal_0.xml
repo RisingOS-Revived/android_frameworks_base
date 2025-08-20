@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Copyright (c) 2023 Qualcomm Innovation Center, Inc. All rights reserved.
+    SPDX-License-Identifier: BSD-3-Clause-Clear
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="26dp"
+    android:height="24dp"
+    android:viewportWidth="26"
+    android:viewportHeight="24">
+  <path
+      android:fillColor="@android:color/white"
+      android:pathData="M 12,2.001359 C 7.2499999,2.001359 2.9699999,4.079946 -1.25e-7,7.389946 L 12,21.998641 15.048913,18.289401 A 6.2033902,6.4067802 0 0 1 14.192935,16.186142 L 12,18.851901 2.6983696,7.528533 C 5.2683695,5.268533 8.5799999,3.998641 12,3.998641 c 3.42,0 6.73163,1.269892 9.30163,3.529892 l -0.709239,0.86413 a 6.2033902,6.4067802 0 0 1 2.148097,0.529891 L 24,7.389946 c -2.97,-3.31 -7.25,-5.388587 -12,-5.388587 z"/>
+  <path
+      android:fillColor="@android:color/white"
+      android:pathData="m25.469,11.959 l-3.454,5.584l-2.157,-0.024l3.586,-5.634l-3.855,-0.043l0.014,-1.343l5.881,0.066z"/>
+</vector>

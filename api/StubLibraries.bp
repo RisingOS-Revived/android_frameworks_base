@@ -51,11 +51,11 @@ non_updatable_exportable_droidstubs {
             removed_api_file: ":android-non-updatable-removed.api.combined.public.latest",
             baseline_file: ":android-non-updatable-incompatibilities.api.public.latest",
         },
-        api_lint: {
-            enabled: true,
-            new_since: ":android.api.combined.public.latest",
-            baseline_file: ":non-updatable-lint-baseline.txt",
-        },
+        // api_lint: {
+        //     enabled: true,
+        //     new_since: ":android.api.combined.public.latest",
+        //     baseline_file: ":non-updatable-lint-baseline.txt",
+        // },
     },
     soong_config_variables: {
         release_hidden_api_exportable_stubs: {

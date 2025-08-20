@@ -30,6 +30,9 @@ import com.android.systemui.log.table.TableRowLogger
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.connectivity.WifiIcons
 import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiNetworkModel
+// QTI_BEGIN: 2024-07-22: WLAN: SystemUI: replacing wifistandard with ScanResult's standard value.
+import android.net.wifi.ScanResult
+// QTI_END: 2024-07-22: WLAN: SystemUI: replacing wifistandard with ScanResult's standard value.
 
 /** Represents the various states of the wifi icon. */
 sealed interface WifiIcon : Diffable<WifiIcon> {
@@ -66,6 +69,14 @@ sealed interface WifiIcon : Diffable<WifiIcon> {
         @VisibleForTesting
         internal val NO_INTERNET = R.string.data_connection_no_internet
 
+// QTI_BEGIN: 2024-06-20: WLAN: SystemUI: adding control to wifiStandard display feature
+        var mIsWifiStandardDisplaySupported: Boolean? = null
+
+        fun initializeConfig(context: Context) {
+            mIsWifiStandardDisplaySupported = context.resources.getBoolean(com.android.
+                                              settingslib.R.bool.config_show_wifi_standard)
+        }
+// QTI_END: 2024-06-20: WLAN: SystemUI: adding control to wifiStandard display feature
         /**
          * Mapping from a [WifiNetworkModel] to the appropriate [WifiIcon].
          *
@@ -131,16 +142,64 @@ sealed interface WifiIcon : Diffable<WifiIcon> {
 
         private fun WifiNetworkModel.Active.toBasicIcon(context: Context): Visible {
             val levelDesc = context.getString(WIFI_CONNECTION_STRENGTH[this.level])
+// QTI_BEGIN: 2024-06-02: WLAN: SystemUI: Wifi generation icons in Notification bar.
+            val wifiStandard = this.wifiStandard
+
+// QTI_END: 2024-06-02: WLAN: SystemUI: Wifi generation icons in Notification bar.
+// QTI_BEGIN: 2024-06-20: WLAN: SystemUI: adding control to wifiStandard display feature
+            if (mIsWifiStandardDisplaySupported == null) {
+                initializeConfig(context)
+            }
+            val isWifiStandardDisplaySupported = mIsWifiStandardDisplaySupported ?: false
+
+// QTI_END: 2024-06-20: WLAN: SystemUI: adding control to wifiStandard display feature
             return if (this.isValidated) {
-                Visible(
-                    WifiIcons.WIFI_FULL_ICONS[this.level],
-                    ContentDescription.Loaded(levelDesc),
-                )
+// QTI_BEGIN: 2024-06-02: WLAN: SystemUI: Wifi generation icons in Notification bar.
+                val icon = when (wifiStandard) {
+// QTI_END: 2024-06-02: WLAN: SystemUI: Wifi generation icons in Notification bar.
+// QTI_BEGIN: 2024-07-22: WLAN: SystemUI: replacing wifistandard with ScanResult's standard value.
+                    ScanResult.WIFI_STANDARD_11N -> WifiIcons.WIFI_4_FULL_ICONS[this.level]
+                    ScanResult.WIFI_STANDARD_11AC -> WifiIcons.WIFI_5_FULL_ICONS[this.level]
+                    ScanResult.WIFI_STANDARD_11AX -> WifiIcons.WIFI_6_FULL_ICONS[this.level]
+                    ScanResult.WIFI_STANDARD_11BE -> WifiIcons.WIFI_7_FULL_ICONS[this.level]
+// QTI_END: 2024-07-22: WLAN: SystemUI: replacing wifistandard with ScanResult's standard value.
+// QTI_BEGIN: 2024-06-02: WLAN: SystemUI: Wifi generation icons in Notification bar.
+                    else -> WifiIcons.WIFI_FULL_ICONS[this.level]
+                }
+// QTI_END: 2024-06-02: WLAN: SystemUI: Wifi generation icons in Notification bar.
+// QTI_BEGIN: 2024-06-20: WLAN: SystemUI: adding control to wifiStandard display feature
+                if(isWifiStandardDisplaySupported) {
+                    Visible(icon, ContentDescription.Loaded(levelDesc))
+                } else {
+                    Visible(WifiIcons.WIFI_FULL_ICONS[this.level],
+                    ContentDescription.Loaded(levelDesc))
+                }
+// QTI_END: 2024-06-20: WLAN: SystemUI: adding control to wifiStandard display feature
             } else {
-                Visible(
-                    WifiIcons.WIFI_NO_INTERNET_ICONS[this.level],
-                    ContentDescription.Loaded("$levelDesc,${context.getString(NO_INTERNET)}"),
-                )
+// QTI_BEGIN: 2024-06-02: WLAN: SystemUI: Wifi generation icons in Notification bar.
+                val icon = when (wifiStandard) {
+// QTI_END: 2024-06-02: WLAN: SystemUI: Wifi generation icons in Notification bar.
+// QTI_BEGIN: 2024-07-22: WLAN: SystemUI: replacing wifistandard with ScanResult's standard value.
+                    ScanResult.WIFI_STANDARD_11N -> WifiIcons.WIFI_4_NO_INTERNET_ICONS[this.level]
+                    ScanResult.WIFI_STANDARD_11AC -> WifiIcons.WIFI_5_NO_INTERNET_ICONS[this.level]
+                    ScanResult.WIFI_STANDARD_11AX -> WifiIcons.WIFI_6_NO_INTERNET_ICONS[this.level]
+                    ScanResult.WIFI_STANDARD_11BE -> WifiIcons.WIFI_7_NO_INTERNET_ICONS[this.level]
+// QTI_END: 2024-07-22: WLAN: SystemUI: replacing wifistandard with ScanResult's standard value.
+// QTI_BEGIN: 2024-06-02: WLAN: SystemUI: Wifi generation icons in Notification bar.
+                    else -> WifiIcons.WIFI_NO_INTERNET_ICONS[this.level]
+                }
+// QTI_END: 2024-06-02: WLAN: SystemUI: Wifi generation icons in Notification bar.
+// QTI_BEGIN: 2024-06-20: WLAN: SystemUI: adding control to wifiStandard display feature
+                if(isWifiStandardDisplaySupported) {
+                    Visible(icon,
+                        ContentDescription.Loaded("$levelDesc,${context.getString(NO_INTERNET)}"),
+                    )
+                } else {
+                    Visible(WifiIcons.WIFI_NO_INTERNET_ICONS[this.level],
+                        ContentDescription.Loaded("$levelDesc,${context.getString(NO_INTERNET)}"),
+                    )
+                }
+// QTI_END: 2024-06-20: WLAN: SystemUI: adding control to wifiStandard display feature
             }
         }
     }

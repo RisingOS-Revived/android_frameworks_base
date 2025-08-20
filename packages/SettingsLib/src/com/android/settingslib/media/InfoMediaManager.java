@@ -505,6 +505,7 @@ public abstract class InfoMediaManager {
         return true;
     }
 
+
     /**
      * Returns the list of {@link MediaDevice media devices} that can be added to the current {@link
      * RoutingSessionInfo routing session}.
@@ -650,8 +651,21 @@ public abstract class InfoMediaManager {
 
         // In practice, mMediaDevices should always have at least one route.
         if (!mMediaDevices.isEmpty()) {
-            // First device on the list is always the first selected route.
-            mCurrentConnectedDevice = mMediaDevices.get(0);
+// QTI_BEGIN: 2024-07-04: Bluetooth: Use first selected route device as current connected device
+            for (MediaDevice mediaDevice : mMediaDevices) {
+                // First selected route device on the list
+                if (mediaDevice.getState() == STATE_SELECTED) {
+                    Log.d(TAG, "buildAvailableRoutes() first selected device : "
+                            + mediaDevice.getDeviceType());
+                    mCurrentConnectedDevice = mediaDevice;
+                    break;
+                }
+            }
+            if (mCurrentConnectedDevice == null) {
+                // First device on the list is always the first selected route.
+                mCurrentConnectedDevice = mMediaDevices.get(0);
+            }
+// QTI_END: 2024-07-04: Bluetooth: Use first selected route device as current connected device
         }
     }
 

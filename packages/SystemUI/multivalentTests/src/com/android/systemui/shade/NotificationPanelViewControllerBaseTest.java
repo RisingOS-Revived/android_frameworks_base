@@ -61,6 +61,7 @@ import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.testing.UiEventLoggerFake;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.util.LatencyTracker;
+import com.android.keyguard.EmergencyButtonController;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.dagger.KeyguardStatusBarViewComponent;
 import com.android.systemui.SysuiTestCase;
@@ -242,6 +243,7 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
     @Mock protected FragmentService mFragmentService;
     @Mock protected FragmentHostManager mFragmentHostManager;
     @Mock protected IStatusBarService mStatusBarService;
+    @Mock protected EmergencyButtonController.Factory mEmergencyButtonControllerFactory;
     @Mock protected NotificationRemoteInputManager mNotificationRemoteInputManager;
     @Mock protected RecordingController mRecordingController;
     @Mock protected LockscreenGestureLogger mLockscreenGestureLogger;
@@ -572,6 +574,7 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                 mActivityStarter,
                 mSharedNotificationContainerInteractor,
                 mActiveNotificationsInteractor,
+                mEmergencyButtonControllerFactory,
                 mShadeAnimationInteractor,
                 mDeviceEntryFaceAuthInteractor,
                 new ResourcesSplitShadeStateController(),

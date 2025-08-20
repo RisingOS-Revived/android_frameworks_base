@@ -20,6 +20,9 @@ import android.content.Context;
 import android.util.DisplayMetrics;
 import android.view.Display;
 import android.view.Surface;
+// QTI_BEGIN: 2020-03-12: Display: SystemUI: Add support to enable RC & NOTCH dynamically.
+import android.os.SystemProperties;
+// QTI_END: 2020-03-12: Display: SystemUI: Add support to enable RC & NOTCH dynamically.
 
 import com.android.systemui.res.R;
 
@@ -110,6 +113,14 @@ public class DisplayUtils {
     }
 
     private static int getCornerRadiusDefault(Context context) {
+        int radius = 0;
+// QTI_BEGIN: 2020-03-12: Display: SystemUI: Add support to enable RC & NOTCH dynamically.
+        int disableRoundedCorner = SystemProperties.getInt("vendor.display.disable_rounded_corner",
+                0);
+        if (disableRoundedCorner == 1) {
+           return radius;
+        }
+// QTI_END: 2020-03-12: Display: SystemUI: Add support to enable RC & NOTCH dynamically.
         return context.getResources().getDimensionPixelSize(R.dimen.config_rounded_mask_size);
     }
 }

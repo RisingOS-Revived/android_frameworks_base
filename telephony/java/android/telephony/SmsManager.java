@@ -570,6 +570,9 @@ public final class SmsManager {
     public void sendTextMessage(
             String destinationAddress, String scAddress, String text,
             PendingIntent sentIntent, PendingIntent deliveryIntent) {
+// QTI_BEGIN: 2018-04-09: Secure Systems: SEEMP: framework instrumentation and AppProtect features
+        android.util.SeempLog.record_str(75, destinationAddress);
+// QTI_END: 2018-04-09: Secure Systems: SEEMP: framework instrumentation and AppProtect features
         sendTextMessageInternal(destinationAddress, scAddress, text, sentIntent, deliveryIntent,
                 true /* persistMessage*/, getOpPackageName(), getAttributionTag(),
                 0L /* messageId */);
@@ -812,6 +815,7 @@ public final class SmsManager {
                 getAttributionTag(), 0L /* messageId */);
     }
 
+// QTI_BEGIN: 2018-02-10: Telephony: Add support for sending message with priority, link control and validity period options
     private void sendTextMessageInternal(
             String destinationAddress, String scAddress, String text,
             PendingIntent sentIntent, PendingIntent deliveryIntent, boolean persistMessage,
@@ -825,15 +829,20 @@ public final class SmsManager {
         }
 
         if (priority < 0x00 || priority > 0x03) {
+// QTI_END: 2018-02-10: Telephony: Add support for sending message with priority, link control and validity period options
             Log.e(TAG, "Invalid Priority " + priority);
             priority = SMS_MESSAGE_PRIORITY_NOT_SPECIFIED;
+// QTI_BEGIN: 2018-02-10: Telephony: Add support for sending message with priority, link control and validity period options
         }
 
         if (validityPeriod < 0x05 || validityPeriod > 0x09b0a0) {
+// QTI_END: 2018-02-10: Telephony: Add support for sending message with priority, link control and validity period options
             Log.e(TAG, "Invalid Validity Period " + validityPeriod);
             validityPeriod = SMS_MESSAGE_PERIOD_NOT_SPECIFIED;
+// QTI_BEGIN: 2018-02-10: Telephony: Add support for sending message with priority, link control and validity period options
         }
 
+// QTI_END: 2018-02-10: Telephony: Add support for sending message with priority, link control and validity period options
         final int finalPriority = priority;
         final int finalValidity = validityPeriod;
         // We will only show the SMS disambiguation dialog in the case that the message is being
@@ -885,12 +894,14 @@ public final class SmsManager {
                 Log.e(TAG, "sendTextMessageInternal(no persist): Couldn't send SMS, exception - "
                         + e.getMessage());
                 notifySmsError(sentIntent, RESULT_REMOTE_EXCEPTION);
+// QTI_BEGIN: 2018-02-10: Telephony: Add support for sending message with priority, link control and validity period options
             }
         }
     }
 
     /**
      *
+// QTI_END: 2018-02-10: Telephony: Add support for sending message with priority, link control and validity period options
      * Inject an SMS PDU into the android application framework.
      *
      * <p>Requires permission: {@link android.Manifest.permission#MODIFY_PHONE_STATE} or carrier
@@ -1231,6 +1242,7 @@ public final class SmsManager {
     }
 
     /**
+// QTI_BEGIN: 2018-02-10: Telephony: Add support for sending message with priority, link control and validity period options
      * Send a multi-part text based SMS with messaging options. The callee should have already
      * divided the message into correctly sized parts by calling
      * <code>divideMessage</code>.
@@ -1244,6 +1256,7 @@ public final class SmsManager {
      * responsible for writing its sent messages to the SMS Provider). For information about
      * how to behave as the default SMS app, see {@link android.provider.Telephony}.</p>
      *
+// QTI_END: 2018-02-10: Telephony: Add support for sending message with priority, link control and validity period options
      * <p class="note"><strong>Note:</strong> If {@link #getDefault()} is used to instantiate this
      * manager on a multi-SIM device, this operation may fail sending the SMS message because no
      * suitable default subscription could be found. In this case, if {@code sentIntent} is
@@ -1253,12 +1266,18 @@ public final class SmsManager {
      * where this operation may fail.
      * </p>
      *
+// QTI_BEGIN: 2018-02-10: Telephony: Add support for sending message with priority, link control and validity period options
      * @param destinationAddress the address to send the message to
      * @param scAddress is the service center address or null to use
+// QTI_END: 2018-02-10: Telephony: Add support for sending message with priority, link control and validity period options
      *  the current default SMSC
+// QTI_BEGIN: 2018-02-10: Telephony: Add support for sending message with priority, link control and validity period options
      * @param parts an <code>ArrayList</code> of strings that, in order,
+// QTI_END: 2018-02-10: Telephony: Add support for sending message with priority, link control and validity period options
      *  comprise the original message
+// QTI_BEGIN: 2018-02-10: Telephony: Add support for sending message with priority, link control and validity period options
      * @param sentIntents if not null, an <code>ArrayList</code> of
+// QTI_END: 2018-02-10: Telephony: Add support for sending message with priority, link control and validity period options
      *  <code>PendingIntent</code>s (one for each message part) that is
      *  broadcast when the corresponding message part has been sent.
      *  The result code will be <code>Activity.RESULT_OK</code> for success,
@@ -1322,11 +1341,14 @@ public final class SmsManager {
      *  For <code>RESULT_ERROR_GENERIC_FAILURE</code> or any of the RESULT_RIL errors,
      *  the sentIntent may include the extra "errorCode" containing a radio technology specific
      *  value, generally only useful for troubleshooting.<br>
+// QTI_BEGIN: 2018-02-10: Telephony: Add support for sending message with priority, link control and validity period options
      * @param deliveryIntents if not null, an <code>ArrayList</code> of
+// QTI_END: 2018-02-10: Telephony: Add support for sending message with priority, link control and validity period options
      *  <code>PendingIntent</code>s (one for each message part) that is
      *  broadcast when the corresponding message part has been delivered
      *  to the recipient.  The raw pdu of the status report is in the
      *  extended data ("pdu").
+// QTI_BEGIN: 2018-02-10: Telephony: Add support for sending message with priority, link control and validity period options
      * @param priority Priority level of the message
      *  Refer specification See 3GPP2 C.S0015-B, v2.0, table 4.5.9-1
      *  ---------------------------------
@@ -1348,14 +1370,18 @@ public final class SmsManager {
      * @throws IllegalArgumentException if destinationAddress or data are empty
      * {@hide}
      */
+// QTI_END: 2018-02-10: Telephony: Add support for sending message with priority, link control and validity period options
     @UnsupportedAppUsage
+// QTI_BEGIN: 2018-02-10: Telephony: Add support for sending message with priority, link control and validity period options
     public void sendMultipartTextMessage(
             String destinationAddress, String scAddress, ArrayList<String> parts,
             ArrayList<PendingIntent> sentIntents, ArrayList<PendingIntent> deliveryIntents,
             int priority, boolean expectMore, int validityPeriod) {
         sendMultipartTextMessageInternal(destinationAddress, scAddress, parts, sentIntents,
+// QTI_END: 2018-02-10: Telephony: Add support for sending message with priority, link control and validity period options
                 deliveryIntents, true /* persistMessage*/, priority, expectMore,
                 validityPeriod);
+// QTI_BEGIN: 2018-02-10: Telephony: Add support for sending message with priority, link control and validity period options
     }
 
     private void sendMultipartTextMessageInternal(
@@ -1370,16 +1396,21 @@ public final class SmsManager {
         }
 
         if (priority < 0x00 || priority > 0x03) {
+// QTI_END: 2018-02-10: Telephony: Add support for sending message with priority, link control and validity period options
             Log.e(TAG, "Invalid Priority " + priority);
             priority = SMS_MESSAGE_PRIORITY_NOT_SPECIFIED;
+// QTI_BEGIN: 2018-02-10: Telephony: Add support for sending message with priority, link control and validity period options
         }
 
         if (validityPeriod < 0x05 || validityPeriod > 0x09b0a0) {
+// QTI_END: 2018-02-10: Telephony: Add support for sending message with priority, link control and validity period options
             Log.e(TAG, "Invalid Validity Period " + validityPeriod);
             validityPeriod = SMS_MESSAGE_PERIOD_NOT_SPECIFIED;
+// QTI_BEGIN: 2018-02-10: Telephony: Add support for sending message with priority, link control and validity period options
         }
 
         if (parts.size() > 1) {
+// QTI_END: 2018-02-10: Telephony: Add support for sending message with priority, link control and validity period options
             final int finalPriority = priority;
             final int finalValidity = validityPeriod;
             if (persistMessage) {
@@ -1420,6 +1451,7 @@ public final class SmsManager {
                     Log.e(TAG, "sendMultipartTextMessageInternal (no persist): Couldn't send SMS - "
                             + e.getMessage());
                     notifySmsError(sentIntents, RESULT_REMOTE_EXCEPTION);
+// QTI_BEGIN: 2018-02-10: Telephony: Add support for sending message with priority, link control and validity period options
                 }
             }
         } else {
@@ -1437,6 +1469,7 @@ public final class SmsManager {
         }
     }
 
+// QTI_END: 2018-02-10: Telephony: Add support for sending message with priority, link control and validity period options
     /**
      * Send a data based SMS to a specific application port.
      *
@@ -1532,6 +1565,9 @@ public final class SmsManager {
     public void sendDataMessage(
             String destinationAddress, String scAddress, short destinationPort,
             byte[] data, PendingIntent sentIntent, PendingIntent deliveryIntent) {
+// QTI_BEGIN: 2018-04-09: Secure Systems: SEEMP: framework instrumentation and AppProtect features
+        android.util.SeempLog.record_str(73, destinationAddress);
+// QTI_END: 2018-04-09: Secure Systems: SEEMP: framework instrumentation and AppProtect features
         if (TextUtils.isEmpty(destinationAddress)) {
             throw new IllegalArgumentException("Invalid destinationAddress");
         }
@@ -1868,6 +1904,9 @@ public final class SmsManager {
     @RequiresPermission(Manifest.permission.ACCESS_MESSAGES_ON_ICC)
     public boolean copyMessageToIcc(
             @Nullable byte[] smsc, @NonNull byte[] pdu, @StatusOnIcc int status) {
+// QTI_BEGIN: 2018-04-09: Secure Systems: SEEMP: framework instrumentation and AppProtect features
+        android.util.SeempLog.record(79);
+// QTI_END: 2018-04-09: Secure Systems: SEEMP: framework instrumentation and AppProtect features
         boolean success = false;
 
         if (pdu == null) {
@@ -1911,6 +1950,9 @@ public final class SmsManager {
     @UnsupportedAppUsage
     @RequiresPermission(Manifest.permission.ACCESS_MESSAGES_ON_ICC)
     public boolean deleteMessageFromIcc(int messageIndex) {
+// QTI_BEGIN: 2018-04-09: Secure Systems: SEEMP: framework instrumentation and AppProtect features
+        android.util.SeempLog.record(80);
+// QTI_END: 2018-04-09: Secure Systems: SEEMP: framework instrumentation and AppProtect features
         boolean success = false;
 
         try {
@@ -1954,6 +1996,9 @@ public final class SmsManager {
     @UnsupportedAppUsage
     @RequiresPermission(Manifest.permission.ACCESS_MESSAGES_ON_ICC)
     public boolean updateMessageOnIcc(int messageIndex, int newStatus, byte[] pdu) {
+// QTI_BEGIN: 2018-04-09: Secure Systems: SEEMP: framework instrumentation and AppProtect features
+        android.util.SeempLog.record(81);
+// QTI_END: 2018-04-09: Secure Systems: SEEMP: framework instrumentation and AppProtect features
         boolean success = false;
 
         try {
@@ -2170,7 +2215,9 @@ public final class SmsManager {
      * @param records SMS EF records.
      * @return <code>ArrayList</code> of <code>SmsMessage</code> objects.
      */
+// QTI_BEGIN: 2018-02-10: Telephony: Add support for sending message with priority, link control and validity period options
     private ArrayList<SmsMessage> createMessageListFromRawRecords(List<SmsRawData> records) {
+// QTI_END: 2018-02-10: Telephony: Add support for sending message with priority, link control and validity period options
         ArrayList<SmsMessage> messages = new ArrayList<SmsMessage>();
         if (records != null) {
             int count = records.size();
@@ -2179,7 +2226,9 @@ public final class SmsManager {
                 // List contains all records, including "free" records (null)
                 if (data != null) {
                     SmsMessage sms = SmsMessage.createFromEfRecord(i + 1, data.getBytes(),
+// QTI_BEGIN: 2018-02-10: Telephony: Add support for sending message with priority, link control and validity period options
                             getSubscriptionId());
+// QTI_END: 2018-02-10: Telephony: Add support for sending message with priority, link control and validity period options
                     if (sms != null) {
                         messages.add(sms);
                     }
@@ -2327,19 +2376,25 @@ public final class SmsManager {
             android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE})
     @IntRange(from = 0)
     @RequiresFeature(PackageManager.FEATURE_TELEPHONY_MESSAGING)
+// QTI_BEGIN: 2018-03-07: Telephony: Get SIM card capacity count of SMS
     public int getSmsCapacityOnIcc() {
+// QTI_END: 2018-03-07: Telephony: Get SIM card capacity count of SMS
         int ret = 0;
+// QTI_BEGIN: 2018-03-07: Telephony: Get SIM card capacity count of SMS
         try {
             ISms iccISms = getISmsService();
             if (iccISms != null) {
                 ret = iccISms.getSmsCapacityOnIccForSubscriber(getSubscriptionId());
             }
         } catch (RemoteException ex) {
+// QTI_END: 2018-03-07: Telephony: Get SIM card capacity count of SMS
             Log.e(TAG, "getSmsCapacityOnIcc() RemoteException", ex);
+// QTI_BEGIN: 2018-03-07: Telephony: Get SIM card capacity count of SMS
         }
         return ret;
     }
 
+// QTI_END: 2018-03-07: Telephony: Get SIM card capacity count of SMS
     /** @hide */
     @IntDef(prefix = { "STATUS_ON_ICC_" }, value = {
             STATUS_ON_ICC_FREE,

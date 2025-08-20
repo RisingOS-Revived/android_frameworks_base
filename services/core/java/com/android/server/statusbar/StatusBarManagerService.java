@@ -125,6 +125,9 @@ import com.android.server.pm.UserManagerService;
 import com.android.server.policy.GlobalActionsProvider;
 import com.android.server.power.ShutdownCheckPoints;
 import com.android.server.power.ShutdownThread;
+// QTI_BEGIN: 2019-12-22: Frameworks: Avoid system reboot while invalidate LegacyGlobalAction
+import com.android.server.UiThread;
+// QTI_END: 2019-12-22: Frameworks: Avoid system reboot while invalidate LegacyGlobalAction
 import com.android.server.wm.ActivityTaskManagerInternal;
 import com.android.systemui.shared.Flags;
 
@@ -1882,7 +1885,9 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
     }
 
     private void notifyBarAttachChanged() {
+// QTI_BEGIN: 2019-12-22: Frameworks: Avoid system reboot while invalidate LegacyGlobalAction
         UiThread.getHandler().post(() -> {
+// QTI_END: 2019-12-22: Frameworks: Avoid system reboot while invalidate LegacyGlobalAction
             if (mGlobalActionListener == null) return;
             mGlobalActionListener.onGlobalActionsAvailableChanged(mBar != null);
         });

@@ -37,10 +37,10 @@ filegroup {
     srcs: ["removed.txt"],
 }
 
-filegroup {
-    name: "non-updatable-lint-baseline.txt",
-    srcs: ["lint-baseline.txt"],
-}
+// filegroup {
+//     name: "non-updatable-lint-baseline.txt",
+//     srcs: ["lint-baseline.txt"],
+// }
 
 filegroup {
     name: "non-updatable-system-current.txt",

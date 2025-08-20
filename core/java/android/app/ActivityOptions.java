@@ -1970,6 +1970,7 @@ public class ActivityOptions extends ComponentOptions {
         return mDisableStartingWindow;
     }
 
+
     /**
      * Specifies intent flags to be applied for any activity started from a PendingIntent.
      *

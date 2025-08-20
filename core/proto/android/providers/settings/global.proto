@@ -736,6 +736,10 @@ message GlobalSettingsProto {
         optional SettingProto server = 1;
         // Timeout in milliseconds to wait for NTP server.
         optional SettingProto timeout_ms = 2 [ (android.privacy).dest = DEST_AUTOMATIC ];
+/* QTI_BEGIN: 2018-08-11: Frameworks: base: Secondary NTP Server Settings*/
+        // Secondary NTP server.
+        optional SettingProto server_2 = 3;
+/* QTI_END: 2018-08-11: Frameworks: base: Secondary NTP Server Settings*/
     }
     optional Ntp ntp = 84;
 

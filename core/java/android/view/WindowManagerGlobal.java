@@ -40,6 +40,9 @@ import android.os.SystemProperties;
 import android.util.AndroidRuntimeException;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+// QTI_BEGIN: 2023-02-15: Performance: perf: recover the pre-rendering feature in the U
+import android.util.BoostFramework.ScrollOptimizer;
+// QTI_END: 2023-02-15: Performance: perf: recover the pre-rendering feature in the U
 import android.util.Log;
 import android.util.Pair;
 import android.util.SparseArray;
@@ -382,6 +385,38 @@ public final class WindowManagerGlobal {
         return null;
     }
 
+// QTI_BEGIN: 2024-02-27: Performance: perf: porting the fixes for pre-rendering from U to V.
+    private int getVisibleRootCount (ArrayList<ViewRootImpl> roots) {
+        int visibleRootCount = 0;
+        int lastLeft = -1;
+        int lastTop = -1;
+        int lastWidth = 0;
+        int lastHeight = 0;
+        for (int i = roots.size() - 1; i >= 0; --i) {
+            View root_view = roots.get(i).getView();
+            if (root_view != null && root_view.getVisibility() == View.VISIBLE) {
+                int left = root_view.getLeft();
+                int top = root_view.getTop();
+                int width = root_view.getRight() - root_view.getLeft() ;
+                int height = root_view.getBottom() - root_view.getTop() ;
+                // Filter the invalid visible views.
+                if (width != 0 && height != 0) {
+                    // Filter the overwritten visible views.
+                    if (lastWidth != width || lastHeight != height ||
+                        lastLeft != left || lastTop != top ) {
+                        visibleRootCount++;
+                    }
+                    lastLeft = left;
+                    lastTop = top;
+                    lastWidth = width;
+                    lastHeight = height;
+                }
+            }
+        }
+        return visibleRootCount;
+    }
+
+// QTI_END: 2024-02-27: Performance: perf: porting the fixes for pre-rendering from U to V.
     public void addView(View view, ViewGroup.LayoutParams params,
             Display display, Window parentWindow, int userId) {
         if (view == null) {
@@ -481,6 +516,18 @@ public final class WindowManagerGlobal {
 
             view.setLayoutParams(wparams);
 
+// QTI_BEGIN: 2023-02-15: Performance: perf: recover the pre-rendering feature in the U
+            int visibleRootCount = 0;
+// QTI_END: 2023-02-15: Performance: perf: recover the pre-rendering feature in the U
+// QTI_BEGIN: 2024-02-27: Performance: perf: porting the fixes for pre-rendering from U to V.
+            visibleRootCount = getVisibleRootCount(mRoots);
+            if (visibleRootCount > 1) {
+// QTI_END: 2024-02-27: Performance: perf: porting the fixes for pre-rendering from U to V.
+// QTI_BEGIN: 2023-02-15: Performance: perf: recover the pre-rendering feature in the U
+                ScrollOptimizer.disableOptimizer(true);
+            }
+
+// QTI_END: 2023-02-15: Performance: perf: recover the pre-rendering feature in the U
             mViews.add(view);
             mRoots.add(root);
             mParams.add(wparams);
@@ -607,6 +654,27 @@ public final class WindowManagerGlobal {
                 final View view = mViews.remove(index);
                 mDyingViews.remove(view);
             }
+
+// QTI_BEGIN: 2024-02-27: Performance: perf: porting the fixes for pre-rendering from U to V.
+            // The visibleRootCount more than one means multi-layer, and multi-layer rendering
+            // can result in unexpected pending between UI thread and render thread with
+            // pre-rendering enabled. Need to disable pre-rendering for multi-layer cases.
+// QTI_END: 2024-02-27: Performance: perf: porting the fixes for pre-rendering from U to V.
+// QTI_BEGIN: 2023-02-15: Performance: perf: recover the pre-rendering feature in the U
+            int visibleRootCount = 0;
+// QTI_END: 2023-02-15: Performance: perf: recover the pre-rendering feature in the U
+// QTI_BEGIN: 2024-02-27: Performance: perf: porting the fixes for pre-rendering from U to V.
+            visibleRootCount = getVisibleRootCount(mRoots);
+
+            if (visibleRootCount > 1) {
+                ScrollOptimizer.disableOptimizer(true);
+            } else if (visibleRootCount == 1) {
+// QTI_END: 2024-02-27: Performance: perf: porting the fixes for pre-rendering from U to V.
+// QTI_BEGIN: 2023-02-15: Performance: perf: recover the pre-rendering feature in the U
+                ScrollOptimizer.disableOptimizer(false);
+            }
+
+// QTI_END: 2023-02-15: Performance: perf: recover the pre-rendering feature in the U
             allViewsRemoved = mRoots.isEmpty();
             mWindowViewsListenerGroup.accept(getWindowViews());
         }

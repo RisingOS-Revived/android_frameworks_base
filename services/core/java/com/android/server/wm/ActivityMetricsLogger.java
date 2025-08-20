@@ -1,5 +1,8 @@
 package com.android.server.wm;
 
+// QTI_BEGIN: 2020-01-20: Performance: Changing app classification logic from manifest-based to WLC-based
+import android.app.ActivityManager;
+// QTI_END: 2020-01-20: Performance: Changing app classification logic from manifest-based to WLC-based
 import static android.app.ActivityManager.PROCESS_STATE_NONEXISTENT;
 import static android.app.ActivityManager.START_SUCCESS;
 import static android.app.ActivityManager.START_TASK_TO_FRONT;
@@ -98,6 +101,9 @@ import android.os.SystemClock;
 import android.os.Trace;
 import android.os.incremental.IncrementalManager;
 import android.util.ArrayMap;
+// QTI_BEGIN: 2019-01-29: Core: Revert "Temporarily revert am, wm, and policy servers to upstream QP1A.181202.001"
+import android.util.BoostFramework;
+// QTI_END: 2019-01-29: Core: Revert "Temporarily revert am, wm, and policy servers to upstream QP1A.181202.001"
 import android.util.EventLog;
 import android.util.Log;
 import android.util.Slog;
@@ -188,6 +194,16 @@ class ActivityMetricsLogger {
     private ArtManagerInternal mArtManagerInternal;
     private final StringBuilder mStringBuilder = new StringBuilder();
 
+// QTI_BEGIN: 2019-05-01: Performance: IOP: Fix and rebase PreferredApps.
+    public static BoostFramework mUxPerf = new BoostFramework();
+// QTI_END: 2019-05-01: Performance: IOP: Fix and rebase PreferredApps.
+// QTI_BEGIN: 2021-06-14: Performance: BoostFramework: Fix the broken Displayed activity hint.
+    public static BoostFramework mPerfBoost = new BoostFramework();
+// QTI_END: 2021-06-14: Performance: BoostFramework: Fix the broken Displayed activity hint.
+// QTI_BEGIN: 2019-01-29: Core: Revert "Temporarily revert am, wm, and policy servers to upstream QP1A.181202.001"
+    private static ActivityRecord mLaunchedActivity;
+
+// QTI_END: 2019-01-29: Core: Revert "Temporarily revert am, wm, and policy servers to upstream QP1A.181202.001"
     /**
      * Due to the global single concurrent launch sequence, all calls to this observer must be made
      * in-order on the same thread to fulfill the "happens-before" guarantee in LaunchObserver.
@@ -1126,6 +1142,8 @@ class ActivityMetricsLogger {
     private void logAppTransitionFinished(@NonNull TransitionInfo info, boolean isHibernating) {
         if (DEBUG_METRICS) Slog.i(TAG, "logging finished transition " + info);
 
+        mLaunchedActivity = info.mLastLaunchedActivity;
+
         // Take a snapshot of the transition info before sending it to the handler for logging.
         // This will avoid any races with other operations that modify the ActivityRecord.
         final TransitionInfoSnapshot infoSnapshot = new TransitionInfoSnapshot(info);
@@ -1290,7 +1308,67 @@ class ActivityMetricsLogger {
         sb.append(info.userId);
         sb.append(": ");
         TimeUtils.formatDuration(info.windowsDrawnDelayMs, sb);
+
+// QTI_BEGIN: 2021-06-14: Performance: BoostFramework: Fix the broken Displayed activity hint.
+        if (mPerfBoost != null) {
+// QTI_END: 2021-06-14: Performance: BoostFramework: Fix the broken Displayed activity hint.
+// QTI_BEGIN: 2021-07-29: Performance: Address Null pointer exception
+            if (info.processRecord != null) {
+                mPerfBoost.perfHint(BoostFramework.VENDOR_HINT_FIRST_DRAW, info.packageName,
+// QTI_END: 2021-07-29: Performance: Address Null pointer exception
+                    info.processRecord.getPid(), info.windowsDrawnDelayMs);
+// QTI_BEGIN: 2021-07-29: Performance: Address Null pointer exception
+            }
+// QTI_END: 2021-07-29: Performance: Address Null pointer exception
+// QTI_BEGIN: 2021-06-14: Performance: BoostFramework: Fix the broken Displayed activity hint.
+        }
+
+// QTI_END: 2021-06-14: Performance: BoostFramework: Fix the broken Displayed activity hint.
+// QTI_BEGIN: 2019-05-01: Performance: IOP: Fix and rebase PreferredApps.
+        if (mUxPerf != null) {
+// QTI_END: 2019-05-01: Performance: IOP: Fix and rebase PreferredApps.
+            if (mUxPerf.board_first_api_lvl < BoostFramework.VENDOR_T_API_LEVEL &&
+                mUxPerf.board_api_lvl < BoostFramework.VENDOR_T_API_LEVEL) {
+                mUxPerf.perfUXEngine_events(BoostFramework.UXE_EVENT_DISPLAYED_ACT, 0, info.packageName, info.windowsDrawnDelayMs);
+            }
+// QTI_BEGIN: 2019-01-29: Core: Revert "Temporarily revert am, wm, and policy servers to upstream QP1A.181202.001"
+        }
+
+// QTI_END: 2019-01-29: Core: Revert "Temporarily revert am, wm, and policy servers to upstream QP1A.181202.001"
         Log.i(TAG, sb.toString());
+
+// QTI_BEGIN: 2019-05-01: Performance: IOP: Fix and rebase PreferredApps.
+        if (mUxPerf !=  null) {
+// QTI_END: 2019-05-01: Performance: IOP: Fix and rebase PreferredApps.
+// QTI_BEGIN: 2020-01-20: Performance: Changing app classification logic from manifest-based to WLC-based
+            int isGame;
+
+            if (ActivityManager.isLowRamDeviceStatic()) {
+                isGame = mLaunchedActivity.isAppInfoGame();
+            } else {
+                isGame = (mUxPerf.perfGetFeedback(BoostFramework.VENDOR_FEEDBACK_WORKLOAD_TYPE,
+                                        mLaunchedActivity.packageName) == BoostFramework.WorkloadType.GAME) ? 1 : 0;
+            }
+// QTI_END: 2020-01-20: Performance: Changing app classification logic from manifest-based to WLC-based
+// QTI_BEGIN: 2020-08-13: Performance: Fix app crashes due to PApps.
+            if (mLaunchedActivity.processName != null) {
+                if (!mLaunchedActivity.processName.equals(info.packageName)) {
+                    isGame = 1;
+                }
+            }
+// QTI_END: 2020-08-13: Performance: Fix app crashes due to PApps.
+            if (mUxPerf.board_first_api_lvl < BoostFramework.VENDOR_T_API_LEVEL &&
+                mUxPerf.board_api_lvl < BoostFramework.VENDOR_T_API_LEVEL) {
+                mUxPerf.perfUXEngine_events(BoostFramework.UXE_EVENT_GAME, 0, info.packageName, isGame);
+            }
+// QTI_BEGIN: 2019-01-29: Core: Revert "Temporarily revert am, wm, and policy servers to upstream QP1A.181202.001"
+        }
+
+        if (mLaunchedActivity.mPerf != null && mLaunchedActivity.perfActivityBoostHandler > 0) {
+            mLaunchedActivity.mPerf.perfLockReleaseHandler(mLaunchedActivity.perfActivityBoostHandler);
+            mLaunchedActivity.perfActivityBoostHandler = -1;
+        }
+// QTI_END: 2019-01-29: Core: Revert "Temporarily revert am, wm, and policy servers to upstream QP1A.181202.001"
     }
 
     private void logRecentsAnimationLatency(TransitionInfo info) {

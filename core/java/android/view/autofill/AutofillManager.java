@@ -21,7 +21,9 @@ import static android.service.autofill.FillRequest.FLAG_MANUAL_REQUEST;
 import static android.service.autofill.FillRequest.FLAG_PASSWORD_INPUT_TYPE;
 import static android.service.autofill.FillRequest.FLAG_PCC_DETECTION;
 import static android.service.autofill.FillRequest.FLAG_RESET_FILL_DIALOG_STATE;
+// QTI_BEGIN: 2024-12-03: SystemUI: Adding changes for Autofill test cases module
 import static android.service.autofill.FillRequest.FLAG_SCREEN_HAS_CREDMAN_FIELD;
+// QTI_END: 2024-12-03: SystemUI: Adding changes for Autofill test cases module
 import static android.service.autofill.FillRequest.FLAG_SUPPORTS_FILL_DIALOG;
 import static android.service.autofill.FillRequest.FLAG_VIEW_NOT_FOCUSED;
 import static android.service.autofill.FillRequest.FLAG_VIEW_REQUESTS_CREDMAN_SERVICE;
@@ -702,14 +704,16 @@ public final class AutofillManager {
 
     private final boolean mIsFillDialogEnabled;
 
-    private final boolean mIsFillAndSaveDialogDisabledForCredentialManager;
-
     // Indicate whether trigger fill request on unimportant views is enabled
     private boolean mIsTriggerFillRequestOnUnimportantViewEnabled = false;
 
     // Indicate whether to apply heuristic check on important views before trigger fill request
     private boolean mIsTriggerFillRequestOnFilteredImportantViewsEnabled;
 
+// QTI_BEGIN: 2024-12-03: SystemUI: Adding changes for Autofill test cases module
+    private final boolean mIsFillAndSaveDialogDisabledForCredentialManager;
+
+// QTI_END: 2024-12-03: SystemUI: Adding changes for Autofill test cases module
     // Indicate whether to enable autofill for all view types
     private boolean mShouldEnableAutofillOnAllViewTypes;
 
@@ -947,10 +951,10 @@ public final class AutofillManager {
 
         mIsFillDialogEnabled = AutofillFeatureFlags.isFillDialogEnabled();
         mFillDialogEnabledHints = AutofillFeatureFlags.getFillDialogEnabledHints();
-
+// QTI_BEGIN: 2024-12-03: SystemUI: Adding changes for Autofill test cases module
         mIsFillAndSaveDialogDisabledForCredentialManager =
-            AutofillFeatureFlags.isFillAndSaveDialogDisabledForCredentialManager();
-
+        AutofillFeatureFlags.isFillAndSaveDialogDisabledForCredentialManager();
+// QTI_END: 2024-12-03: SystemUI: Adding changes for Autofill test cases module
         if (sDebug) {
             Log.d(TAG, "Fill dialog is enabled:" + mIsFillDialogEnabled
                     + ", hints=" + Arrays.toString(mFillDialogEnabledHints));
@@ -1639,9 +1643,10 @@ public final class AutofillManager {
         if (infos.size() == 0) {
             throw new IllegalArgumentException("No VirtualViewInfo found");
         }
+
         boolean isCredmanRequested = false;
-        if (shouldSuppressDialogsForCredman(view)
-                && mIsFillAndSaveDialogDisabledForCredentialManager) {
+        if (AutofillFeatureFlags.isFillAndSaveDialogDisabledForCredentialManager()
+                && shouldSuppressDialogsForCredman(view)) {
             mScreenHasCredmanField = true;
             if (isCredmanRequested(view)) {
                 if (sDebug) {
@@ -1649,11 +1654,17 @@ public final class AutofillManager {
                             + view.getAutofillId().toString());
                 }
                 isCredmanRequested = true;
-            } else {
-                if (sDebug) {
-                    Log.d(TAG, "Ignoring Fill Dialog request since important for credMan:"
+// QTI_BEGIN: 2024-12-03: SystemUI: Adding changes for Autofill test cases module
+            }
+                if (view.isCredential() && mIsFillAndSaveDialogDisabledForCredentialManager) {
+                    if (sDebug) {
+                       Log.d(TAG, "Ignoring Fill Dialog request since important for credMan:"
+// QTI_END: 2024-12-03: SystemUI: Adding changes for Autofill test cases module
                             + view.getAutofillId().toString());
-                }
+// QTI_BEGIN: 2024-12-03: SystemUI: Adding changes for Autofill test cases module
+                    }
+                mScreenHasCredmanField = true;
+// QTI_END: 2024-12-03: SystemUI: Adding changes for Autofill test cases module
                 return;
             }
         }
@@ -1674,8 +1685,8 @@ public final class AutofillManager {
      */
     public void notifyViewEnteredForFillDialog(View v) {
         boolean isCredmanRequested = false;
-        if (shouldSuppressDialogsForCredman(v)
-                && mIsFillAndSaveDialogDisabledForCredentialManager) {
+        if (AutofillFeatureFlags.isFillAndSaveDialogDisabledForCredentialManager()
+                && shouldSuppressDialogsForCredman(v)) {
             mScreenHasCredmanField = true;
             if (isCredmanRequested(v)) {
                 if (sDebug) {
@@ -1683,11 +1694,17 @@ public final class AutofillManager {
                             + v.getAutofillId().toString());
                 }
                 isCredmanRequested = true;
-            } else {
-                if (sDebug) {
+// QTI_BEGIN: 2024-12-03: SystemUI: Adding changes for Autofill test cases module
+            }
+            if (v.isCredential() && mIsFillAndSaveDialogDisabledForCredentialManager) {
+                   if (sDebug) {
+// QTI_END: 2024-12-03: SystemUI: Adding changes for Autofill test cases module
                     Log.d(TAG, "Ignoring Fill Dialog request since important for credMan:"
-                            + v.getAutofillId().toString());
-                }
+// QTI_BEGIN: 2024-12-03: SystemUI: Adding changes for Autofill test cases module
+                            + v.getAutofillId());
+                   }
+                mScreenHasCredmanField = true;
+// QTI_END: 2024-12-03: SystemUI: Adding changes for Autofill test cases module
                 return;
             }
         }
@@ -1772,7 +1789,7 @@ public final class AutofillManager {
         }
         if (shouldSendPreFillRequestForFillDialog) {
             if (sDebug) {
-                Log.d(TAG, "Triggering pre-emptive request for fill dialog.");
+                Log.d(TAG, "Trigger fill request when the view is ready.");
             }
             int flags = FLAG_SUPPORTS_FILL_DIALOG;
             flags |= FLAG_VIEW_NOT_FOCUSED;
@@ -2022,7 +2039,7 @@ public final class AutofillManager {
             if (view instanceof TextView && ((TextView) view).isAnyPasswordInputType()) {
                 flags |= FLAG_PASSWORD_INPUT_TYPE;
             }
-
+// QTI_BEGIN: 2024-12-03: SystemUI: Adding changes for Autofill test cases module
             // Update session when screen has credman field
             if (AutofillFeatureFlags.isFillAndSaveDialogDisabledForCredentialManager()
                     && mScreenHasCredmanField) {
@@ -2031,6 +2048,7 @@ public final class AutofillManager {
                     Log.v(TAG, "updating session with flag screen has credman view");
                 }
             }
+// QTI_END: 2024-12-03: SystemUI: Adding changes for Autofill test cases module
 
             flags |= getImeStateFlag(view);
 
@@ -2828,7 +2846,9 @@ public final class AutofillManager {
         mIsFillRequested.set(false);
         mShowAutofillDialogCalled = false;
         mFillDialogTriggerIds = null;
+// QTI_BEGIN: 2024-12-03: SystemUI: Adding changes for Autofill test cases module
         mScreenHasCredmanField = false;
+// QTI_END: 2024-12-03: SystemUI: Adding changes for Autofill test cases module
         mAllTrackedViews.clear();
         if (resetEnteredIds) {
             mEnteredIds = null;
@@ -4170,8 +4190,10 @@ public final class AutofillManager {
     private boolean shouldShowAutofillDialog(View view, AutofillId id) {
         if (!hasFillDialogUiFeature()
                 || mShowAutofillDialogCalled
+// QTI_BEGIN: 2024-12-03: SystemUI: Adding changes for Autofill test cases module
                 || mFillDialogTriggerIds == null
                 || mScreenHasCredmanField) {
+// QTI_END: 2024-12-03: SystemUI: Adding changes for Autofill test cases module
             return false;
         }
 

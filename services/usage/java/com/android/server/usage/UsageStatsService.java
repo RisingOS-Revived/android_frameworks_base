@@ -2271,9 +2271,8 @@ public class UsageStatsService extends SystemService implements
                 // System UID can always report UsageStats
                 return true;
             }
-
             return getContext().checkCallingPermission(Manifest.permission.REPORT_USAGE_STATS)
-                    == PackageManager.PERMISSION_GRANTED;
+                        == PackageManager.PERMISSION_GRANTED;
         }
 
         private boolean hasObserverPermission() {

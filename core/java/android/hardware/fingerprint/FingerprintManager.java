@@ -1503,10 +1503,6 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
                 }
             }
         }
-
-        // This is used as a last resort in case a vendor string is missing
-        // It should not happen for anything other than FINGERPRINT_ERROR_VENDOR, but
-        // warn and use the default if all else fails.
         Slog.w(TAG, "Invalid error message: " + errMsg + ", " + vendorCode);
         return context.getString(
                 com.android.internal.R.string.fingerprint_error_vendor_unknown);

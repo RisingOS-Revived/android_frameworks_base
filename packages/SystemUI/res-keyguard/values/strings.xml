@@ -264,6 +264,16 @@
         =1 {Incorrect SIM PIN code, you have # remaining attempt before you must contact your carrier to unlock your device.}
         other {Incorrect SIM PIN code, you have # remaining attempts. }
     }</string>
+<!-- QTI_BEGIN: 2018-05-03: Android_UI: SystemUI: Add SlotId for MultiSim-->
+<!-- QTI_END: 2018-05-03: Android_UI: SystemUI: Add SlotId for MultiSim-->
+    <plurals name="kg_password_wrong_pin_code_multi_sim">
+<!-- QTI_BEGIN: 2018-05-03: Android_UI: SystemUI: Add SlotId for MultiSim-->
+<!-- QTI_END: 2018-05-03: Android_UI: SystemUI: Add SlotId for MultiSim-->
+        <item quantity="one">Incorrect SIM<xliff:g id="slotid">%d</xliff:g> PIN code, you have <xliff:g id="number">%d</xliff:g> remaining attempt before you must contact your carrier to unlock your device.</item>
+<!-- QTI_BEGIN: 2018-05-03: Android_UI: SystemUI: Add SlotId for MultiSim-->
+<!-- QTI_END: 2018-05-03: Android_UI: SystemUI: Add SlotId for MultiSim-->
+        <item quantity="other">Incorrect SIM<xliff:g id="slotid">%d</xliff:g> PIN code, you have <xliff:g id="number">%d</xliff:g> remaining attempts.</item>
+    </plurals>
 
     <!-- Instructions telling the user that they have exhausted SIM PUK retries and the SIM is now unusable.
          Displayed in a dialog box.  -->
@@ -332,6 +342,16 @@
         =1 {Enter SIM PIN. You have # remaining attempt before you must contact your carrier to unlock your device.}
         other {Enter SIM PIN. You have # remaining attempts.}
     }</string>
+<!-- QTI_BEGIN: 2018-05-03: Android_UI: SystemUI: Add SlotId for MultiSim-->
+<!-- QTI_END: 2018-05-03: Android_UI: SystemUI: Add SlotId for MultiSim-->
+    <plurals name="kg_password_default_pin_message_multi_sim">
+<!-- QTI_BEGIN: 2018-05-03: Android_UI: SystemUI: Add SlotId for MultiSim-->
+<!-- QTI_END: 2018-05-03: Android_UI: SystemUI: Add SlotId for MultiSim-->
+        <item quantity="one">Enter SIM<xliff:g id="slotid">%d</xliff:g> PIN, you have <xliff:g id="number">%d</xliff:g> remaining attempt before you must contact your carrier to unlock your device.</item>
+<!-- QTI_BEGIN: 2018-05-03: Android_UI: SystemUI: Add SlotId for MultiSim-->
+<!-- QTI_END: 2018-05-03: Android_UI: SystemUI: Add SlotId for MultiSim-->
+        <item quantity="other">Enter SIM<xliff:g id="slotid">%d</xliff:g> PIN, you have <xliff:g id="number">%d</xliff:g> remaining attempts.</item>
+    </plurals>
 
     <!-- Instructions telling the user remaining times when enter SIM PUK view. [CHAR LIMIT=NONE] -->
     <string name="kg_password_default_puk_message">{count, plural,

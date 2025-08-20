@@ -1212,7 +1212,9 @@ public abstract class WallpaperService extends Service {
         void updateSurface(boolean forceRelayout, boolean forceReport, boolean redrawNeeded) {
             if (mDestroyed) {
                 Log.w(TAG, "Ignoring updateSurface due to destroyed");
+// QTI_BEGIN: 2021-09-08: Android_UI: frameworks/base:NPE in ImageWallpaper
                 return;
+// QTI_END: 2021-09-08: Android_UI: frameworks/base:NPE in ImageWallpaper
             }
 
             boolean fixedSize = false;

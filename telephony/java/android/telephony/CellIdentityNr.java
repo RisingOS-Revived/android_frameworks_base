@@ -14,6 +14,15 @@
  * limitations under the License.
  */
 
+// QTI_BEGIN: 2022-09-11: Telephony: CAG and SNPN feature
+/*
+ * Changes from Qualcomm Innovation Center are provided under the following license:
+ *
+ * Copyright (c) 2022 Qualcomm Innovation Center, Inc. All rights reserved.
+ * SPDX-License-Identifier: BSD-3-Clause-Clear
+ */
+
+// QTI_END: 2022-09-11: Telephony: CAG and SNPN feature
 package android.telephony;
 
 import static android.text.TextUtils.formatSimple;
@@ -48,6 +57,10 @@ public final class CellIdentityNr extends CellIdentity {
     private final int mTac;
     private final long mNci;
     private final int[] mBands;
+// QTI_BEGIN: 2022-09-11: Telephony: CAG and SNPN feature
+    private SnpnInfo mSnpnInfo;
+    private CagInfo mCagInfo;
+// QTI_END: 2022-09-11: Telephony: CAG and SNPN feature
 
     // a list of additional PLMN-IDs reported for this cell
     private final ArraySet<String> mAdditionalPlmns;
@@ -62,6 +75,10 @@ public final class CellIdentityNr extends CellIdentity {
         mBands = new int[] {};
         mAdditionalPlmns = new ArraySet();
         mGlobalCellId = null;
+// QTI_BEGIN: 2022-09-11: Telephony: CAG and SNPN feature
+        mSnpnInfo = new SnpnInfo();
+        mCagInfo = new CagInfo();
+// QTI_END: 2022-09-11: Telephony: CAG and SNPN feature
     }
 
     /**
@@ -98,12 +115,27 @@ public final class CellIdentityNr extends CellIdentity {
         updateGlobalCellId();
     }
 
+// QTI_BEGIN: 2022-09-11: Telephony: CAG and SNPN feature
+    /** @hide */
+    public CellIdentityNr(int pci, int tac, int nrArfcn, @NonNull @NgranBand int[] bands,
+                          @Nullable String mccStr, @Nullable String mncStr, long nci,
+                          @Nullable String alphal, @Nullable String alphas,
+                          @NonNull Collection<String> additionalPlmns,
+                          SnpnInfo snpnInfo,CagInfo cagInfo) {
+        this(pci, tac, nrArfcn, bands, mccStr, mncStr, nci, alphal, alphas, additionalPlmns);
+        mSnpnInfo = snpnInfo;
+        mCagInfo = cagInfo;
+    }
+
+// QTI_END: 2022-09-11: Telephony: CAG and SNPN feature
     /** @hide */
     @Override
     public @NonNull CellIdentityNr sanitizeLocationInfo() {
         return new CellIdentityNr(CellInfo.UNAVAILABLE, CellInfo.UNAVAILABLE, mNrArfcn,
                 mBands, mMccStr, mMncStr, CellInfo.UNAVAILABLE_LONG, mAlphaLong, mAlphaShort,
-                mAdditionalPlmns);
+// QTI_BEGIN: 2022-09-11: Telephony: CAG and SNPN feature
+                mAdditionalPlmns, mSnpnInfo, mCagInfo);
+// QTI_END: 2022-09-11: Telephony: CAG and SNPN feature
     }
 
     /** @hide */
@@ -134,7 +166,10 @@ public final class CellIdentityNr extends CellIdentity {
     @Override
     public int hashCode() {
         return Objects.hash(super.hashCode(), mPci, mTac,
-                mNrArfcn, Arrays.hashCode(mBands), mNci, mAdditionalPlmns.hashCode());
+// QTI_BEGIN: 2022-09-11: Telephony: CAG and SNPN feature
+                mNrArfcn, Arrays.hashCode(mBands), mNci, mAdditionalPlmns.hashCode(),
+                mSnpnInfo, mCagInfo);
+// QTI_END: 2022-09-11: Telephony: CAG and SNPN feature
     }
 
     @Override
@@ -150,7 +185,24 @@ public final class CellIdentityNr extends CellIdentity {
         CellIdentityNr o = (CellIdentityNr) other;
         return super.equals(o) && mPci == o.mPci && mTac == o.mTac && mNrArfcn == o.mNrArfcn
                 && Arrays.equals(mBands, o.mBands) && mNci == o.mNci
-                && mAdditionalPlmns.equals(o.mAdditionalPlmns);
+// QTI_BEGIN: 2022-09-11: Telephony: CAG and SNPN feature
+                && mAdditionalPlmns.equals(o.mAdditionalPlmns)
+// QTI_END: 2022-09-11: Telephony: CAG and SNPN feature
+// QTI_BEGIN: 2022-10-06: Telephony: CAG and SNPN feature
+                && equalsHandlesNulls(mSnpnInfo, o.mSnpnInfo)
+                && equalsHandlesNulls(mCagInfo, o.mCagInfo);
+    }
+
+    /**
+     * Test whether two objects hold the same data values or both are null.
+     *
+     * @param a first obj
+     * @param b second obj
+     * @return true if two objects equal or both are null
+     */
+    private static boolean equalsHandlesNulls (Object a, Object b) {
+        return (a == null) ? (b == null) : a.equals (b);
+// QTI_END: 2022-10-06: Telephony: CAG and SNPN feature
     }
 
     /**
@@ -238,6 +290,24 @@ public final class CellIdentityNr extends CellIdentity {
         return Collections.unmodifiableSet(mAdditionalPlmns);
     }
 
+// QTI_BEGIN: 2022-09-11: Telephony: CAG and SNPN feature
+    /**
+     * Returns the SNPN information.
+     * @hide
+     */
+    public SnpnInfo getSnpnInfo() {
+        return mSnpnInfo;
+    }
+
+    /**
+     * Returns the CAG information.
+     * @hide
+     */
+    public CagInfo getCagInfo() {
+        return mCagInfo;
+    }
+
+// QTI_END: 2022-09-11: Telephony: CAG and SNPN feature
     @Override
     public String toString() {
         return new StringBuilder(TAG + ":{")
@@ -251,6 +321,10 @@ public final class CellIdentityNr extends CellIdentity {
                 .append(" mAlphaLong = ").append(mAlphaLong)
                 .append(" mAlphaShort = ").append(mAlphaShort)
                 .append(" mAdditionalPlmns = ").append(mAdditionalPlmns)
+// QTI_BEGIN: 2022-09-11: Telephony: CAG and SNPN feature
+                .append(" mSnpnInfo = ").append(mSnpnInfo)
+                .append(" mCagInfo = ").append(mCagInfo)
+// QTI_END: 2022-09-11: Telephony: CAG and SNPN feature
                 .append(" }")
                 .toString();
     }
@@ -264,6 +338,10 @@ public final class CellIdentityNr extends CellIdentity {
         dest.writeIntArray(mBands);
         dest.writeLong(mNci);
         dest.writeArraySet(mAdditionalPlmns);
+// QTI_BEGIN: 2022-09-11: Telephony: CAG and SNPN feature
+        dest.writeParcelable(mSnpnInfo, 0);
+        dest.writeParcelable(mCagInfo, 0);
+// QTI_END: 2022-09-11: Telephony: CAG and SNPN feature
     }
 
     /** Construct from Parcel, type has already been processed */
@@ -275,7 +353,10 @@ public final class CellIdentityNr extends CellIdentity {
         mBands = in.createIntArray();
         mNci = in.readLong();
         mAdditionalPlmns = (ArraySet<String>) in.readArraySet(null);
-
+// QTI_BEGIN: 2022-09-11: Telephony: CAG and SNPN feature
+        mSnpnInfo = in.readParcelable(SnpnInfo.class.getClassLoader(), SnpnInfo.class);
+        mCagInfo = in.readParcelable(CagInfo.class.getClassLoader(), CagInfo.class);
+// QTI_END: 2022-09-11: Telephony: CAG and SNPN feature
         updateGlobalCellId();
     }
 

@@ -71,6 +71,9 @@ int register_com_android_server_wm_TaskFpsCallbackController(JNIEnv* env);
 int register_com_android_server_display_DisplayControl(JNIEnv* env);
 int register_com_android_server_SystemClockTime(JNIEnv* env);
 int register_android_server_display_smallAreaDetectionController(JNIEnv* env);
+// QTI_BEGIN: 2019-11-13: Core: Add mechanism to improve consistancy of notification
+int register_android_server_ActivityTriggerService(JNIEnv* env);
+// QTI_END: 2019-11-13: Core: Add mechanism to improve consistancy of notification
 int register_com_android_server_accessibility_BrailleDisplayConnection(JNIEnv* env);
 int register_android_server_am_PhantomProcessList(JNIEnv* env);
 
@@ -139,6 +142,9 @@ extern "C" jint JNI_OnLoad(JavaVM* vm, void* /* reserved */)
     register_com_android_server_display_DisplayControl(env);
     register_com_android_server_SystemClockTime(env);
     register_android_server_display_smallAreaDetectionController(env);
+// QTI_BEGIN: 2019-11-13: Core: Add mechanism to improve consistancy of notification
+    register_android_server_ActivityTriggerService(env);
+// QTI_END: 2019-11-13: Core: Add mechanism to improve consistancy of notification
     register_com_android_server_accessibility_BrailleDisplayConnection(env);
     register_android_server_am_PhantomProcessList(env);
     return JNI_VERSION_1_4;

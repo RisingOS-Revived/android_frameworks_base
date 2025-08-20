@@ -21,8 +21,8 @@ import android.graphics.RectF
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
-import com.android.app.animation.Interpolators
 import com.android.systemui.Dumpable
+import com.android.app.animation.Interpolators
 import com.android.systemui.biometrics.domain.interactor.UdfpsOverlayInteractor
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.lifecycle.repeatWhenAttached

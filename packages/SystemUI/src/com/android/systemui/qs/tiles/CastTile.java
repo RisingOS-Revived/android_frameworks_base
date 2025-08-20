@@ -27,6 +27,9 @@ import android.media.MediaRouter.RouteInfo;
 import android.media.projection.StopReason;
 import android.os.Handler;
 import android.os.Looper;
+// QTI_BEGIN: 2019-07-10: Video: CastTile: Fix availability of Cast Quick Setting Tile
+import android.os.SystemProperties;
+// QTI_END: 2019-07-10: Video: CastTile: Fix availability of Cast Quick Setting Tile
 import android.provider.Settings;
 import android.service.quicksettings.Tile;
 import android.util.Log;

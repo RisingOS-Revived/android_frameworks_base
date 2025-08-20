@@ -100,6 +100,10 @@ public final class EncoderProfiles
                 return MediaFormat.MIMETYPE_VIDEO_VP8;
             } else if (codec == MediaRecorder.VideoEncoder.HEVC) {
                 return MediaFormat.MIMETYPE_VIDEO_HEVC;
+// QTI_BEGIN: 2024-09-12: Video: base: Define MIMETYPE_VIDEO_MVHEVC and Profile/Level handling for MVHEVC
+            } else if (codec == MediaRecorder.VideoEncoder.MVHEVC) {
+                return MediaFormat.MIMETYPE_VIDEO_MVHEVC;
+// QTI_END: 2024-09-12: Video: base: Define MIMETYPE_VIDEO_MVHEVC and Profile/Level handling for MVHEVC
             } else if (codec == MediaRecorder.VideoEncoder.VP9) {
                 return MediaFormat.MIMETYPE_VIDEO_VP9;
             } else if (codec == MediaRecorder.VideoEncoder.DOLBY_VISION) {
@@ -396,6 +400,7 @@ public final class EncoderProfiles
                 return MediaFormat.MIMETYPE_AUDIO_AMR_WB;
             } else if (codec == MediaRecorder.AudioEncoder.AAC
                     || codec == MediaRecorder.AudioEncoder.HE_AAC
+                    || codec == MediaRecorder.AudioEncoder.HE_AAC_PS
                     || codec == MediaRecorder.AudioEncoder.AAC_ELD) {
                 return MediaFormat.MIMETYPE_AUDIO_AAC;
             } else if (codec == MediaRecorder.AudioEncoder.VORBIS) {

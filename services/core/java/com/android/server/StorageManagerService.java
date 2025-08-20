@@ -169,6 +169,9 @@ import com.android.server.utils.WatchedArrayMap;
 import com.android.server.utils.Watcher;
 import com.android.server.wm.ActivityTaskManagerInternal;
 import com.android.server.wm.ActivityTaskManagerInternal.ScreenObserver;
+// QTI_BEGIN: 2018-05-29: SecureSystems: frameworks: base: Port password retention feature
+import com.android.internal.widget.ILockSettings;
+// QTI_END: 2018-05-29: SecureSystems: frameworks: base: Port password retention feature
 
 import libcore.io.IoUtils;
 import libcore.util.EmptyArray;
@@ -3385,14 +3388,18 @@ class StorageManagerService extends IStorageManager.Stub
 
     /* Only for use by LockSettingsService */
     @android.annotation.EnforcePermission(android.Manifest.permission.STORAGE_INTERNAL)
+// QTI_BEGIN: 2018-07-31: SecureSystems: LockSettingsService: Support for separate clear key api
     @Override
+// QTI_END: 2018-07-31: SecureSystems: LockSettingsService: Support for separate clear key api
     public void setCeStorageProtection(@UserIdInt int userId, byte[] secret)
             throws RemoteException {
         super.setCeStorageProtection_enforcePermission();
 
         mVold.setCeStorageProtection(userId, secret);
+// QTI_BEGIN: 2018-07-31: SecureSystems: LockSettingsService: Support for separate clear key api
     }
 
+// QTI_END: 2018-07-31: SecureSystems: LockSettingsService: Support for separate clear key api
     /* Only for use by LockSettingsService */
     @android.annotation.EnforcePermission(android.Manifest.permission.STORAGE_INTERNAL)
     @Override

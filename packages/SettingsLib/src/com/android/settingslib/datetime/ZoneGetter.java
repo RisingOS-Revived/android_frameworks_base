@@ -269,11 +269,20 @@ public class ZoneGetter {
     }
 
     private static String getCanonicalZoneId(TimeZone timeZone) {
+// QTI_BEGIN: 2020-06-17: Android_UI: Frameworks: Fix missing timezone strings in some cases
+        // Canonicalize the zone ID for ICU. It will only return valid strings for zone IDs
+        // that match ICUs zone IDs (which are similar but not guaranteed the same as those
+        // in timezones.xml). timezones.xml and related files uses the IANA IDs. ICU IDs are
+        // stable and IANA IDs have changed over time so they have drifted.
+        // See http://bugs.icu-project.org/trac/ticket/13070 / http://b/36469833.
+// QTI_END: 2020-06-17: Android_UI: Frameworks: Fix missing timezone strings in some cases
         final String id = timeZone.getID();
         final String canonicalId = android.icu.util.TimeZone.getCanonicalID(id);
         if (canonicalId != null) {
             return canonicalId;
+// QTI_BEGIN: 2020-06-17: Android_UI: Frameworks: Fix missing timezone strings in some cases
         }
+// QTI_END: 2020-06-17: Android_UI: Frameworks: Fix missing timezone strings in some cases
         return id;
     }
 

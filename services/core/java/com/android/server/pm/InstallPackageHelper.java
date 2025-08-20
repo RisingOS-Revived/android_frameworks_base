@@ -13,7 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+ /*
+ * Changes from Qualcomm Innovation Center, Inc. are provided under the following license:
+ * Copyright (c) 2025 Qualcomm Innovation Center, Inc. All rights reserved.
+ * SPDX-License-Identifier: BSD-3-Clause-Clear
+ */
 package com.android.server.pm;
 
 import static android.content.pm.Flags.disallowSdkLibsToBeApps;
@@ -136,6 +140,9 @@ import android.os.Message;
 import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteException;
+// QTI_BEGIN: 2024-11-13: Telephony: Add provision to prevent installation of some apps
+import android.os.SystemProperties;
+// QTI_END: 2024-11-13: Telephony: Add provision to prevent installation of some apps
 import android.os.SELinux;
 import android.os.SystemClock;
 import android.os.Trace;
@@ -156,6 +163,7 @@ import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
+import android.util.BoostFramework;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.content.F2fsUtils;
@@ -185,6 +193,9 @@ import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.pm.pkg.SharedLibraryWrapper;
 import com.android.server.rollback.RollbackManagerInternal;
 import com.android.server.utils.Slogf;
+// QTI_BEGIN: 2024-11-13: Telephony: Add provision to prevent installation of some apps
+import com.android.server.utils.TimingsTraceAndSlog;
+// QTI_END: 2024-11-13: Telephony: Add provision to prevent installation of some apps
 import com.android.server.utils.WatchedArrayMap;
 import com.android.server.utils.WatchedLongSparseArray;
 
@@ -192,6 +203,10 @@ import dalvik.system.VMRuntime;
 
 import java.io.File;
 import java.io.FileInputStream;
+// QTI_BEGIN: 2024-11-13: Telephony: Add provision to prevent installation of some apps
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+// QTI_END: 2024-11-13: Telephony: Add provision to prevent installation of some apps
 import java.io.IOException;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
@@ -201,6 +216,9 @@ import java.security.cert.CertificateException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+// QTI_BEGIN: 2024-11-13: Telephony: Add provision to prevent installation of some apps
+import java.util.HashMap;
+// QTI_END: 2024-11-13: Telephony: Add provision to prevent installation of some apps
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -209,6 +227,11 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 
+// QTI_BEGIN: 2024-11-13: Telephony: Add provision to prevent installation of some apps
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlPullParserFactory;
+// QTI_END: 2024-11-13: Telephony: Add provision to prevent installation of some apps
 
 final class InstallPackageHelper {
     // One minute over PM WATCHDOG_TIMEOUT
@@ -228,6 +251,20 @@ final class InstallPackageHelper {
     private final SharedLibrariesImpl mSharedLibraries;
     private final PackageManagerServiceInjector mInjector;
     private final UpdateOwnershipHelper mUpdateOwnershipHelper;
+// QTI_BEGIN: 2024-11-13: Telephony: Add provision to prevent installation of some apps
+    private static final String PROPERTY_NO_RIL = "ro.radio.noril";
+// QTI_END: 2024-11-13: Telephony: Add provision to prevent installation of some apps
+// QTI_BEGIN: 2025-02-12: Core: Add provision to disable applications for QSPA enabled targets
+
+    private static final String PROPERTY_QSPA_Enabled = "ro.boot.vendor.qspa";
+// QTI_END: 2025-02-12: Core: Add provision to disable applications for QSPA enabled targets
+// QTI_BEGIN: 2024-11-13: Telephony: Add provision to prevent installation of some apps
+    /**
+     * Tracks packages that need to be disabled.
+     * Map of package name to its path on the file system.
+     */
+    final private HashMap<String, String> mPackagesToBeDisabled = new HashMap<>();
+// QTI_END: 2024-11-13: Telephony: Add provision to prevent installation of some apps
 
     private final Object mInternalLock = new Object();
     @GuardedBy("mInternalLock")
@@ -1699,6 +1736,16 @@ final class InstallPackageHelper {
                     // on the device; we should replace it.
                     replace = true;
                     if (DEBUG_INSTALL) Slog.d(TAG, "Replace existing package: " + pkgName);
+                    if (pkgName != null) {
+                        BoostFramework mPerf = new BoostFramework();
+                        if (mPerf != null) {
+                            if (mPerf.board_first_api_lvl < BoostFramework.VENDOR_T_API_LEVEL &&
+                                mPerf.board_api_lvl < BoostFramework.VENDOR_T_API_LEVEL) {
+                                mPerf.perfUXEngine_events(BoostFramework.UXE_EVENT_PKG_INSTALL, 0, pkgName, 1);
+                            }
+                            mPerf.perfEvent(BoostFramework.VENDOR_HINT_APP_UPDATE, pkgName, 2, 0, -1);
+                        }
+                    }
                 }
                 if (ps != null && replace) {
                     // Prevent apps opting out from runtime permissions
@@ -2619,6 +2666,17 @@ final class InstallPackageHelper {
                     "User " + userId + " doesn't exist or has been removed",
                     PackageManagerException.INTERNAL_ERROR_MISSING_USER));
             return;
+        }
+        if (pkgName != null) {
+            BoostFramework mPerf = new BoostFramework();
+            if (mPerf != null) {
+                if (mPerf.board_first_api_lvl < BoostFramework.VENDOR_T_API_LEVEL &&
+                    mPerf.board_api_lvl < BoostFramework.VENDOR_T_API_LEVEL) {
+                    mPerf.perfUXEngine_events(BoostFramework.UXE_EVENT_PKG_INSTALL, 0, pkgName, 0);
+                } else {
+                    mPerf.perfEvent(BoostFramework.VENDOR_HINT_PKG_INSTALL, pkgName, 2, 0, 0);
+                }
+            }
         }
         synchronized (mPm.mLock) {
             // For system-bundled packages, we assume that installing an upgraded version
@@ -3917,6 +3975,17 @@ final class InstallPackageHelper {
                 Log.w(TAG, "Dropping cache of " + file.getAbsolutePath());
                 cacher.cleanCachedResult(file);
             }
+// QTI_BEGIN: 2024-11-13: Telephony: Add provision to prevent installation of some apps
+
+            if (mPackagesToBeDisabled.values() != null &&
+                    (mPackagesToBeDisabled.values().contains(file.toString()) ||
+                    mPackagesToBeDisabled.values().stream().anyMatch(file.toString()::contains))) {
+                // Ignore entries contained in {@link #mPackagesToBeDisabled}
+                Slog.d(TAG, "ignoring package: " + file);
+                continue;
+            }
+
+// QTI_END: 2024-11-13: Telephony: Add provision to prevent installation of some apps
             parallelPackageParser.submit(file, parseFlags);
             fileCount++;
         }
@@ -3964,6 +4033,208 @@ final class InstallPackageHelper {
         }
     }
 
+// QTI_BEGIN: 2024-11-13: Telephony: Add provision to prevent installation of some apps
+    /**
+// QTI_END: 2024-11-13: Telephony: Add provision to prevent installation of some apps
+// QTI_BEGIN: 2025-02-12: Core: Add provision to disable applications for QSPA enabled targets
+     * Read the list of telephony packages that need to be disabled.
+// QTI_END: 2025-02-12: Core: Add provision to disable applications for QSPA enabled targets
+// QTI_BEGIN: 2024-11-13: Telephony: Add provision to prevent installation of some apps
+     *
+     * For wifi-only devices (modem-less), telephony related applications do not need to run.
+     * This method will read the list of packages from a predefined file in the file system,
+     * and store it in {@link #mPackagesToBeDisabled}. These applications will be skipped when
+     * directories are scanned later.
+     */
+// QTI_END: 2024-11-13: Telephony: Add provision to prevent installation of some apps
+// QTI_BEGIN: 2025-02-12: Core: Add provision to disable applications for QSPA enabled targets
+    protected void readListOfTelephonyPackagesToBeDisabled() {
+// QTI_END: 2025-02-12: Core: Add provision to disable applications for QSPA enabled targets
+// QTI_BEGIN: 2024-11-13: Telephony: Add provision to prevent installation of some apps
+        boolean wifiOnly = SystemProperties.getBoolean(PROPERTY_NO_RIL, false);
+        if (!wifiOnly) {
+            // Apps need to be disabled only for modem-less devices
+            return;
+        }
+
+        final String TELEPHONY_PACKAGES_PATH = "etc/telephony_packages.xml";
+        File telephonyPackagesFile =
+                new File(Environment.getVendorDirectory(), TELEPHONY_PACKAGES_PATH);
+        FileReader packagesReader = null;
+        Slog.d(TAG, "Disabling packages for wifi-only device, source: " + telephonyPackagesFile);
+
+        try {
+            XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
+            factory.setNamespaceAware(true);
+            XmlPullParser packagesParser = factory.newPullParser();
+            packagesReader = new FileReader(telephonyPackagesFile);
+
+            if (packagesParser != null) {
+                packagesParser.setInput(packagesReader);
+                int eventType = packagesParser.getEventType();
+                while (eventType != XmlPullParser.END_DOCUMENT) {
+                    String tagName = packagesParser.getName();
+                    switch (eventType) {
+                        case XmlPullParser.START_TAG:
+                            if (TextUtils.equals(tagName, "packageinfo")) {
+                                String name = packagesParser.getAttributeValue(null, "name");
+                                String path = packagesParser.getAttributeValue(null, "path");
+                                mPackagesToBeDisabled.put(name, path);
+                            }
+                            break;
+                    }
+                    eventType = packagesParser.next();
+                }
+            }
+        } catch (XmlPullParserException e) {
+            Log.e(TAG, "XmlPullParserException parsing '"+ telephonyPackagesFile + "'", e);
+        } catch (IOException e) {
+            Log.e(TAG, "IOException parsing '" + telephonyPackagesFile + "'", e);
+        } catch (Exception e) {
+            Log.e(TAG, "Exception parsing '" + telephonyPackagesFile + "'", e);
+        }
+
+        if (packagesReader != null) {
+            try {
+                packagesReader.close();
+            } catch (IOException e) {
+                // do nothing
+            }
+        }
+
+        if (DEBUG_PACKAGE_SCANNING) {
+            for (String packageName : mPackagesToBeDisabled.keySet()) {
+                Slog.d(TAG, "readListOfPackagesToBeDisabled"
+                        + ", package: " + packageName
+                        + ", path: " + mPackagesToBeDisabled.get(packageName));
+            }
+        }
+    }
+
+// QTI_END: 2024-11-13: Telephony: Add provision to prevent installation of some apps
+// QTI_BEGIN: 2025-02-12: Core: Add provision to disable applications for QSPA enabled targets
+
+    /**
+     * Read the list of packages that need to be disabled.
+     *
+     * For Qspa enabled targets, some defined applications do not need to run if the specific
+     * hardware subsystem is not enabled(disabled) on the target.
+     * This method will read the list of packages from a predefined file in the file system,
+     * and store it in {@link #mPackagesToBeDisabled} if the property value on device matches the
+     * systemPropertyValue i.e., disabled. These applications will be skipped when
+     * directories are scanned later.
+     */
+    protected void readListOfPackagesToBeDisabled() {
+        boolean qspaEnabled = SystemProperties.getBoolean(PROPERTY_QSPA_Enabled, false);
+        if (!qspaEnabled) {
+            // Apps need to be disabled only for Qspa Enabled targets
+            return;
+        }
+
+        final String QSPA_PACKAGES_PATH = "etc/qspa_application_packages.xml";
+        File qspaPackagesFile =
+                new File(Environment.getVendorDirectory(), QSPA_PACKAGES_PATH);
+
+
+        if (!qspaPackagesFile.exists()) {
+            Slog.e(TAG, "File not found: " + qspaPackagesFile);
+            return; // Return early if the file does not exist
+        }
+        FileReader packagesReader = null;
+        Slog.d(TAG, "Disabling packages for qspa enabled targets, source: " + qspaPackagesFile);
+
+        try {
+            XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
+            factory.setNamespaceAware(true);
+            XmlPullParser packagesParser = factory.newPullParser();
+            packagesReader = new FileReader(qspaPackagesFile);
+
+            if (packagesParser != null) {
+                packagesParser.setInput(packagesReader);
+                int eventType = packagesParser.getEventType();
+                while (eventType != XmlPullParser.END_DOCUMENT) {
+                    String tagName = packagesParser.getName();
+                    switch (eventType) {
+                        case XmlPullParser.START_TAG:
+                            if (TextUtils.equals(tagName, "propertyCheck")) {
+                                String subsystem =
+                                        packagesParser.getAttributeValue(null, "subsystem");
+                                String systemPropertyName = "ro.boot.vendor.qspa." + subsystem;
+                                String currValue = SystemProperties.get(systemPropertyName);
+                                Slog.d(TAG, "subsystem: " + subsystem + " currValue: " + currValue);
+                                int innerEventType = packagesParser.next();
+                                while (innerEventType != XmlPullParser.END_TAG ||
+                                        !TextUtils.equals(packagesParser.getName(),
+                                        "propertyCheck")) {
+                                    if (innerEventType == XmlPullParser.START_TAG &&
+                                            TextUtils.equals(packagesParser.getName(),
+                                            "propertyValue")) {
+                                        String systemPropertyValue =
+                                                packagesParser.getAttributeValue(null, "value");
+                                        if (TextUtils.equals(currValue, systemPropertyValue)) {
+                                            int packageEventType = packagesParser.next();
+                                            while (packageEventType != XmlPullParser.END_TAG ||
+                                                    !TextUtils.equals(packagesParser.getName(),
+                                                    "propertyValue")) {
+                                                if (packageEventType == XmlPullParser.START_TAG &&
+                                                        TextUtils.equals(packagesParser.getName(),
+                                                        "packageinfo")) {
+                                                    String name = packagesParser.getAttributeValue(
+                                                            null, "name");
+                                                    String path = packagesParser.getAttributeValue(
+                                                            null, "path");
+                                                    mPackagesToBeDisabled.put(name, path);
+                                                }
+                                                packageEventType = packagesParser.next();
+                                            }
+                                        }
+                                        else
+                                        {
+                                            Slog.w(TAG, "Ignoring disabling packages due to " +
+                                                "systemPropertyName: " + systemPropertyName +
+                                                " with value: " + systemPropertyValue);
+                                        }
+                                    }
+                                    innerEventType = packagesParser.next();
+                                }
+                            }
+                            break;
+                    }
+                    eventType = packagesParser.next();
+                }
+            }
+        } catch (XmlPullParserException e) {
+            Slog.e(TAG, "XmlPullParserException parsing '"+ qspaPackagesFile + "'", e);
+        } catch (IOException e) {
+            Slog.e(TAG, "IOException parsing '" + qspaPackagesFile + "'", e);
+        } catch (Exception e) {
+            Slog.e(TAG, "Exception parsing '" + qspaPackagesFile + "'", e);
+        }
+
+        if (packagesReader != null) {
+            try {
+                packagesReader.close();
+            } catch (IOException e) {
+                // do nothing
+            }
+        }
+
+        for (String packageName : mPackagesToBeDisabled.keySet()) {
+                Slog.d(TAG, "readListOfPackagesToBeDisabled"
+                        + ", package: " + packageName
+                        + ", path: " + mPackagesToBeDisabled.get(packageName));
+            }
+
+        if (DEBUG_PACKAGE_SCANNING) {
+            for (String packageName : mPackagesToBeDisabled.keySet()) {
+                Slog.d(TAG, "readListOfPackagesToBeDisabled"
+                        + ", package: " + packageName
+                        + ", path: " + mPackagesToBeDisabled.get(packageName));
+            }
+        }
+    }
+
+// QTI_END: 2025-02-12: Core: Add provision to disable applications for QSPA enabled targets
     /**
      * Make sure all system apps that we expected to appear on
      * the userdata partition actually showed up. If they never

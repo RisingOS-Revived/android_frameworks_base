@@ -24,6 +24,8 @@ import static android.view.WindowManagerPolicyConstants.OFF_BECAUSE_OF_USER;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.SOME_AUTH_REQUIRED_AFTER_ADAPTIVE_AUTH_REQUEST;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_DPM_LOCK_NOW;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_NON_STRONG_BIOMETRICS_TIMEOUT;
+import static com.android.systemui.keyguard.KeyguardViewMediator.DELAYED_KEYGUARD_ACTION;
+import static com.android.systemui.keyguard.KeyguardViewMediator.KEYGUARD_LOCK_AFTER_DELAY_DEFAULT;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN;
 import static com.android.systemui.Flags.FLAG_KEYGUARD_WM_STATE_REFACTOR;
 import static com.android.systemui.Flags.FLAG_RELOCK_WITH_POWER_BUTTON_IMMEDIATELY;
@@ -69,6 +71,9 @@ import android.platform.test.annotations.EnableFlags;
 import android.telephony.TelephonyManager;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
+// QTI_BEGIN: 2021-09-08: Android_UI: Revert "Make sure SIM PIN screen shows"
+import android.testing.TestableLooper.RunWithLooper;
+// QTI_END: 2021-09-08: Android_UI: Revert "Make sure SIM PIN screen shows"
 import android.view.IRemoteAnimationFinishedCallback;
 import android.view.RemoteAnimationTarget;
 import android.view.View;
@@ -127,6 +132,8 @@ import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
+import com.android.systemui.unfold.FoldAodAnimationController;
+import com.android.systemui.unfold.UnfoldLightRevealOverlayAnimation;
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor;
 import com.android.systemui.util.DeviceConfigProxy;
 import com.android.systemui.util.DeviceConfigProxyFake;
@@ -154,7 +161,9 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 @RunWith(AndroidTestingRunner.class)
-@TestableLooper.RunWithLooper
+// QTI_BEGIN: 2021-09-08: Android_UI: Revert "Make sure SIM PIN screen shows"
+@RunWithLooper
+// QTI_END: 2021-09-08: Android_UI: Revert "Make sure SIM PIN screen shows"
 @SmallTest
 public class KeyguardViewMediatorTest extends SysuiTestCase {
 
@@ -197,6 +206,8 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
     private @Mock DreamOverlayStateController mDreamOverlayStateController;
     private @Mock ActivityTransitionAnimator mActivityTransitionAnimator;
     private @Mock ScrimController mScrimController;
+    private @Mock FoldAodAnimationController mFoldAodAnimationController;
+    private @Mock UnfoldLightRevealOverlayAnimation mUnfoldAnimation;
     private @Mock IActivityTaskManager mActivityTaskManagerService;
     private @Mock IStatusBarService mStatusBarService;
     private @Mock SysuiColorExtractor mColorExtractor;
@@ -671,6 +682,13 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
         assertFalse(mViewMediator.isAnimatingScreenOff());
     }
 
+    private void onUnfoldOverlayReady() {
+        ArgumentCaptor<Runnable> overlayReadyCaptor = ArgumentCaptor.forClass(Runnable.class);
+        verify(mUnfoldAnimation).onScreenTurningOn(overlayReadyCaptor.capture());
+        overlayReadyCaptor.getValue().run();
+        TestableLooper.get(this).processAllMessages();
+    }
+
     @Test
     @TestableLooper.RunWithLooper(setAsMainLooper = true)
     public void wakeupFromDreamingWhenKeyguardHides_orderUnlockAndWakeOff() {
@@ -732,29 +750,11 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
                 eq("com.android.systemui:UNLOCK_DREAMING"));
     }
 
-    @Test
-    @TestableLooper.RunWithLooper(setAsMainLooper = true)
-    public void restoreBouncerWhenSimLockedAndKeyguardIsGoingAway() {
-        // When showing and provisioned
-        mViewMediator.onSystemReady();
-        when(mUpdateMonitor.isDeviceProvisioned()).thenReturn(true);
-        mViewMediator.setShowingLocked(true, "");
-
-        // and a SIM becomes locked and requires a PIN
-        mViewMediator.mUpdateCallback.onSimStateChanged(
-                1 /* subId */,
-                0 /* slotId */,
-                TelephonyManager.SIM_STATE_PIN_REQUIRED);
-
-        // and the keyguard goes away
-        mViewMediator.setShowingLocked(false, "");
-        when(mKeyguardStateController.isShowing()).thenReturn(false);
-        mViewMediator.mUpdateCallback.onKeyguardVisibilityChanged(false);
-
+    private void onFoldAodReady() {
+        ArgumentCaptor<Runnable> ready = ArgumentCaptor.forClass(Runnable.class);
+        verify(mFoldAodAnimationController).onScreenTurningOn(ready.capture());
+        ready.getValue().run();
         TestableLooper.get(this).processAllMessages();
-
-        // then make sure it comes back
-        verify(mStatusBarKeyguardViewManager, atLeast(1)).show(null);
     }
 
     @Test
@@ -784,31 +784,6 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
 
         // A call to reset the keyguard and bouncer was invoked
         verify(mStatusBarKeyguardViewManager).reset(true);
-    }
-
-    @Test
-    @TestableLooper.RunWithLooper(setAsMainLooper = true)
-    public void restoreBouncerWhenSimLockedAndKeyguardIsGoingAway_initiallyNotShowing() {
-        // When showing and provisioned
-        mViewMediator.onSystemReady();
-        when(mUpdateMonitor.isDeviceProvisioned()).thenReturn(true);
-        mViewMediator.setShowingLocked(false, "");
-
-        // and a SIM becomes locked and requires a PIN
-        mViewMediator.mUpdateCallback.onSimStateChanged(
-                1 /* subId */,
-                0 /* slotId */,
-                TelephonyManager.SIM_STATE_PIN_REQUIRED);
-
-        // and the keyguard goes away
-        mViewMediator.setShowingLocked(false, "");
-        when(mKeyguardStateController.isShowing()).thenReturn(false);
-        mViewMediator.mUpdateCallback.onKeyguardVisibilityChanged(false);
-
-        TestableLooper.get(this).processAllMessages();
-
-        // then make sure it comes back
-        verify(mStatusBarKeyguardViewManager, atLeast(1)).show(null);
     }
 
     @Test

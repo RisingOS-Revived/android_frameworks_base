@@ -38,6 +38,9 @@ public final class SmsEnvelope {
     static public final int TELESERVICE_WAP               = 0x1004;
     static public final int TELESERVICE_WEMT              = 0x1005;
     static public final int TELESERVICE_SCPT              = 0x1006;
+// QTI_BEGIN: 2018-03-12: Telephony: SMS: Parsing of CDMA MMS notification carried by SMS
+    static public final int TELESERVICE_CT_WAP            = 0xFDEA;
+// QTI_END: 2018-03-12: Telephony: SMS: Parsing of CDMA MMS notification carried by SMS
 
     /** Carriers specific Teleservice IDs. */
     public static final int TELESERVICE_FDEA_WAP = 0xFDEA; // 65002

@@ -115,6 +115,10 @@ public class DctConstants {
     public static final int EVENT_SIM_STATE_UPDATED = BASE + 55;
     public static final int EVENT_APN_UNTHROTTLED = BASE + 56;
     public static final int EVENT_TRAFFIC_DESCRIPTORS_UPDATED = BASE + 57;
+    public static final int EVENT_AIRPLANE_MODE_CHANGED = BASE + 58;
+    public static final int EVENT_GET_ENHANCED_RADIO_CAPABILITY = BASE + 59;
+    public static final int EVENT_GET_ENHANCED_RADIO_CAPABILITY_RETRY = BASE + 60;
+    public static final int EVENT_RECONNECT_EXT_TELEPHONY_SERVICE = BASE + 61;
 
     /***** Constants *****/
 

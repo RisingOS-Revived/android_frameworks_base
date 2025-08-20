@@ -281,6 +281,11 @@ interface IAudioService {
 
     int getCurrentAudioFocus();
 
+// QTI_BEGIN: 2024-07-18: Audio: Route SCO related params through AudioDeviceBroker to AHAL
+    void setSwbParameters(in String keyValuePairs);
+    void setScoParameters(in String name, boolean hasNrecEnabled, boolean hasWbsEnabled);
+
+// QTI_END: 2024-07-18: Audio: Route SCO related params through AudioDeviceBroker to AHAL
     void startBluetoothSco(IBinder cb, int targetSdkVersion,
             in AttributionSource attributionSource);
     void startBluetoothScoVirtualCall(IBinder cb, in AttributionSource attributionSource);
@@ -311,6 +316,11 @@ interface IAudioService {
     @EnforcePermission("MODIFY_AUDIO_ROUTING")
     void setWiredDeviceConnectionState(in AudioDeviceAttributes aa, int state, String caller);
 
+// QTI_BEGIN: 2019-06-20: Audio: Revert the change: AudioService: remove dead BT code.
+    void handleBluetoothA2dpActiveDeviceChange(in BluetoothDevice device,
+            int state, int profile, boolean suppressNoisyIntent, int a2dpVolume);
+
+// QTI_END: 2019-06-20: Audio: Revert the change: AudioService: remove dead BT code.
     @UnsupportedAppUsage
     AudioRoutesInfo startWatchingRoutes(in IAudioRoutesObserver observer);
 
@@ -523,6 +533,10 @@ interface IAudioService {
     @EnforcePermission("MODIFY_AUDIO_ROUTING")
     oneway void setMultiAudioFocusEnabled(in boolean enabled);
 
+// QTI_BEGIN: 2021-05-17: Audio: Add HDR restore param functionality in AudioService
+    void cacheParameters(in String keyValuePairs);
+
+// QTI_END: 2021-05-17: Audio: Add HDR restore param functionality in AudioService
     int setPreferredDevicesForCapturePreset(
             in int capturePreset, in List<AudioDeviceAttributes> devices);
 

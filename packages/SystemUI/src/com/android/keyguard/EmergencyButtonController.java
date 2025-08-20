@@ -29,6 +29,13 @@ import android.os.PowerManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.telecom.TelecomManager;
+// QTI_BEGIN: 2021-05-10: Android_UI: SystemUI: Fix emergency call button no response issue
+import android.telephony.CellInfo;
+// QTI_END: 2021-05-10: Android_UI: SystemUI: Fix emergency call button no response issue
+import android.telephony.ServiceState;
+// QTI_BEGIN: 2021-05-10: Android_UI: SystemUI: Fix emergency call button no response issue
+import android.telephony.SubscriptionManager;
+// QTI_END: 2021-05-10: Android_UI: SystemUI: Fix emergency call button no response issue
 import android.util.Log;
 
 import androidx.annotation.Nullable;
@@ -40,6 +47,7 @@ import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.dagger.KeyguardBouncerScope;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.res.R;
 import com.android.systemui.shade.ShadeController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener;
@@ -51,6 +59,9 @@ import com.google.android.msdl.data.model.MSDLToken;
 import com.google.android.msdl.domain.MSDLPlayer;
 
 import java.util.concurrent.Executor;
+// QTI_BEGIN: 2024-03-13: Android_UI: SystemUI:check ServiceStatus for all subs to show Emergency button
+import java.util.HashMap;
+// QTI_END: 2024-03-13: Android_UI: SystemUI:check ServiceStatus for all subs to show Emergency button
 
 import javax.inject.Inject;
 
@@ -66,12 +77,13 @@ public class EmergencyButtonController extends ViewController<EmergencyButton> {
     private final TelecomManager mTelecomManager;
     private final MetricsLogger mMetricsLogger;
 
-    private EmergencyButtonCallback mEmergencyButtonCallback;
     private final LockPatternUtils mLockPatternUtils;
     private final Executor mMainExecutor;
     private final Executor mBackgroundExecutor;
     private final SelectedUserInteractor mSelectedUserInteractor;
     private final MSDLPlayer mMSDLPlayer;
+
+    private EmergencyButtonCallback mEmergencyButtonCallback;
 
     private final KeyguardUpdateMonitorCallback mInfoCallback =
             new KeyguardUpdateMonitorCallback() {
@@ -82,6 +94,11 @@ public class EmergencyButtonController extends ViewController<EmergencyButton> {
 
         @Override
         public void onPhoneStateChanged(int phoneState) {
+            updateEmergencyCallButton();
+        }
+
+        @Override
+        public void onServiceStateChanged(int subId, ServiceState state) {
             updateEmergencyCallButton();
         }
     };
@@ -158,7 +175,8 @@ public class EmergencyButtonController extends ViewController<EmergencyButton> {
                         /* hasTelephonyRadio= */ getContext().getPackageManager()
                                 .hasSystemFeature(PackageManager.FEATURE_TELEPHONY_CALLING),
                         /* simLocked= */ mKeyguardUpdateMonitor.isSimPinVoiceSecure(),
-                        /* isSecure= */ isSecure));
+                        /* isSecure= */ isSecure,
+                        isEmergencyCapable()));
             });
         }
     }
@@ -212,6 +230,36 @@ public class EmergencyButtonController extends ViewController<EmergencyButton> {
         });
     }
 
+// QTI_BEGIN: 2021-05-10: Android_UI: SystemUI: Fix emergency call button no response issue
+    private boolean isEmergencyCapable() {
+// QTI_END: 2021-05-10: Android_UI: SystemUI: Fix emergency call button no response issue
+// QTI_BEGIN: 2024-05-16: Android_UI: SystemUI: Update EmergencyButton display logic
+        int slotCount = mKeyguardUpdateMonitor.getActiveSlots();
+        Log.d(TAG, "isEmergencyCapable slotCount:" + slotCount);
+        for (int slotId = 0; slotId < slotCount; slotId++) {
+            ServiceState ss = mKeyguardUpdateMonitor.getServiceStateWithSlotid(slotId);
+            Log.d(TAG, "mServiceStates list slotid:" + slotId + ";;ss:" + ss);
+// QTI_END: 2024-05-16: Android_UI: SystemUI: Update EmergencyButton display logic
+// QTI_BEGIN: 2024-03-13: Android_UI: SystemUI:check ServiceStatus for all subs to show Emergency button
+            if (ss != null) {
+                if (ss.isEmergencyOnly()) {
+                    return true;
+// QTI_END: 2024-03-13: Android_UI: SystemUI:check ServiceStatus for all subs to show Emergency button
+// QTI_BEGIN: 2024-05-16: Android_UI: SystemUI: Update EmergencyButton display logic
+                } else if ((ss.getVoiceRegState() != ServiceState.STATE_OUT_OF_SERVICE)
+                        && (ss.getVoiceRegState() != ServiceState.STATE_POWER_OFF)) {
+                    return true;
+// QTI_END: 2024-05-16: Android_UI: SystemUI: Update EmergencyButton display logic
+// QTI_BEGIN: 2024-03-13: Android_UI: SystemUI:check ServiceStatus for all subs to show Emergency button
+                }
+            }
+        }
+        return false;
+// QTI_END: 2024-03-13: Android_UI: SystemUI:check ServiceStatus for all subs to show Emergency button
+// QTI_BEGIN: 2021-05-10: Android_UI: SystemUI: Fix emergency call button no response issue
+    }
+
+// QTI_END: 2021-05-10: Android_UI: SystemUI: Fix emergency call button no response issue
     /** */
     public interface EmergencyButtonCallback {
         /** */

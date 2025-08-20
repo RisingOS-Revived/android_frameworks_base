@@ -525,12 +525,7 @@ constructor(
         }
 
         if (designatedCornerChanged) {
-            currentViewState.designatedCorner?.contentDescription = null
-            state.designatedCorner?.contentDescription = state.contentDescription
-
             updateDesignatedCorner(state.designatedCorner, state.shouldShowDot())
-        } else if (state.contentDescription != currentViewState.contentDescription) {
-            state.designatedCorner?.contentDescription = state.contentDescription
         }
 
         updateDotView(state)

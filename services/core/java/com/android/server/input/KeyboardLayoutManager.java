@@ -253,6 +253,8 @@ class KeyboardLayoutManager implements InputManager.InputDeviceListener {
         if (needToShowNotification) {
             maybeUpdateNotification();
         }
+        // TODO (b/280421650): Implement logging statements using KeyboardMetricsCollector
+        //  for KeyboardConfigured atom
     }
 
     @MainThread

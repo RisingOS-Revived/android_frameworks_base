@@ -30,6 +30,12 @@ public interface HotspotController extends CallbackController<Callback>, Dumpabl
 
     interface Callback {
         void onHotspotChanged(boolean enabled, int numDevices);
+// QTI_BEGIN: 2020-04-22: WLAN: wifi: refactor Wi-Fi generation UI enhancements
+        default void onHotspotChanged(boolean enabled, int numDevices,
+                                      int standard) {
+            onHotspotChanged(enabled, numDevices);
+        }
+// QTI_END: 2020-04-22: WLAN: wifi: refactor Wi-Fi generation UI enhancements
         default void onHotspotAvailabilityChanged(boolean available) {}
     }
 }

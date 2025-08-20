@@ -42,6 +42,9 @@ import com.android.systemui.statusbar.pipeline.mobile.data.repository.prod.FullM
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.prod.MobileTelephonyHelpers.getTelephonyCallbackForType
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.FakeWifiRepository
 import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiNetworkModel
+// QTI_BEGIN: 2023-03-02: Android_UI: SystemUI: Support side car 5G icon
+import com.android.systemui.statusbar.policy.FiveGServiceClient
+// QTI_END: 2023-03-02: Android_UI: SystemUI: Support side car 5G icon
 import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.eq
@@ -654,7 +657,7 @@ class FullMobileConnectionRepositoryTest : SysuiTestCase() {
         val realRepo =
             MobileConnectionRepositoryImpl(
                 SUB_ID,
-                context,
+                mContext,
                 subscriptionModel,
                 DEFAULT_NAME_MODEL,
                 SEP,
@@ -668,6 +671,9 @@ class FullMobileConnectionRepositoryTest : SysuiTestCase() {
                 tableLogBuffer,
                 flags,
                 testScope.backgroundScope,
+// QTI_BEGIN: 2023-03-02: Android_UI: SystemUI: Support side car 5G icon
+                FiveGServiceClient(mContext),
+// QTI_END: 2023-03-02: Android_UI: SystemUI: Support side car 5G icon
             )
         whenever(
                 mobileFactory.build(

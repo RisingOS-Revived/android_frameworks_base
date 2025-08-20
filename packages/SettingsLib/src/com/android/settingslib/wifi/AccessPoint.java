@@ -117,6 +117,7 @@ public class AccessPoint implements Comparable<AccessPoint> {
      */
     public static final int HIGHER_FREQ_5GHZ = 5900;
 
+// QTI_BEGIN: 2019-10-10: WIGIG: wifi: add basic support for 60GHz band
     /**
      * Lower bound on the 60 GHz (802.11ad) WIGIG channels
      */
@@ -127,6 +128,19 @@ public class AccessPoint implements Comparable<AccessPoint> {
      */
     public static final int HIGHER_FREQ_60GHZ = 70200;
 
+// QTI_END: 2019-10-10: WIGIG: wifi: add basic support for 60GHz band
+// QTI_BEGIN: 2020-08-06: WLAN: Wi-Fi: Add support to scan and display 6GHz APs
+    /**
+     * Lower bound on the 6.0 GHz (802.11ax) WLAN channels
+     */
+    public static final int LOWER_FREQ_6GHZ = 5935;
+
+    /**
+     * Upper bound on the 6.0 GHz (802.11ax) WLAN channels
+     */
+    public static final int HIGHER_FREQ_6GHZ = 7115;
+
+// QTI_END: 2020-08-06: WLAN: Wi-Fi: Add support to scan and display 6GHz APs
     /** The key which identifies this AccessPoint grouping. */
     private String mKey;
 
@@ -221,11 +235,16 @@ public class AccessPoint implements Comparable<AccessPoint> {
     public static final int SECURITY_WEP = 1;
     public static final int SECURITY_PSK = 2;
     public static final int SECURITY_EAP = 3;
+// QTI_BEGIN: 2018-07-31: WLAN: Wifi: Update accesspoint to cater to add network option from GUI
     public static final int SECURITY_OWE = 4;
+// QTI_END: 2018-07-31: WLAN: Wifi: Update accesspoint to cater to add network option from GUI
+// QTI_BEGIN: 2018-05-12: WLAN: wifi: Add APIs and keymgmt to support WPA3(DPP,SAE,OWE,SuiteB).
     public static final int SECURITY_SAE = 5;
+// QTI_END: 2018-05-12: WLAN: wifi: Add APIs and keymgmt to support WPA3(DPP,SAE,OWE,SuiteB).
     public static final int SECURITY_EAP_SUITE_B = 6;
     public static final int SECURITY_EAP_WPA3_ENTERPRISE = 7;
-    public static final int SECURITY_MAX_VAL = 8; // Has to be the last
+    public static final int SECURITY_DPP = 8;
+    public static final int SECURITY_MAX_VAL = 9; // Has to be the last
 
     private static final int PSK_UNKNOWN = 0;
     private static final int PSK_WPA = 1;
@@ -258,6 +277,11 @@ public class AccessPoint implements Comparable<AccessPoint> {
     private WifiConfiguration mConfig;
 
     private int mRssi = UNREACHABLE_RSSI;
+
+// QTI_BEGIN: 2020-04-22: WLAN: wifi: refactor Wi-Fi generation UI enhancements
+    private int mDeviceWifiStandard;
+    private int mWifiStandard = ScanResult.WIFI_STANDARD_LEGACY;
+// QTI_END: 2020-04-22: WLAN: wifi: refactor Wi-Fi generation UI enhancements
 
     private WifiInfo mInfo;
     private NetworkInfo mNetworkInfo;
@@ -359,6 +383,12 @@ public class AccessPoint implements Comparable<AccessPoint> {
         // Calculate required fields
         updateKey();
         updateBestRssiInfo();
+// QTI_BEGIN: 2020-04-22: WLAN: wifi: refactor Wi-Fi generation UI enhancements
+        updateDeviceWifiGenerationInfo();
+// QTI_END: 2020-04-22: WLAN: wifi: refactor Wi-Fi generation UI enhancements
+// QTI_BEGIN: 2019-04-03: WLAN: wifi: Add support to get wifi generation info for Access points.
+        updateWifiGeneration();
+// QTI_END: 2019-04-03: WLAN: wifi: Add support to get wifi generation info for Access points.
     }
 
     /**
@@ -369,6 +399,9 @@ public class AccessPoint implements Comparable<AccessPoint> {
         mContext = context;
         loadConfig(config);
         updateKey();
+// QTI_BEGIN: 2020-04-22: WLAN: wifi: refactor Wi-Fi generation UI enhancements
+        updateDeviceWifiGenerationInfo();
+// QTI_END: 2020-04-22: WLAN: wifi: refactor Wi-Fi generation UI enhancements
     }
 
     /**
@@ -387,6 +420,9 @@ public class AccessPoint implements Comparable<AccessPoint> {
             mPasspointConfigurationVersion = PasspointConfigurationVersion.NO_OSU_PROVISIONED;
         }
         updateKey();
+// QTI_BEGIN: 2020-04-22: WLAN: wifi: refactor Wi-Fi generation UI enhancements
+        updateDeviceWifiGenerationInfo();
+// QTI_END: 2020-04-22: WLAN: wifi: refactor Wi-Fi generation UI enhancements
     }
 
     /**
@@ -400,6 +436,9 @@ public class AccessPoint implements Comparable<AccessPoint> {
         mConfig = config;
         mPasspointUniqueId = config.getKey();
         mFqdn = config.FQDN;
+// QTI_BEGIN: 2020-04-22: WLAN: wifi: refactor Wi-Fi generation UI enhancements
+        updateDeviceWifiGenerationInfo();
+// QTI_END: 2020-04-22: WLAN: wifi: refactor Wi-Fi generation UI enhancements
         setScanResultsPasspoint(homeScans, roamingScans);
         updateKey();
     }
@@ -411,12 +450,18 @@ public class AccessPoint implements Comparable<AccessPoint> {
             @NonNull Collection<ScanResult> results) {
         mContext = context;
         mOsuProvider = provider;
+// QTI_BEGIN: 2020-04-22: WLAN: wifi: refactor Wi-Fi generation UI enhancements
+        updateDeviceWifiGenerationInfo();
+// QTI_END: 2020-04-22: WLAN: wifi: refactor Wi-Fi generation UI enhancements
         setScanResults(results);
         updateKey();
     }
 
     AccessPoint(Context context, Collection<ScanResult> results) {
         mContext = context;
+// QTI_BEGIN: 2020-04-22: WLAN: wifi: refactor Wi-Fi generation UI enhancements
+        updateDeviceWifiGenerationInfo();
+// QTI_END: 2020-04-22: WLAN: wifi: refactor Wi-Fi generation UI enhancements
         setScanResults(results);
         updateKey();
     }
@@ -1048,12 +1093,19 @@ public class AccessPoint implements Comparable<AccessPoint> {
             case SECURITY_WEP:
                 return concise ? context.getString(R.string.wifi_security_short_wep) :
                     context.getString(R.string.wifi_security_wep);
+// QTI_BEGIN: 2018-05-12: WLAN: wifi: Add APIs and keymgmt to support WPA3(DPP,SAE,OWE,SuiteB).
+            case SECURITY_DPP:
+                return concise ? context.getString(R.string.wifi_security_short_dpp) :
+                    context.getString(R.string.wifi_security_dpp);
             case SECURITY_SAE:
+// QTI_END: 2018-05-12: WLAN: wifi: Add APIs and keymgmt to support WPA3(DPP,SAE,OWE,SuiteB).
                 return concise ? context.getString(R.string.wifi_security_short_sae) :
                         context.getString(R.string.wifi_security_sae);
+// QTI_BEGIN: 2018-05-12: WLAN: wifi: Add APIs and keymgmt to support WPA3(DPP,SAE,OWE,SuiteB).
             case SECURITY_OWE:
                 return concise ? context.getString(R.string.wifi_security_short_owe) :
                     context.getString(R.string.wifi_security_owe);
+// QTI_END: 2018-05-12: WLAN: wifi: Add APIs and keymgmt to support WPA3(DPP,SAE,OWE,SuiteB).
             case SECURITY_NONE:
             default:
                 return concise ? "" : context.getString(R.string.wifi_security_none);
@@ -1462,6 +1514,9 @@ public class AccessPoint implements Comparable<AccessPoint> {
             mScanResults.addAll(scanResults);
         }
         updateBestRssiInfo();
+// QTI_BEGIN: 2019-04-03: WLAN: wifi: Add support to get wifi generation info for Access points.
+        updateWifiGeneration();
+// QTI_END: 2019-04-03: WLAN: wifi: Add support to get wifi generation info for Access points.
         int newLevel = getLevel();
 
         // If newLevel is 0, there will be no displayed Preference since the AP is unreachable
@@ -1529,6 +1584,11 @@ public class AccessPoint implements Comparable<AccessPoint> {
                 // are still seen, we will investigate further.
                 update(config); // Notifies the AccessPointListener of the change
             }
+            if (getWifiStandard() != info.getWifiStandard()) {
+// QTI_BEGIN: 2019-04-03: WLAN: wifi: Add support to get wifi generation info for Access points.
+                updated = true;
+            }
+// QTI_END: 2019-04-03: WLAN: wifi: Add support to get wifi generation info for Access points.
             if (mRssi != info.getRssi() && info.getRssi() != WifiInfo.INVALID_RSSI) {
                 mRssi = info.getRssi();
                 updated = true;
@@ -1542,6 +1602,9 @@ public class AccessPoint implements Comparable<AccessPoint> {
             updated = true;
             mInfo = null;
             mNetworkInfo = null;
+// QTI_BEGIN: 2019-04-03: WLAN: wifi: Add support to get wifi generation info for Access points.
+            updateWifiGeneration();
+// QTI_END: 2019-04-03: WLAN: wifi: Add support to get wifi generation info for Access points.
         }
         if (updated && mAccessPointListener != null) {
             ThreadUtils.postOnMainThread(() -> {
@@ -1760,6 +1823,7 @@ public class AccessPoint implements Comparable<AccessPoint> {
         final boolean isEap = result.capabilities.contains("EAP");
         final boolean isOwe = result.capabilities.contains("OWE");
         final boolean isOweTransition = result.capabilities.contains("OWE_TRANSITION");
+        final boolean isDpp = result.capabilities.contains("DPP");
 
         if (isSae && isPsk) {
             final WifiManager wifiManager = (WifiManager)
@@ -1772,16 +1836,26 @@ public class AccessPoint implements Comparable<AccessPoint> {
             return wifiManager.isEnhancedOpenSupported() ? SECURITY_OWE : SECURITY_NONE;
         }
 
-        if (isWep) {
+        if (isDpp) {
+// QTI_BEGIN: 2018-05-12: WLAN: wifi: Add APIs and keymgmt to support WPA3(DPP,SAE,OWE,SuiteB).
+            return SECURITY_DPP;
+// QTI_END: 2018-05-12: WLAN: wifi: Add APIs and keymgmt to support WPA3(DPP,SAE,OWE,SuiteB).
+        } else if (isWep) {
+// QTI_BEGIN: 2018-05-25: WLAN: Wifi: Check for SAE/OWE AKM prior to PSK
             return SECURITY_WEP;
+// QTI_END: 2018-05-25: WLAN: Wifi: Check for SAE/OWE AKM prior to PSK
         } else if (isSae) {
             return SECURITY_SAE;
         } else if (isPsk) {
+// QTI_BEGIN: 2018-05-25: WLAN: Wifi: Check for SAE/OWE AKM prior to PSK
             return SECURITY_PSK;
+// QTI_END: 2018-05-25: WLAN: Wifi: Check for SAE/OWE AKM prior to PSK
         } else if (isEapSuiteB192) {
             return SECURITY_EAP_SUITE_B;
         } else if (isEap) {
+// QTI_BEGIN: 2018-05-25: WLAN: Wifi: Check for SAE/OWE AKM prior to PSK
             return SECURITY_EAP;
+// QTI_END: 2018-05-25: WLAN: Wifi: Check for SAE/OWE AKM prior to PSK
         } else if (isOwe) {
             return SECURITY_OWE;
         }
@@ -1802,9 +1876,14 @@ public class AccessPoint implements Comparable<AccessPoint> {
                 config.allowedKeyManagement.get(KeyMgmt.IEEE8021X)) {
             return SECURITY_EAP;
         }
+// QTI_BEGIN: 2018-05-12: WLAN: wifi: Add APIs and keymgmt to support WPA3(DPP,SAE,OWE,SuiteB).
+        if (config.allowedKeyManagement.get(KeyMgmt.DPP)) {
+            return SECURITY_DPP;
+        }
         if (config.allowedKeyManagement.get(KeyMgmt.OWE)) {
             return SECURITY_OWE;
         }
+// QTI_END: 2018-05-12: WLAN: wifi: Add APIs and keymgmt to support WPA3(DPP,SAE,OWE,SuiteB).
         return (config.wepTxKeyIndex >= 0
                 && config.wepTxKeyIndex < config.wepKeys.length
                 && config.wepKeys[config.wepTxKeyIndex] != null)
@@ -1825,12 +1904,18 @@ public class AccessPoint implements Comparable<AccessPoint> {
             return "PSK";
         } else if (security == SECURITY_EAP) {
             return "EAP";
+// QTI_BEGIN: 2018-05-12: WLAN: wifi: Add APIs and keymgmt to support WPA3(DPP,SAE,OWE,SuiteB).
+        } else if (security == SECURITY_DPP) {
+            return "DPP";
         } else if (security == SECURITY_SAE) {
             return "SAE";
+// QTI_END: 2018-05-12: WLAN: wifi: Add APIs and keymgmt to support WPA3(DPP,SAE,OWE,SuiteB).
         } else if (security == SECURITY_EAP_SUITE_B) {
             return "SUITE_B";
+// QTI_BEGIN: 2018-05-12: WLAN: wifi: Add APIs and keymgmt to support WPA3(DPP,SAE,OWE,SuiteB).
         } else if (security == SECURITY_OWE) {
             return "OWE";
+// QTI_END: 2018-05-12: WLAN: wifi: Add APIs and keymgmt to support WPA3(DPP,SAE,OWE,SuiteB).
         }
         return "NONE";
     }
@@ -2064,4 +2149,50 @@ public class AccessPoint implements Comparable<AccessPoint> {
         }
         return false;
     }
+// QTI_BEGIN: 2020-04-22: WLAN: wifi: refactor Wi-Fi generation UI enhancements
+
+    private void updateDeviceWifiGenerationInfo() {
+        final WifiManager wifiManager = getWifiManager();
+
+        if (wifiManager.isWifiStandardSupported(ScanResult.WIFI_STANDARD_11AX))
+            mDeviceWifiStandard = ScanResult.WIFI_STANDARD_11AX;
+        else if (wifiManager.isWifiStandardSupported(ScanResult.WIFI_STANDARD_11AC))
+            mDeviceWifiStandard = ScanResult.WIFI_STANDARD_11AC;
+        else if (wifiManager.isWifiStandardSupported(ScanResult.WIFI_STANDARD_11N))
+            mDeviceWifiStandard = ScanResult.WIFI_STANDARD_11N;
+        else
+            mDeviceWifiStandard = ScanResult.WIFI_STANDARD_LEGACY;
+    }
+
+    /**
+// QTI_END: 2020-04-22: WLAN: wifi: refactor Wi-Fi generation UI enhancements
+     * Updates {@link #mWifiStandard}.
+// QTI_BEGIN: 2020-04-22: WLAN: wifi: refactor Wi-Fi generation UI enhancements
+     *
+     * <p>If the given connection is active, the existing values are valid.
+     * If the given AccessPoint is not connected, a value will be calculated from previous scan
+     * results, based on minimum capability for all BSSIDs and capability of device.
+     */
+    private void updateWifiGeneration() {
+        int currResultWifiStandard;
+        int minConnectionCapability = mDeviceWifiStandard;
+
+        for (ScanResult result : mScanResults) {
+            currResultWifiStandard = result.getWifiStandard();
+
+            if (currResultWifiStandard < minConnectionCapability) {
+                minConnectionCapability = currResultWifiStandard;
+            }
+        }
+
+        mWifiStandard = minConnectionCapability;
+    }
+
+    public int getWifiStandard() {
+        if (this.isActive() && mInfo != null)
+            return mInfo.getWifiStandard();
+
+        return mWifiStandard;
+    }
+// QTI_END: 2020-04-22: WLAN: wifi: refactor Wi-Fi generation UI enhancements
 }

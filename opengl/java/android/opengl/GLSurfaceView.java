@@ -1570,6 +1570,12 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
                         if (view != null) {
                             try {
                                 Trace.traceBegin(Trace.TRACE_TAG_VIEW, "onDrawFrame");
+// QTI_BEGIN: 2018-05-13: Performance: GLSurfaceView: report draw finished after first onDrawFrame in GLThread.
+                                if (mFinishDrawingRunnable != null) {
+                                    finishDrawingRunnable = mFinishDrawingRunnable;
+                                    mFinishDrawingRunnable = null;
+                                }
+// QTI_END: 2018-05-13: Performance: GLSurfaceView: report draw finished after first onDrawFrame in GLThread.
                                 view.mRenderer.onDrawFrame(gl);
                                 if (finishDrawingRunnable != null) {
                                     finishDrawingRunnable.run();

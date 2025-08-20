@@ -32,7 +32,9 @@ internal class WifiState(
      * *not* for typical wifi connections. See b/225902574.
      */
     @JvmField var isDefaultConnectionValidated: Boolean = false,
-    @JvmField var subId: Int = 0
+    @JvmField var subId: Int = 0,
+    @JvmField var wifiStandard: Int = 0,
+    @JvmField var isReady: Boolean = false
 ) : ConnectivityState() {
 
     public override fun copyFrom(s: ConnectivityState) {
@@ -45,11 +47,15 @@ internal class WifiState(
         isCarrierMerged = state.isCarrierMerged
         isDefaultConnectionValidated = state.isDefaultConnectionValidated
         subId = state.subId
+        wifiStandard = state.wifiStandard
+        isReady = state.isReady
     }
 
     override fun toString(builder: StringBuilder) {
         super.toString(builder)
         builder.append(",ssid=").append(ssid)
+                .append(",wifiStandard=").append(wifiStandard)
+                .append(",isReady=").append(isReady)
                 .append(",isTransient=").append(isTransient)
                 .append(",isDefault=").append(isDefault)
                 .append(",statusLabel=").append(statusLabel)
@@ -92,6 +98,8 @@ internal class WifiState(
         other as WifiState
 
         if (ssid != other.ssid) return false
+        if (wifiStandard != other.wifiStandard) return false
+        if (isReady != other.isReady) return false
         if (isTransient != other.isTransient) return false
         if (isDefault != other.isDefault) return false
         if (statusLabel != other.statusLabel) return false

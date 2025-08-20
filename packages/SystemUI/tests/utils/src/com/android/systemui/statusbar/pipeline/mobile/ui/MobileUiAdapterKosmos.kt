@@ -16,10 +16,12 @@
 
 package com.android.systemui.statusbar.pipeline.mobile.ui
 
+import android.telephony.TelephonyManager
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.statusbar.phone.ui.statusBarIconController
 import com.android.systemui.statusbar.pipeline.mobile.ui.viewmodel.mobileIconsViewModel
+import org.mockito.kotlin.mock
 
 val Kosmos.mobileUiAdapter by
     Kosmos.Fixture {
@@ -28,5 +30,6 @@ val Kosmos.mobileUiAdapter by
           mobileIconsViewModel,
           mobileViewLogger,
           applicationCoroutineScope,
+          mock<TelephonyManager>(),
       )
     }

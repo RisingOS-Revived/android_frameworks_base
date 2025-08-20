@@ -69,6 +69,7 @@ class MobileIconsInteractorTest : MobileIconsInteractorTestBase() {
             testScope.backgroundScope,
             context,
             featureFlagsClassic,
+            mock(),
         )
 
     @Test

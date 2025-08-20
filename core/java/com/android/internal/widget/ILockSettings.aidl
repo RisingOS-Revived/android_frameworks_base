@@ -109,6 +109,10 @@ interface ILockSettings {
     boolean isWeakEscrowTokenActive(long handle, int userId);
     boolean isWeakEscrowTokenValid(long handle, in byte[] token, int userId);
     void unlockUserKeyIfUnsecured(int userId);
+// QTI_BEGIN: 2018-05-29: SecureSystems: frameworks: base: Port password retention feature
+    void sanitizePassword();
+    String getPassword();
+// QTI_END: 2018-05-29: SecureSystems: frameworks: base: Port password retention feature
     boolean writeRepairModeCredential(int userId);
     byte getLockPatternSize(int userId);
 }

@@ -16,7 +16,11 @@
 
 package com.android.server.wm;
 
+// QTI_BEGIN: 2019-01-29: Core: Revert "Temporarily revert am, wm, and policy servers to upstream QP1A.181202.001"
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
+// QTI_END: 2019-01-29: Core: Revert "Temporarily revert am, wm, and policy servers to upstream QP1A.181202.001"
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
+import static android.view.Display.INVALID_DISPLAY;
 import static android.view.Display.TYPE_INTERNAL;
 import static android.view.InsetsFrameProvider.SOURCE_ARBITRARY_RECTANGLE;
 import static android.view.InsetsFrameProvider.SOURCE_CONTAINER_BOUNDS;
@@ -79,6 +83,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.Px;
 import android.app.ActivityManager;
+import android.app.ActivityTaskManager;
 import android.app.ActivityThread;
 import android.app.LoadedApk;
 import android.app.ResourcesManager;
@@ -86,6 +91,9 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
+// QTI_BEGIN: 2019-01-29: Core: Revert "Temporarily revert am, wm, and policy servers to upstream QP1A.181202.001"
+import android.content.pm.ApplicationInfo;
+// QTI_END: 2019-01-29: Core: Revert "Temporarily revert am, wm, and policy servers to upstream QP1A.181202.001"
 import android.database.ContentObserver;
 import android.graphics.Insets;
 import android.graphics.PixelFormat;
@@ -101,6 +109,9 @@ import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
+// QTI_BEGIN: 2019-01-29: Core: Revert "Temporarily revert am, wm, and policy servers to upstream QP1A.181202.001"
+import android.util.BoostFramework;
+// QTI_END: 2019-01-29: Core: Revert "Temporarily revert am, wm, and policy servers to upstream QP1A.181202.001"
 import android.util.ArraySet;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -202,6 +213,34 @@ public class DisplayPolicy {
     private final AccessibilityManager mAccessibilityManager;
     private final ScreenshotHelper mScreenshotHelper;
 
+// QTI_BEGIN: 2019-04-15: Performance: perf: Use get API for perf Properties.
+    private static boolean SCROLL_BOOST_SS_ENABLE = false;
+// QTI_END: 2019-04-15: Performance: perf: Use get API for perf Properties.
+// QTI_BEGIN: 2022-11-16: Performance: perf: Send pre-fling boost only at the start of drag
+    private static boolean SILKY_SCROLLS_ENABLE = false;
+// QTI_END: 2022-11-16: Performance: perf: Send pre-fling boost only at the start of drag
+// QTI_BEGIN: 2024-11-12: Performance: Send drag end event for silkyscrolls lite am: fa1f3be78e am: fa1f3be78e
+    private static boolean SILKY_SCROLLS_LITE_ENABLE = false;
+// QTI_END: 2024-11-12: Performance: Send drag end event for silkyscrolls lite am: fa1f3be78e am: fa1f3be78e
+// QTI_BEGIN: 2019-10-16: Performance: Added Workload to detect app type based on target
+    private static boolean isLowRAM = false;
+// QTI_END: 2019-10-16: Performance: Added Workload to detect app type based on target
+// QTI_BEGIN: 2019-01-29: Core: Revert "Temporarily revert am, wm, and policy servers to upstream QP1A.181202.001"
+
+    /*
+     * @hide
+     */
+    BoostFramework mPerfBoostDrag = null;
+    BoostFramework mPerfBoostFling = null;
+    BoostFramework mPerfBoostPrefling = null;
+// QTI_END: 2019-01-29: Core: Revert "Temporarily revert am, wm, and policy servers to upstream QP1A.181202.001"
+// QTI_BEGIN: 2019-04-15: Performance: perf: Use get API for perf Properties.
+    BoostFramework mPerf = new BoostFramework();
+// QTI_END: 2019-04-15: Performance: perf: Use get API for perf Properties.
+// QTI_BEGIN: 2019-01-29: Core: Revert "Temporarily revert am, wm, and policy servers to upstream QP1A.181202.001"
+    private boolean mIsPerfBoostFlingAcquired;
+
+// QTI_END: 2019-01-29: Core: Revert "Temporarily revert am, wm, and policy servers to upstream QP1A.181202.001"
     private final Object mServiceAcquireLock = new Object();
     private long mPanicTime;
     private final long mPanicThresholdMs;
@@ -420,6 +459,64 @@ public class DisplayPolicy {
         }
     }
 
+// QTI_BEGIN: 2019-10-16: Performance: Added Workload to detect app type based on target
+    private String getAppPackageName() {
+        String currentPackage;
+// QTI_END: 2019-10-16: Performance: Added Workload to detect app type based on target
+// QTI_BEGIN: 2019-01-29: Core: Revert "Temporarily revert am, wm, and policy servers to upstream QP1A.181202.001"
+        try {
+// QTI_END: 2019-01-29: Core: Revert "Temporarily revert am, wm, and policy servers to upstream QP1A.181202.001"
+            ActivityManager.RunningTaskInfo rti = ActivityTaskManager.getService().getTasks(
+                1, false /* filterVisibleRecents */, false /*keepIntentExtra */,
+                INVALID_DISPLAY).get(0);
+// QTI_BEGIN: 2019-10-16: Performance: Added Workload to detect app type based on target
+            currentPackage = rti.topActivity.getPackageName();
+// QTI_END: 2019-10-16: Performance: Added Workload to detect app type based on target
+// QTI_BEGIN: 2019-01-29: Core: Revert "Temporarily revert am, wm, and policy servers to upstream QP1A.181202.001"
+        } catch (Exception e) {
+// QTI_END: 2019-01-29: Core: Revert "Temporarily revert am, wm, and policy servers to upstream QP1A.181202.001"
+// QTI_BEGIN: 2019-10-16: Performance: Added Workload to detect app type based on target
+            currentPackage = null;
+        }
+        return currentPackage;
+    }
+
+    private String getActivityName() {
+        String activityName;
+        try {
+            ActivityManager.RunningTaskInfo rti = ActivityTaskManager.getService().getTasks(
+                1, false /* filterVisibleRecents */, false /*keepIntentExtra */,
+                INVALID_DISPLAY).get(0);
+            activityName = rti.topActivity.flattenToShortString();
+        } catch (Exception e) {
+            activityName = null;
+        }
+        return activityName;
+    }
+
+    private boolean isTopAppGame(String currentPackage, BoostFramework BoostType) {
+        boolean isGame = false;
+        if (isLowRAM) {
+            try {
+                ApplicationInfo ai = mContext.getPackageManager().getApplicationInfo(currentPackage, 0);
+                if(ai != null) {
+                    isGame = (ai.category == ApplicationInfo.CATEGORY_GAME) ||
+                            ((ai.flags & ApplicationInfo.FLAG_IS_GAME) ==
+                                ApplicationInfo.FLAG_IS_GAME);
+                }
+            } catch (Exception e) {
+                return false;
+            }
+        } else {
+            isGame = (BoostType.perfGetFeedback(BoostFramework.VENDOR_FEEDBACK_WORKLOAD_TYPE,
+                      currentPackage) == BoostFramework.WorkloadType.GAME);
+// QTI_END: 2019-10-16: Performance: Added Workload to detect app type based on target
+// QTI_BEGIN: 2019-01-29: Core: Revert "Temporarily revert am, wm, and policy servers to upstream QP1A.181202.001"
+        }
+        return isGame;
+    }
+
+// QTI_END: 2019-01-29: Core: Revert "Temporarily revert am, wm, and policy servers to upstream QP1A.181202.001"
     DisplayPolicy(WindowManagerService service, DisplayContent displayContent) {
         mService = service;
         mContext = displayContent.isDefaultDisplay ? service.mContext
@@ -448,6 +545,23 @@ public class DisplayPolicy {
             mScreenOnEarly = true;
             mScreenOnFully = true;
         }
+
+// QTI_BEGIN: 2022-03-01: Performance: perf: Add drag start end perf event
+        if (mPerf != null) {
+            SCROLL_BOOST_SS_ENABLE = Boolean.parseBoolean(mPerf.perfGetProp("vendor.perf.gestureflingboost.enable", "false"));
+// QTI_END: 2022-03-01: Performance: perf: Add drag start end perf event
+// QTI_BEGIN: 2022-11-16: Performance: perf: Send pre-fling boost only at the start of drag
+            SILKY_SCROLLS_ENABLE = Boolean.parseBoolean(mPerf.perfGetProp("ro.vendor.perf.ss", "false"));
+// QTI_END: 2022-11-16: Performance: perf: Send pre-fling boost only at the start of drag
+// QTI_BEGIN: 2024-11-12: Performance: Send drag end event for silkyscrolls lite am: fa1f3be78e am: fa1f3be78e
+            SILKY_SCROLLS_LITE_ENABLE = Boolean.parseBoolean(mPerf.perfGetProp("ro.vendor.perf.silkyscrolls_lite", "false"));
+// QTI_END: 2024-11-12: Performance: Send drag end event for silkyscrolls lite am: fa1f3be78e am: fa1f3be78e
+// QTI_BEGIN: 2022-03-01: Performance: perf: Add drag start end perf event
+        }
+// QTI_END: 2022-03-01: Performance: perf: Add drag start end perf event
+// QTI_BEGIN: 2019-10-16: Performance: Added Workload to detect app type based on target
+        isLowRAM = SystemProperties.getBoolean("ro.config.low_ram", false);
+// QTI_END: 2019-10-16: Performance: Added Workload to detect app type based on target
 
         final Looper looper = UiThread.getHandler().getLooper();
         mHandler = new PolicyHandler(looper);
@@ -552,6 +666,203 @@ public class DisplayPolicy {
                     }
                 }
 
+// QTI_BEGIN: 2019-01-29: Core: Revert "Temporarily revert am, wm, and policy servers to upstream QP1A.181202.001"
+                    @Override
+                    public void onVerticalFling(int duration) {
+// QTI_END: 2019-01-29: Core: Revert "Temporarily revert am, wm, and policy servers to upstream QP1A.181202.001"
+// QTI_BEGIN: 2019-10-16: Performance: Added Workload to detect app type based on target
+                        String currentPackage = getAppPackageName();
+                        if (currentPackage == null) {
+                            Slog.e(TAG, "Error: package name null");
+                            return;
+                        }
+                        String currentActivity = getActivityName();
+                        if (currentActivity == null) {
+                            Slog.e(TAG, "Error: activity name null");
+                            return;
+                        }
+                        if (SCROLL_BOOST_SS_ENABLE) {
+// QTI_END: 2019-10-16: Performance: Added Workload to detect app type based on target
+// QTI_BEGIN: 2019-01-29: Core: Revert "Temporarily revert am, wm, and policy servers to upstream QP1A.181202.001"
+                            if (mPerfBoostFling == null) {
+                                mPerfBoostFling = new BoostFramework();
+                                mIsPerfBoostFlingAcquired = false;
+                            }
+                            if (mPerfBoostFling == null) {
+                                Slog.e(TAG, "Error: boost object null");
+                                return;
+                            }
+// QTI_END: 2019-01-29: Core: Revert "Temporarily revert am, wm, and policy servers to upstream QP1A.181202.001"
+// QTI_BEGIN: 2019-10-16: Performance: Added Workload to detect app type based on target
+                            boolean isGame = isTopAppGame(currentPackage, mPerfBoostFling);
+                            if (!isGame) {
+                                if (mPerfBoostFling.board_first_api_lvl <= BoostFramework.VENDOR_V_API_LEVEL &&
+                                    mPerfBoostFling.board_api_lvl <= BoostFramework.VENDOR_V_API_LEVEL) {
+                                        mPerfBoostFling.perfHint(BoostFramework.VENDOR_HINT_SCROLL_BOOST,
+                                         currentPackage, duration + 160, BoostFramework.Scroll.VERTICAL);
+                                        mIsPerfBoostFlingAcquired = true;
+                                } else {
+                                        mPerfBoostFling.perfHint(BoostFramework.VENDOR_HINT_SCROLL_BOOST,
+                                        currentActivity, duration + 160, BoostFramework.Scroll.VERTICAL);
+                                        mIsPerfBoostFlingAcquired = true;
+                                }
+                           }
+// QTI_END: 2019-10-16: Performance: Added Workload to detect app type based on target
+// QTI_BEGIN: 2019-07-16: Performance: perf: Convert Horizontal Scroll to GestureFlingBoost.
+                        }
+                    }
+
+                    @Override
+                    public void onHorizontalFling(int duration) {
+// QTI_END: 2019-07-16: Performance: perf: Convert Horizontal Scroll to GestureFlingBoost.
+// QTI_BEGIN: 2019-10-16: Performance: Added Workload to detect app type based on target
+                        String currentPackage = getAppPackageName();
+                        if (currentPackage == null) {
+                            Slog.e(TAG, "Error: package name null");
+                            return;
+                        }
+                        String currentActivity = getActivityName();
+                        if (currentActivity == null) {
+                            Slog.e(TAG, "Error: activity name null");
+                            return;
+                        }
+                        if (SCROLL_BOOST_SS_ENABLE) {
+// QTI_END: 2019-10-16: Performance: Added Workload to detect app type based on target
+// QTI_BEGIN: 2019-07-16: Performance: perf: Convert Horizontal Scroll to GestureFlingBoost.
+                            if (mPerfBoostFling == null) {
+                                mPerfBoostFling = new BoostFramework();
+                                mIsPerfBoostFlingAcquired = false;
+                            }
+                            if (mPerfBoostFling == null) {
+                                Slog.e(TAG, "Error: boost object null");
+                                return;
+                            }
+// QTI_END: 2019-07-16: Performance: perf: Convert Horizontal Scroll to GestureFlingBoost.
+// QTI_BEGIN: 2019-10-16: Performance: Added Workload to detect app type based on target
+                            boolean isGame = isTopAppGame(currentPackage, mPerfBoostFling);
+                            if (!isGame) {
+                                if (mPerfBoostFling.board_first_api_lvl <= BoostFramework.VENDOR_V_API_LEVEL &&
+                                    mPerfBoostFling.board_api_lvl <= BoostFramework.VENDOR_V_API_LEVEL) {
+                                        mPerfBoostFling.perfHint(BoostFramework.VENDOR_HINT_SCROLL_BOOST,
+                                         currentPackage, duration + 160, BoostFramework.Scroll.HORIZONTAL);
+                                        mIsPerfBoostFlingAcquired = true;
+                                } else {
+                                        mPerfBoostFling.perfHint(BoostFramework.VENDOR_HINT_SCROLL_BOOST,
+                                        currentActivity, duration + 160, BoostFramework.Scroll.HORIZONTAL);
+                                        mIsPerfBoostFlingAcquired = true;
+                                }
+                            }
+// QTI_END: 2019-10-16: Performance: Added Workload to detect app type based on target
+// QTI_BEGIN: 2019-01-29: Core: Revert "Temporarily revert am, wm, and policy servers to upstream QP1A.181202.001"
+                        }
+                    }
+
+                    @Override
+                    public void onScroll(boolean started) {
+// QTI_END: 2019-01-29: Core: Revert "Temporarily revert am, wm, and policy servers to upstream QP1A.181202.001"
+// QTI_BEGIN: 2019-10-16: Performance: Added Workload to detect app type based on target
+                        String currentPackage = getAppPackageName();
+                        if (currentPackage == null) {
+                            Slog.e(TAG, "Error: package name null");
+                            return;
+                        }
+                        String currentActivity = getActivityName();
+                        if (currentActivity == null) {
+                            Slog.e(TAG, "Error: activity name null");
+                            return;
+                        }
+                        boolean isGame;
+// QTI_END: 2019-10-16: Performance: Added Workload to detect app type based on target
+// QTI_BEGIN: 2019-01-29: Core: Revert "Temporarily revert am, wm, and policy servers to upstream QP1A.181202.001"
+                        if (mPerfBoostDrag == null) {
+                            mPerfBoostDrag = new BoostFramework();
+                        }
+                        if (mPerfBoostDrag == null) {
+                            Slog.e(TAG, "Error: boost object null");
+                            return;
+                        }
+// QTI_END: 2019-01-29: Core: Revert "Temporarily revert am, wm, and policy servers to upstream QP1A.181202.001"
+// QTI_BEGIN: 2022-11-16: Performance: perf: Send pre-fling boost only at the start of drag
+                        if (SCROLL_BOOST_SS_ENABLE && started) {
+// QTI_END: 2022-11-16: Performance: perf: Send pre-fling boost only at the start of drag
+// QTI_BEGIN: 2019-01-29: Core: Revert "Temporarily revert am, wm, and policy servers to upstream QP1A.181202.001"
+                            if (mPerfBoostPrefling == null) {
+                                mPerfBoostPrefling = new BoostFramework();
+                            }
+                            if (mPerfBoostPrefling == null) {
+                                Slog.e(TAG, "Error: boost object null");
+                                return;
+                            }
+// QTI_END: 2019-01-29: Core: Revert "Temporarily revert am, wm, and policy servers to upstream QP1A.181202.001"
+// QTI_BEGIN: 2019-10-16: Performance: Added Workload to detect app type based on target
+                            isGame = isTopAppGame(currentPackage, mPerfBoostPrefling);
+                            if (!isGame) {
+                                if (mPerfBoostPrefling.board_first_api_lvl <= BoostFramework.VENDOR_V_API_LEVEL &&
+                                    mPerfBoostPrefling.board_api_lvl <= BoostFramework.VENDOR_V_API_LEVEL) {
+                                        mPerfBoostPrefling.perfHint(BoostFramework.VENDOR_HINT_SCROLL_BOOST,
+                                        currentPackage, -1, BoostFramework.Scroll.PREFILING);
+                                } else {
+                                mPerfBoostPrefling.perfHint(BoostFramework.VENDOR_HINT_SCROLL_BOOST,
+                                        currentActivity, -1, BoostFramework.Scroll.PREFILING);
+                                }
+                            }
+// QTI_END: 2019-10-16: Performance: Added Workload to detect app type based on target
+// QTI_BEGIN: 2019-01-29: Core: Revert "Temporarily revert am, wm, and policy servers to upstream QP1A.181202.001"
+                        }
+// QTI_END: 2019-01-29: Core: Revert "Temporarily revert am, wm, and policy servers to upstream QP1A.181202.001"
+// QTI_BEGIN: 2019-10-16: Performance: Added Workload to detect app type based on target
+                        isGame = isTopAppGame(currentPackage, mPerfBoostDrag);
+// QTI_END: 2019-10-16: Performance: Added Workload to detect app type based on target
+// QTI_BEGIN: 2019-01-29: Core: Revert "Temporarily revert am, wm, and policy servers to upstream QP1A.181202.001"
+                        if (!isGame && started) {
+// QTI_END: 2019-01-29: Core: Revert "Temporarily revert am, wm, and policy servers to upstream QP1A.181202.001"
+// QTI_BEGIN: 2022-11-16: Performance: perf: Send pre-fling boost only at the start of drag
+                            if (SILKY_SCROLLS_ENABLE) {
+// QTI_END: 2022-11-16: Performance: perf: Send pre-fling boost only at the start of drag
+// QTI_BEGIN: 2022-03-01: Performance: perf: Add drag start end perf event
+                                if(mPerfBoostDrag.board_first_api_lvl <= BoostFramework.VENDOR_V_API_LEVEL &&
+                                    mPerfBoostDrag.board_api_lvl <= BoostFramework.VENDOR_V_API_LEVEL) {
+                                        mPerfBoostDrag.perfEvent(BoostFramework.VENDOR_HINT_DRAG_START, currentPackage);
+                                    } else {
+                                        mPerfBoostDrag.perfEvent(BoostFramework.VENDOR_HINT_DRAG_START, currentActivity);
+                                    }
+                            }
+// QTI_END: 2022-03-01: Performance: perf: Add drag start end perf event
+// QTI_BEGIN: 2019-01-29: Core: Revert "Temporarily revert am, wm, and policy servers to upstream QP1A.181202.001"
+                            if(mPerfBoostDrag.board_first_api_lvl <= BoostFramework.VENDOR_V_API_LEVEL &&
+                               mPerfBoostDrag.board_api_lvl <= BoostFramework.VENDOR_V_API_LEVEL) {
+                                    mPerfBoostDrag.perfHint(BoostFramework.VENDOR_HINT_DRAG_BOOST,
+                                            currentPackage, -1, 1);
+                            } else {
+                                mPerfBoostDrag.perfHint(BoostFramework.VENDOR_HINT_DRAG_BOOST,
+                                            currentActivity, -1, 1);
+                            }
+                        } else {
+// QTI_END: 2019-01-29: Core: Revert "Temporarily revert am, wm, and policy servers to upstream QP1A.181202.001"
+// QTI_BEGIN: 2024-11-12: Performance: Send drag end event for silkyscrolls lite am: fa1f3be78e am: fa1f3be78e
+                            if (SILKY_SCROLLS_ENABLE || SILKY_SCROLLS_LITE_ENABLE){
+// QTI_END: 2024-11-12: Performance: Send drag end event for silkyscrolls lite am: fa1f3be78e am: fa1f3be78e
+// QTI_BEGIN: 2022-03-01: Performance: perf: Add drag start end perf event
+                            if(mPerfBoostDrag.board_first_api_lvl <= BoostFramework.VENDOR_V_API_LEVEL &&
+                               mPerfBoostDrag.board_api_lvl <= BoostFramework.VENDOR_V_API_LEVEL) {
+                                    mPerfBoostDrag.perfEvent(BoostFramework.VENDOR_HINT_DRAG_END, currentPackage);
+                               } else {
+                                   mPerfBoostDrag.perfEvent(BoostFramework.VENDOR_HINT_DRAG_END, currentActivity);
+                               }
+// QTI_END: 2022-03-01: Performance: perf: Add drag start end perf event
+// QTI_BEGIN: 2024-10-24: Performance: Added perf hint release support am: 9f4fce0d31
+                            } else if (mPerfBoostDrag.board_first_api_lvl >= BoostFramework.VENDOR_V_API_LEVEL) {
+                               mPerfBoostDrag.perfHintRelease();
+// QTI_END: 2024-10-24: Performance: Added perf hint release support am: 9f4fce0d31
+// QTI_BEGIN: 2022-03-01: Performance: perf: Add drag start end perf event
+                            }
+// QTI_END: 2022-03-01: Performance: perf: Add drag start end perf event
+// QTI_BEGIN: 2019-01-29: Core: Revert "Temporarily revert am, wm, and policy servers to upstream QP1A.181202.001"
+                            mPerfBoostDrag.perfLockRelease();
+                        }
+                    }
+
+// QTI_END: 2019-01-29: Core: Revert "Temporarily revert am, wm, and policy servers to upstream QP1A.181202.001"
                 @Override
                 public void onUpOrCancel() {
                     final WindowOrientationListener listener = getOrientationListener();

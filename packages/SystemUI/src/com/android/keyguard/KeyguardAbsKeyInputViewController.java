@@ -185,6 +185,7 @@ public abstract class KeyguardAbsKeyInputViewController<T extends KeyguardAbsKey
     void onPasswordChecked(int userId, boolean matched, int timeoutMs, boolean isValidPassword) {
         boolean dismissKeyguard = mSelectedUserInteractor.getSelectedUserId() == userId;
         if (matched) {
+            mLockPatternUtils.sanitizePassword();
             mBouncerHapticPlayer.playAuthenticationFeedback(
                     /* authenticationSucceeded = */true
             );

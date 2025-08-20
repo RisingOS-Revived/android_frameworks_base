@@ -280,6 +280,7 @@ filegroup {
     visibility: ["//visibility:public"],
 }
 
+// QTI_END: 2021-03-11: Bluetooth: BT fwk: Changes to compile only when bt_adv_audio present
 java_defaults {
     name: "framework-minus-apex-defaults",
     defaults: [
@@ -351,7 +352,9 @@ java_defaults {
         include_dirs: [
             "frameworks/av/aidl",
             "frameworks/native/libs/permission/aidl",
+// QTI_BEGIN: 2023-10-19: Bluetooth: Enable AOSP BT APEX
             "packages/modules/Bluetooth/framework/aidl-export",
+// QTI_END: 2023-10-19: Bluetooth: Enable AOSP BT APEX
             "packages/modules/Connectivity/framework/aidl-export",
             "packages/modules/Media/apex/aidl/stable",
             "hardware/interfaces/biometrics/common/aidl",

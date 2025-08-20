@@ -32,6 +32,9 @@ import com.android.systemui.statusbar.pipeline.mobile.util.MobileMappingsProxy
  */
 sealed interface ResolvedNetworkType : Diffable<ResolvedNetworkType> {
     val lookupKey: String
+// QTI_BEGIN: 2023-03-02: Android_UI: SystemUI: Support side car 5G icon
+    val networkType: Int
+// QTI_END: 2023-03-02: Android_UI: SystemUI: Support side car 5G icon
 
     override fun logDiffs(prevVal: ResolvedNetworkType, row: TableRowLogger) {
         if (prevVal != this) {
@@ -43,20 +46,32 @@ sealed interface ResolvedNetworkType : Diffable<ResolvedNetworkType> {
         override val lookupKey: String = MobileMappings.toIconKey(NETWORK_TYPE_UNKNOWN)
 
         override fun toString(): String = "Unknown"
+// QTI_BEGIN: 2023-03-02: Android_UI: SystemUI: Support side car 5G icon
+        override val networkType: Int = 0
+// QTI_END: 2023-03-02: Android_UI: SystemUI: Support side car 5G icon
     }
 
     data class DefaultNetworkType(
         override val lookupKey: String,
+// QTI_BEGIN: 2023-03-02: Android_UI: SystemUI: Support side car 5G icon
+        override val networkType: Int = 0,
+// QTI_END: 2023-03-02: Android_UI: SystemUI: Support side car 5G icon
     ) : ResolvedNetworkType
 
     data class OverrideNetworkType(
         override val lookupKey: String,
+// QTI_BEGIN: 2023-03-02: Android_UI: SystemUI: Support side car 5G icon
+        override val networkType: Int = 0,
+// QTI_END: 2023-03-02: Android_UI: SystemUI: Support side car 5G icon
     ) : ResolvedNetworkType
 
     /** Represents the carrier merged network. See [CarrierMergedConnectionRepository]. */
     object CarrierMergedNetworkType : ResolvedNetworkType {
         // Effectively unused since [iconGroupOverride] is used instead.
         override val lookupKey: String = "cwf"
+// QTI_BEGIN: 2023-03-02: Android_UI: SystemUI: Support side car 5G icon
+        override val networkType: Int = 0
+// QTI_END: 2023-03-02: Android_UI: SystemUI: Support side car 5G icon
 
         val iconGroupOverride: SignalIcon.MobileIconGroup = TelephonyIcons.CARRIER_MERGED_WIFI
 

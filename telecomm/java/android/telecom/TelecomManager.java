@@ -200,6 +200,19 @@ public class TelecomManager {
     public static final String ACTION_DEFAULT_DIALER_CHANGED =
             "android.telecom.action.DEFAULT_DIALER_CHANGED";
 
+// QTI_BEGIN: 2018-06-13: Bluetooth: BT: Send info if call is CS type from telecomm service to BT apps.
+    /**
+     *@hide Broadcast intent action indicating the call type(CS call or Non-CS call).
+     * The string extra {@link #EXTRA_CALL_TYPE_CS} will contain the
+     * boolean value true if call is CS call else false.
+     *
+     * @see #EXTRA_CALL_TYPE_CS
+     */
+    public static final String ACTION_CALL_TYPE =
+            "codeaurora.telecom.action.CALL_TYPE";
+
+
+// QTI_END: 2018-06-13: Bluetooth: BT: Send info if call is CS type from telecomm service to BT apps.
     /**
      * Extra value used to provide the package name for {@link #ACTION_CHANGE_DEFAULT_DIALER}.
      */
@@ -405,6 +418,15 @@ public class TelecomManager {
             "android.telecom.extra.IS_USER_INTENT_EMERGENCY_CALL";
 
     /**
+     * Optional extra for {@link #ACTION_INCOMING_CALL} containing a boolean to indicate that the
+     * call has an externally generated ringer. Used by the HfpClientConnectionService when In Band
+     * Ringtone is enabled to prevent two ringers from being generated.
+     * @hide
+     */
+    public static final String EXTRA_CALL_EXTERNAL_RINGER =
+            "android.telecom.extra.CALL_EXTERNAL_RINGER";
+
+    /**
      * A mandatory extra containing a {@link Uri} to be passed in when calling
      * {@link #addNewUnknownCall(PhoneAccountHandle, Bundle)}. The {@link Uri} value indicates
      * the remote handle of the new call.
@@ -519,6 +541,15 @@ public class TelecomManager {
     public static final String EXTRA_CALL_NETWORK_TYPE =
             "android.telecom.extra.CALL_NETWORK_TYPE";
 
+// QTI_BEGIN: 2018-06-13: Bluetooth: BT: Send info if call is CS type from telecomm service to BT apps.
+    /**
+     *@hide  Extra value used to provide the call type for {@link #ACTION_CALL_TYPE}.
+     */
+    public static final String EXTRA_CALL_TYPE_CS =
+            "codeaurora.telecom.extra.CALL_TYPE_CS";
+
+
+// QTI_END: 2018-06-13: Bluetooth: BT: Send info if call is CS type from telecomm service to BT apps.
     /**
      * An optional {@link android.content.Intent#ACTION_CALL} intent extra denoting the
      * package name of the app specifying an alternative gateway for the call.

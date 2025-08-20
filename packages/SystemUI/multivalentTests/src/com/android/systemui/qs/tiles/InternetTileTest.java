@@ -14,6 +14,12 @@
  * limitations under the License.
  */
 
+/**
+ * Changes from Qualcomm Innovation Center are provided under the following license:
+ * Copyright (c) 2022 Qualcomm Innovation Center, Inc. All rights reserved.
+ * SPDX-License-Identifier: BSD-3-Clause-Clear
+ */
+
 package com.android.systemui.qs.tiles;
 
 import static android.platform.test.flag.junit.FlagsParameterization.allCombinationsOf;
@@ -53,6 +59,7 @@ import com.android.systemui.statusbar.connectivity.AccessPointController;
 import com.android.systemui.statusbar.connectivity.IconState;
 import com.android.systemui.statusbar.connectivity.NetworkController;
 import com.android.systemui.statusbar.connectivity.WifiIndicators;
+import com.android.systemui.util.CarrierNameCustomization;
 
 import org.junit.After;
 import org.junit.Before;
@@ -88,6 +95,8 @@ public class InternetTileTest extends SysuiTestCase {
     private WifiStateWorker mWifiStateWorker;
     @Mock
     private QsEventLogger mUiEventLogger;
+    @Mock
+    private CarrierNameCustomization mCarrierNameCustomization;
 
     private TestableLooper mTestableLooper;
     private InternetTile mTile;
@@ -117,7 +126,8 @@ public class InternetTileTest extends SysuiTestCase {
             mNetworkController,
             mAccessPointController,
             mInternetDialogManager,
-            mWifiStateWorker
+            mWifiStateWorker,
+            mCarrierNameCustomization
         );
 
         mTile.initialize();

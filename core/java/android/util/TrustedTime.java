@@ -30,9 +30,19 @@ public interface TrustedTime {
     /**
      * Force update with an external trusted time source, returning {@code true}
      * when successful.
+     */
+// QTI_BEGIN: 2018-04-13: Telephony: NtpTrustedTime:Abstract forceSync and forceRefresh
+    public boolean forceSync();
+
+    /**
+     * Force update the cached time with an external trusted time source,
+     * returning {@code true} when successful.
+// QTI_END: 2018-04-13: Telephony: NtpTrustedTime:Abstract forceSync and forceRefresh
      *
      * @deprecated Only kept for UnsupportedAppUsage. Do not use. See {@link NtpTrustedTime}
+// QTI_BEGIN: 2018-04-13: Telephony: NtpTrustedTime:Abstract forceSync and forceRefresh
      */
+// QTI_END: 2018-04-13: Telephony: NtpTrustedTime:Abstract forceSync and forceRefresh
     @Deprecated
     @UnsupportedAppUsage
     public boolean forceRefresh();

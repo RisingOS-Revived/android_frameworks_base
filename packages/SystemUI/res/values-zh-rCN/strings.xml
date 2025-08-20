@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!-- QTI_BEGIN: 2023-07-17: Telephony: Correct the copyright markings on internet dialog-->
+<!-- QTI_END: 2023-07-17: Telephony: Correct the copyright markings on internet dialog-->
 <!-- 
 /**
  * Copyright (c) 2009, The Android Open Source Project
@@ -14,6 +16,10 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * Changes from Qualcomm Innovation Center are provided under the following license:
+ * Copyright (c) 2023 Qualcomm Innovation Center, Inc. All rights reserved.
+ * SPDX-License-Identifier: BSD-3-Clause-Clear
  */
  -->
 
@@ -1077,6 +1083,9 @@
     <string name="running_foreground_services_msg" msgid="3009459259222695385">"点按即可详细了解电量和流量消耗情况"</string>
     <string name="mobile_data_disable_title" msgid="5366476131671617790">"要关闭移动数据网络吗？"</string>
     <string name="mobile_data_disable_message" msgid="8604966027899770415">"关闭后，您将无法通过<xliff:g id="CARRIER">%s</xliff:g>使用移动数据或互联网，只能通过 WLAN 连接到互联网。"</string>
+<!-- QTI_BEGIN: 2023-06-25: Telephony: Add an additional mobile data button support for dual data-->
+<!-- QTI_END: 2023-06-25: Telephony: Add an additional mobile data button support for dual data-->
+    <string name="mobile_data_disable_message_on_dual_data">"您将无法通过<xliff:g id="CARRIER">%s</xliff:g>使用移动数据或互联网。"</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"您的运营商"</string>
     <string name="auto_data_switch_disable_title" msgid="5146527155665190652">"是否要切换回 <xliff:g id="CARRIER">%s</xliff:g>？"</string>
     <string name="auto_data_switch_disable_message" msgid="5885533647399535852">"移动流量不会根据网络可用情况自动切换"</string>
@@ -1555,6 +1564,7 @@
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"第 %1$d 级，共 %2$d 级"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"家居控制"</string>
     <string name="home_controls_dream_description" msgid="4644150952104035789">"通过屏保快速访问家居控制功能"</string>
+    <string name="mobile_data_summary_not_allowed_to_disable_data">其它SIM卡通话期间，不可用</string>
     <string name="volume_undo_action" msgid="5815519725211877114">"撤消"</string>
     <string name="back_edu_toast_content" msgid="4530314597378982956">"如要返回，请用三根手指在触控板上向左或向右滑动"</string>
     <string name="home_edu_toast_content" msgid="3381071147871955415">"如要前往主屏幕，请用三根手指在触控板上向上滑动"</string>

@@ -122,6 +122,7 @@ import android.system.OsConstants;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.BoostFramework;
 import android.util.DebugUtils;
 import android.util.EventLog;
 import android.util.LongSparseArray;
@@ -563,6 +564,13 @@ public final class ProcessList {
     private final int[] mZygoteSigChldMessage = new int[3];
 
     ActivityManagerGlobalLock mProcLock;
+
+// QTI_BEGIN: 2019-08-16: Performance: BoostFramework: Q Upgrade - Add Kill, Update Hints.
+    /**
+     * BoostFramework Object
+     */
+    public static BoostFramework mPerfServiceStartHint = new BoostFramework();
+// QTI_END: 2019-08-16: Performance: BoostFramework: Q Upgrade - Add Kill, Update Hints.
 
     private static final String PROPERTY_APPLY_SDK_SANDBOX_AUDIT_RESTRICTIONS =
             "apply_sdk_sandbox_audit_restrictions";
@@ -1565,6 +1573,42 @@ public final class ProcessList {
         }
     }
 
+    /**
+     * Set the out-of-memory badness adjustment for a process.
+     * If {@code pid <= 0}, this method will be a no-op.
+     *
+     * @param pid The process identifier to set.
+     * @param uid The uid of the app
+     * @param amt Adjustment value -- lmkd allows -1000 to +1000
+     * @param isSystemApp Whether the app is a system app or not.
+     * @param isMainProc Whether the app is a main process or not.
+     *
+     * {@hide}
+     */
+    public static void setOomAdjExt(int pid, int uid, int amt, int isSystemApp, int isMainProc) {
+        // This indicates that the process is not started yet and so no need to proceed further.
+        if (pid <= 0) {
+            return;
+        }
+        if (amt == UNKNOWN_ADJ)
+            return;
+
+        long start = SystemClock.elapsedRealtime();
+        ByteBuffer buf = ByteBuffer.allocate(4 * 6);
+        buf.putInt(LMK_PROCPRIO);
+        buf.putInt(pid);
+        buf.putInt(uid);
+        buf.putInt(amt);
+        buf.putInt(isSystemApp);
+        buf.putInt(isMainProc);
+        writeLmkd(buf, null);
+        long now = SystemClock.elapsedRealtime();
+        if ((now-start) > 250) {
+            Slog.w("ActivityManager", "SLOW OOM ADJ: " + (now-start) + "ms for pid " + pid
+                    + " = " + amt);
+        }
+    }
+
 
     // The max size for PROCS_PRIO cmd in LMKD
     private static final int MAX_PROCS_PRIO_PACKET_SIZE = 3;
@@ -1603,6 +1647,56 @@ public final class ProcessList {
             buf.putInt(pid);
             buf.putInt(uid);
             buf.putInt(amt);
+            buf.putInt(0);  // Default proc type to PROC_TYPE_APP
+            total_procs_in_buf++;
+        }
+        writeLmkd(buf, null);
+    }
+
+    /**
+     * Set the out-of-memory badness adjustment for a list of processes.
+     *
+     * @param apps App list to adjust their respective oom score.
+     *
+     * {@hide}
+     */
+    public static void batchSetOomAdjExt(ArrayList<ProcessRecord> apps) {
+        final int totalApps = apps.size();
+        if (totalApps == 0) {
+            return;
+        }
+
+        final int MAX_OOM_ADJ_BATCH_LENGTH = ((4 * 6) * MAX_PROCS_PRIO_PACKET_SIZE) + 4;
+        ByteBuffer buf = ByteBuffer.allocate(MAX_OOM_ADJ_BATCH_LENGTH);
+        int total_procs_in_buf = 0;
+        buf.putInt(LMK_PROCS_PRIO);
+        for (int i = 0; i < totalApps; i++) {
+            final int pid = apps.get(i).getPid();
+            final int amt = apps.get(i).mState.getCurAdj();
+            final int uid = apps.get(i).uid;
+            if (pid <= 0 || amt == UNKNOWN_ADJ) continue;
+            if (total_procs_in_buf >= MAX_PROCS_PRIO_PACKET_SIZE) {
+                writeLmkd(buf, null);
+                buf.clear();
+                total_procs_in_buf = 0;
+                buf.allocate(MAX_OOM_ADJ_BATCH_LENGTH);
+                buf.putInt(LMK_PROCS_PRIO);
+            }
+            String packageName = apps.get(i).info.packageName;
+            String processName = apps.get(i).processName;
+            int isMainProc = 0;
+            int isSystemApp = 0;
+            if (packageName.equals(processName)) {
+                isMainProc = 1;
+            }
+            if (apps.get(i).info.isSystemApp()) {
+                isSystemApp = 1;
+            }
+            buf.putInt(pid);
+            buf.putInt(uid);
+            buf.putInt(amt);
+            buf.putInt(isSystemApp);
+            buf.putInt(isMainProc);
             buf.putInt(0);  // Default proc type to PROC_TYPE_APP
             total_procs_in_buf++;
         }
@@ -2607,6 +2701,24 @@ public final class ProcessList {
                 storageManagerInternal.prepareStorageDirs(userId, pkgDataInfoMap.keySet(),
                         app.processName);
             }
+// QTI_BEGIN: 2019-08-16: Performance: BoostFramework: Q Upgrade - Add Kill, Update Hints.
+            if (mPerfServiceStartHint != null) {
+// QTI_END: 2019-08-16: Performance: BoostFramework: Q Upgrade - Add Kill, Update Hints.
+// QTI_BEGIN: 2021-01-29: Performance: Boostframework: Call perfHint with new hostingType when application starts.
+                if ((hostingRecord.getType() != null)
+// QTI_END: 2021-01-29: Performance: Boostframework: Call perfHint with new hostingType when application starts.
+                       && (hostingRecord.getType().equals(HostingRecord.HOSTING_TYPE_NEXT_ACTIVITY)
+                               || hostingRecord.getType().equals(HostingRecord.HOSTING_TYPE_NEXT_TOP_ACTIVITY))) {
+// QTI_BEGIN: 2021-01-29: Performance: Boostframework: Call perfHint with new hostingType when application starts.
+                                   //TODO: not acting on pre-activity
+// QTI_END: 2021-01-29: Performance: Boostframework: Call perfHint with new hostingType when application starts.
+// QTI_BEGIN: 2019-08-16: Performance: BoostFramework: Q Upgrade - Add Kill, Update Hints.
+                    if (startResult != null) {
+                        mPerfServiceStartHint.perfHint(BoostFramework.VENDOR_HINT_FIRST_LAUNCH_BOOST, app.processName, startResult.pid, BoostFramework.Launch.TYPE_START_PROC);
+                    }
+                }
+            }
+// QTI_END: 2019-08-16: Performance: BoostFramework: Q Upgrade - Add Kill, Update Hints.
             checkSlow(startTime, "startProcess: returned from zygote!");
             return startResult;
         } finally {

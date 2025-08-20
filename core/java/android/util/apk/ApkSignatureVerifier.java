@@ -34,10 +34,17 @@ import android.content.pm.parsing.result.ParseResult;
 import android.os.Build;
 import android.os.Trace;
 import android.os.incremental.V4Signature;
+// QTI_BEGIN: 2018-03-27: Performance: framework/base: add parallel verifyV1
 import android.util.ArrayMap;
+// QTI_END: 2018-03-27: Performance: framework/base: add parallel verifyV1
 import android.util.Pair;
+// QTI_BEGIN: 2018-03-27: Performance: framework/base: add parallel verifyV1
 import android.util.Slog;
+// QTI_END: 2018-03-27: Performance: framework/base: add parallel verifyV1
 import android.util.jar.StrictJarFile;
+// QTI_BEGIN: 2018-03-27: Performance: framework/base: add parallel verifyV1
+import android.util.BoostFramework;
+// QTI_END: 2018-03-27: Performance: framework/base: add parallel verifyV1
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.ArrayUtils;
@@ -58,6 +65,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.zip.ZipEntry;
+// QTI_BEGIN: 2018-03-27: Performance: framework/base: add parallel verifyV1
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.LinkedBlockingQueue;
+// QTI_END: 2018-03-27: Performance: framework/base: add parallel verifyV1
 
 /**
  * Facade class that takes care of the details of APK verification on
@@ -75,6 +87,14 @@ public class ApkSignatureVerifier {
     private static final ArrayMap<SigningDetails, SigningDetails> sOverrideSigningDetails =
             new ArrayMap<>();
 
+// QTI_BEGIN: 2018-03-27: Performance: framework/base: add parallel verifyV1
+    private static final String TAG = "ApkSignatureVerifier";
+    // multithread verification
+    private static final int NUMBER_OF_CORES =
+            Runtime.getRuntime().availableProcessors() >= 4 ? 4 : Runtime.getRuntime().availableProcessors() ;
+    private static BoostFramework sPerfBoost = null;
+    private static boolean sIsPerfLockAcquired = false;
+// QTI_END: 2018-03-27: Performance: framework/base: add parallel verifyV1
     /**
      * Verifies the provided APK and returns the certificates associated with each signer.
      */
@@ -159,6 +179,7 @@ public class ApkSignatureVerifier {
      * Verifies the provided APK using all allowed signing schemas.
      * @return the certificates associated with each signer and content digests.
      * @param verifyFull whether to verify all contents of this APK or just collect certificates.
+     * @throws PackageParserException if there was a problem collecting certificates
      * @hide
      */
     public static ParseResult<SigningDetailsWithDigests> verifySignaturesInternal(ParseInput input,
@@ -421,32 +442,55 @@ public class ApkSignatureVerifier {
      */
     private static ParseResult<SigningDetailsWithDigests> verifyV1Signature(ParseInput input,
             String apkPath, boolean verifyFull) {
-        StrictJarFile jarFile = null;
-
+// QTI_BEGIN: 2022-02-22: Performance: parallelize verification of package installation
+        int objectNumber = verifyFull ? NUMBER_OF_CORES : 1;
+        StrictJarFile[] jarFile = new StrictJarFile[objectNumber];
+        final ArrayMap<String, StrictJarFile> strictJarFiles = new ArrayMap<String, StrictJarFile>();
+// QTI_END: 2022-02-22: Performance: parallelize verification of package installation
         try {
             final Certificate[][] lastCerts;
             final Signature[] lastSigs;
 
             Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "strictJarFileCtor");
 
+// QTI_BEGIN: 2022-02-22: Performance: parallelize verification of package installation
+            if (sPerfBoost == null) {
+                sPerfBoost = new BoostFramework();
+            }
+            if (sPerfBoost != null && !sIsPerfLockAcquired && verifyFull) {
+                //Use big enough number here to hold the perflock for entire PackageInstall session
+                sPerfBoost.perfHint(BoostFramework.VENDOR_HINT_PACKAGE_INSTALL_BOOST,
+                        null, Integer.MAX_VALUE, -1);
+                Slog.d(TAG, "Perflock acquired for PackageInstall ");
+                sIsPerfLockAcquired = true;
+            }
+// QTI_END: 2022-02-22: Performance: parallelize verification of package installation
             // we still pass verify = true to ctor to collect certs, even though we're not checking
             // the whole jar.
-            jarFile = new StrictJarFile(
-                    apkPath,
-                    true, // collect certs
-                    verifyFull); // whether to reject APK with stripped v2 signatures (b/27887819)
+// QTI_BEGIN: 2022-02-22: Performance: parallelize verification of package installation
+            for (int i = 0; i < objectNumber; i++) {
+                jarFile[i] = new StrictJarFile(
+                        apkPath,
+                        true, // collect certs
+                        verifyFull); // whether to reject APK with stripped v2 signatures (b/27887819)
+            }
+// QTI_END: 2022-02-22: Performance: parallelize verification of package installation
             final List<ZipEntry> toVerify = new ArrayList<>();
 
             // Gather certs from AndroidManifest.xml, which every APK must have, as an optimization
             // to not need to verify the whole APK when verifyFUll == false.
-            final ZipEntry manifestEntry = jarFile.findEntry(
+// QTI_BEGIN: 2022-02-22: Performance: parallelize verification of package installation
+            final ZipEntry manifestEntry = jarFile[0].findEntry(
+// QTI_END: 2022-02-22: Performance: parallelize verification of package installation
                     ApkLiteParseUtils.ANDROID_MANIFEST_FILENAME);
             if (manifestEntry == null) {
                 return input.error(INSTALL_PARSE_FAILED_BAD_MANIFEST,
                         "Package " + apkPath + " has no manifest");
             }
             final ParseResult<Certificate[][]> result =
-                    loadCertificates(input, jarFile, manifestEntry);
+// QTI_BEGIN: 2022-02-22: Performance: parallelize verification of package installation
+                    loadCertificates(input, jarFile[0], manifestEntry);
+// QTI_END: 2022-02-22: Performance: parallelize verification of package installation
             if (result.isError()) {
                 return input.error(result);
             }
@@ -460,7 +504,9 @@ public class ApkSignatureVerifier {
 
             // fully verify all contents, except for AndroidManifest.xml  and the META-INF/ files.
             if (verifyFull) {
-                final Iterator<ZipEntry> i = jarFile.iterator();
+// QTI_BEGIN: 2022-02-22: Performance: parallelize verification of package installation
+                final Iterator<ZipEntry> i = jarFile[0].iterator();
+// QTI_END: 2022-02-22: Performance: parallelize verification of package installation
                 while (i.hasNext()) {
                     final ZipEntry entry = i.next();
                     if (entry.isDirectory()) continue;
@@ -471,30 +517,111 @@ public class ApkSignatureVerifier {
 
                     toVerify.add(entry);
                 }
-
+// QTI_BEGIN: 2022-02-22: Performance: parallelize verification of package installation
+                class VerificationData {
+                    public Exception exception;
+                    public int exceptionFlag;
+                    public boolean wait;
+                    public int index;
+                    public Object objWaitAll;
+                    public boolean shutDown;
+                }
+                VerificationData vData = new VerificationData();
+                vData.objWaitAll = new Object();
+                final ThreadPoolExecutor verificationExecutor = new ThreadPoolExecutor(
+                        NUMBER_OF_CORES,
+                        NUMBER_OF_CORES,
+                        1,/*keep alive time*/
+                        TimeUnit.SECONDS,
+                        new LinkedBlockingQueue<Runnable>());
+// QTI_END: 2022-02-22: Performance: parallelize verification of package installation
                 for (ZipEntry entry : toVerify) {
-                    final Certificate[][] entryCerts;
-                    final ParseResult<Certificate[][]> ret =
-                            loadCertificates(input, jarFile, entry);
-                    if (ret.isError()) {
-                        return input.error(ret);
-                    }
-                    entryCerts = ret.getResult();
-                    if (ArrayUtils.isEmpty(entryCerts)) {
-                        return input.error(INSTALL_PARSE_FAILED_NO_CERTIFICATES,
-                                "Package " + apkPath + " has no certificates at entry "
-                                        + entry.getName());
-                    }
+// QTI_BEGIN: 2022-02-22: Performance: parallelize verification of package installation
+                    Runnable verifyTask = new Runnable(){
+                        public void run() {
+                            try {
+                                if (vData.exceptionFlag != 0 ) {
+                                    Slog.w(TAG, "VerifyV1 exit with exception " + vData.exceptionFlag);
+                                    return;
+                                }
+                                String tid = Long.toString(Thread.currentThread().getId());
+                                StrictJarFile tempJarFile;
+                                synchronized (strictJarFiles) {
+                                    tempJarFile = strictJarFiles.get(tid);
+                                    if (tempJarFile == null) {
+                                        if (vData.index >= NUMBER_OF_CORES) {
+                                            vData.index = 0;
+                                        }
+                                        tempJarFile = jarFile[vData.index++];
+                                        strictJarFiles.put(tid, tempJarFile);
+                                    }
+                                }
+                                final Certificate[][] entryCerts;
+                                final ParseResult<Certificate[][]> ret =
+                                        loadCertificates(input, tempJarFile, entry);
+                                if (ret.isError()) {
+                                    throw new SecurityException(ret.getException());
+                                }
+                                entryCerts = ret.getResult();
+                                if (ArrayUtils.isEmpty(entryCerts)) {
+                                     throw new SignatureNotFoundException("Package " + apkPath + " has no certificates at entry "
+                                            + entry.getName());
+                                }
 
-                    // make sure all entries use the same signing certs
-                    final Signature[] entrySigs = convertToSignatures(entryCerts);
-                    if (!Arrays.equals(lastSigs, entrySigs)) {
-                        return input.error(
-                                INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES,
-                                "Package " + apkPath + " has mismatched certificates at entry "
-                                        + entry.getName());
+                                // make sure all entries use the same signing certs
+                                final Signature[] entrySigs = convertToSignatures(entryCerts);
+// QTI_END: 2022-02-22: Performance: parallelize verification of package installation
+                                if (!Arrays.equals(lastSigs, entrySigs)) {
+// QTI_BEGIN: 2022-02-22: Performance: parallelize verification of package installation
+                                     throw new Exception("Package " + apkPath + " has mismatched certificates at entry "
+                                            + entry.getName());
+                                }
+                            } catch (SignatureNotFoundException | SecurityException e) {
+                                synchronized (vData.objWaitAll) {
+                                    vData.exceptionFlag = INSTALL_PARSE_FAILED_NO_CERTIFICATES;
+                                    vData.exception = e;
+                                }
+                            } catch (GeneralSecurityException e) {
+                                synchronized (vData.objWaitAll) {
+                                    vData.exceptionFlag = INSTALL_PARSE_FAILED_CERTIFICATE_ENCODING;
+                                    vData.exception = e;
+                                }
+                            } catch (Exception e) {
+                                synchronized (vData.objWaitAll) {
+                                    vData.exceptionFlag = INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES;
+                                    vData.exception = e;
+                                }
+                            }
+                        }};
+                    synchronized (vData.objWaitAll) {
+                        if (vData.exceptionFlag == 0) {
+                            verificationExecutor.execute(verifyTask);
+                        }
+// QTI_END: 2022-02-22: Performance: parallelize verification of package installation
+                    }
+// QTI_BEGIN: 2022-02-22: Performance: parallelize verification of package installation
+                }
+                vData.wait = true;
+                verificationExecutor.shutdown();
+                while (vData.wait) {
+                    try {
+                        if (vData.exceptionFlag != 0 && !vData.shutDown) {
+                            Slog.w(TAG, "verifyV1 Exception " + vData.exceptionFlag);
+                            verificationExecutor.shutdownNow();
+                            vData.shutDown = true;
+                        }
+                        vData.wait = !verificationExecutor.awaitTermination(50,
+                                TimeUnit.MILLISECONDS);
+                    } catch (InterruptedException e) {
+                        Slog.w(TAG,"VerifyV1 interrupted while awaiting all threads done...");
+// QTI_END: 2022-02-22: Performance: parallelize verification of package installation
                     }
                 }
+// QTI_BEGIN: 2022-02-22: Performance: parallelize verification of package installation
+                if (vData.exceptionFlag != 0)
+                    return input.error(vData.exceptionFlag,
+                            "Failed to collect certificates from " + apkPath, vData.exception);
+// QTI_END: 2022-02-22: Performance: parallelize verification of package installation
             }
             return input.success(new SigningDetailsWithDigests(
                     new SigningDetails(lastSigs, SignatureSchemeVersion.JAR), null));
@@ -505,8 +632,20 @@ public class ApkSignatureVerifier {
             return input.error(INSTALL_PARSE_FAILED_NO_CERTIFICATES,
                     "Failed to collect certificates from " + apkPath, e);
         } finally {
+// QTI_BEGIN: 2022-02-22: Performance: parallelize verification of package installation
+            if (sIsPerfLockAcquired && sPerfBoost != null) {
+                sPerfBoost.perfLockRelease();
+                sIsPerfLockAcquired = false;
+                Slog.d(TAG, "Perflock released for PackageInstall ");
+            }
+            strictJarFiles.clear();
+// QTI_END: 2022-02-22: Performance: parallelize verification of package installation
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
-            closeQuietly(jarFile);
+// QTI_BEGIN: 2022-02-22: Performance: parallelize verification of package installation
+            for (int i = 0; i < objectNumber ; i++) {
+                closeQuietly(jarFile[i]);
+            }
+// QTI_END: 2022-02-22: Performance: parallelize verification of package installation
         }
     }
 

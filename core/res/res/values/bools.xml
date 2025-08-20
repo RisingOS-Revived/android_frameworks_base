@@ -32,4 +32,7 @@
     <bool name="resolver_landscape_phone">true</bool>
     <!-- Whether or not to include horizontal space around the dialog -->
     <bool name="autofill_dialog_horizontal_space_included">false</bool>
+<!-- QTI_BEGIN: 2018-05-25: WLAN: base: add support for SAP+SAP.-->
+<!-- QTI_END: 2018-05-25: WLAN: base: add support for SAP+SAP.-->
+    <bool name="config_wifi_dual_sap_mode_enabled">false</bool>
 </resources>

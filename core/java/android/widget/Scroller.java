@@ -24,7 +24,6 @@ import android.view.ViewConfiguration;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 
-
 /**
  * <p>This class encapsulates scrolling. You can use scrollers ({@link Scroller}
  * or {@link OverScroller}) to collect the data you need to produce a scrolling
@@ -64,6 +63,9 @@ public class Scroller  {
     @UnsupportedAppUsage
     private final Interpolator mInterpolator;
 
+// QTI_BEGIN: 2018-02-20: Core: BoostFramework: To Enhance performance.
+    private Context mContext;
+// QTI_END: 2018-02-20: Core: BoostFramework: To Enhance performance.
     private int mMode;
 
     private int mStartX;
@@ -175,6 +177,9 @@ public class Scroller  {
      */
     public Scroller(Context context, Interpolator interpolator, boolean flywheel) {
         mFinished = true;
+// QTI_BEGIN: 2018-02-20: Core: BoostFramework: To Enhance performance.
+        mContext = context;
+// QTI_END: 2018-02-20: Core: BoostFramework: To Enhance performance.
         if (interpolator == null) {
             mInterpolator = new ViscousFluidInterpolator();
         } else {

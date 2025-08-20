@@ -1,4 +1,7 @@
 /*
+ * Copyright (c) 2018, The Linux Foundation. All rights reserved.
+ * Not a Contribution.
+ *
  * Copyright (C) 2015 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -59,11 +62,10 @@ public final class AidGroup implements Parcelable {
 
     private static final String TAG = "AidGroup";
 
-
-    private final List<String> mAids;
-    private final String mCategory;
+    final List<String> mAids;
+    final String mCategory;
     @SuppressWarnings("unused") // Unused as of now, but part of the XML input.
-    private final String mDescription;
+    final String mDescription;
 
     /**
      * Creates a new AidGroup object.

@@ -113,6 +113,7 @@ class EmergencyButtonControllerTest : SysuiTestCase() {
                 /* hasTelephonyRadio= */ any(),
                 /* simLocked= */ any(),
                 /* isSecure= */ any(),
+                /* isEmergencyCapable= */ any()
             )
         mainExecutor.runAllReady()
         verify(emergencyButton)
@@ -120,7 +121,8 @@ class EmergencyButtonControllerTest : SysuiTestCase() {
                 /* isInCall= */ eq(true),
                 /* hasTelephonyRadio= */ eq(true),
                 /* simLocked= */ any(),
-                /* isSecure= */ eq(true),
+                /* isSecure= */ any(),
+                /* isEmergencyCapable= */ any()
             )
     }
 

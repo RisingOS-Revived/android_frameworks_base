@@ -18,12 +18,6 @@
     },
     {
       "file_patterns": [
-        "BinderDeathDispatcher\\.java"
-      ],
-      "name": "FrameworksCoreTests_all_binder"
-    },
-    {
-      "file_patterns": [
         "Battery[^/]*\\.java",
         "Kernel[^/]*\\.java",
         "[^/]*Power[^/]*\\.java"

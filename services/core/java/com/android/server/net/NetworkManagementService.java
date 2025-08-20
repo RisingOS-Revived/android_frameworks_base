@@ -319,6 +319,9 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
     }
 
     private void invokeForAllObservers(NetworkManagementEventCallback eventCallback) {
+// QTI_BEGIN: 2025-04-10: Data: Adding a separate synchronized block for invokeForAllObservers
+        synchronized(this){
+// QTI_END: 2025-04-10: Data: Adding a separate synchronized block for invokeForAllObservers
         final int length = mObservers.beginBroadcast();
         try {
             for (int i = 0; i < length; i++) {
@@ -330,8 +333,10 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
         } finally {
             mObservers.finishBroadcast();
         }
+// QTI_BEGIN: 2025-04-10: Data: Adding a separate synchronized block for invokeForAllObservers
+        }
+// QTI_END: 2025-04-10: Data: Adding a separate synchronized block for invokeForAllObservers
     }
-
     /**
      * Notify our observers of an interface status change
      */

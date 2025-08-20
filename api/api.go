@@ -350,6 +350,8 @@ func createMergedFrameworkImpl(ctx android.LoadHookContext, modules proptools.Co
 	// First create updatable-framework-module-impl, which contains all updatable modules.
 	// This module compiles against module_lib SDK.
 	{
+		// TODO(b/214988855): remove the line below when framework-bluetooth has an impl jar.
+		removeAll(modules, []string{"framework-bluetooth"})
 		transformConfigurableArray(modules, "", ".impl")
 		props := libraryProps{}
 		props.Name = proptools.StringPtr("updatable-framework-module-impl")

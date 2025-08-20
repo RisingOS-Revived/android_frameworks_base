@@ -1201,6 +1201,10 @@ public class MediaSwitchingController
             Log.d(TAG, "getLocalBroadcastMetadataQrCodeString: LE Audio Broadcast is null");
             return "";
         }
+        if (broadcast.getLatestBluetoothLeBroadcastMetadata() == null) {
+            Log.d(TAG, "getBroadcastMetadata: LE Broadcast Metadata is null");
+            return "";
+        }
         final LocalBluetoothLeBroadcastMetadata metadata =
                 broadcast.getLocalBluetoothLeBroadcastMetaData();
         return metadata != null ? metadata.convertToQrCodeString() : "";
@@ -1337,6 +1341,27 @@ public class MediaSwitchingController
         }
         assistant.addSource(sink, metadata, isGroupOp);
         return true;
+    }
+
+    boolean isReceiverReceivingBroadcast(BluetoothDevice sink) {
+        LocalBluetoothLeBroadcastAssistant assistant =
+                mLocalBluetoothManager.getProfileManager().getLeAudioBroadcastAssistantProfile();
+        if (assistant == null) {
+            Log.d(TAG, "isSourceAddedIntoSinkDevice: The broadcast assistant profile "
+                    + "is null");
+            return false;
+        }
+        for (BluetoothLeBroadcastReceiveState receiveState: assistant.getAllSources(sink)) {
+            for (int i = 0; i < receiveState.getNumSubgroups(); i++) {
+                Long syncState = receiveState.getBisSyncState().get(i);
+                if (syncState > 0 && syncState < 0xFFFFFFFFL) {
+                    Log.d(TAG, "Synchronized to " + String.valueOf(syncState));
+                    return true;
+                }
+            }
+        }
+        Log.d(TAG, "isSourceAddedIntoSinkDevice: no any BIS synced");
+        return false;
     }
 
     void registerLeBroadcastAssistantServiceCallback(

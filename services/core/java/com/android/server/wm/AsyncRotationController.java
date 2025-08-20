@@ -24,6 +24,9 @@ import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_TOKEN_TRANSFO
 import android.annotation.IntDef;
 import android.os.HandlerExecutor;
 import android.util.ArrayMap;
+// QTI_BEGIN: 2023-05-15: Performance: perf: Add Rotation boosts, based on ShellTransitions.
+import android.util.BoostFramework;
+// QTI_END: 2023-05-15: Performance: perf: Add Rotation boosts, based on ShellTransitions.
 import android.util.Slog;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
@@ -105,11 +108,20 @@ class AsyncRotationController extends FadeAnimationController implements Consume
 
     private int mOriginalRotation;
     private final boolean mHasScreenRotationAnimation;
+// QTI_BEGIN: 2023-05-15: Performance: perf: Add Rotation boosts, based on ShellTransitions.
+    private BoostFramework mPerf = null;
+    private boolean mIsLatencyPerfLockAcquired = false;
+// QTI_END: 2023-05-15: Performance: perf: Add Rotation boosts, based on ShellTransitions.
 
     AsyncRotationController(DisplayContent displayContent) {
         super(displayContent);
         mService = displayContent.mWmService;
         mOriginalRotation = displayContent.getWindowConfiguration().getRotation();
+// QTI_BEGIN: 2023-05-15: Performance: perf: Add Rotation boosts, based on ShellTransitions.
+        if (mPerf == null) {
+            mPerf = new BoostFramework();
+        }
+// QTI_END: 2023-05-15: Performance: perf: Add Rotation boosts, based on ShellTransitions.
         final int transitionType =
                 displayContent.mTransitionController.getCollectingTransitionType();
         if (transitionType == WindowManager.TRANSIT_CHANGE) {
@@ -351,6 +363,13 @@ class AsyncRotationController extends FadeAnimationController implements Consume
             if (DEBUG) Slog.d(TAG, "Complete directly " + token.getTopChild());
             finishOp(token);
             if (mTargetWindowTokens.isEmpty()) {
+// QTI_BEGIN: 2023-05-15: Performance: perf: Add Rotation boosts, based on ShellTransitions.
+                if (mPerf != null && mIsLatencyPerfLockAcquired) {
+                    mPerf.perfLockRelease();
+                    mIsLatencyPerfLockAcquired = false;
+                }
+
+// QTI_END: 2023-05-15: Performance: perf: Add Rotation boosts, based on ShellTransitions.
                 onAllCompleted();
                 return true;
             }
@@ -365,6 +384,12 @@ class AsyncRotationController extends FadeAnimationController implements Consume
      * be seamlessly rotated later.
      */
     void start() {
+// QTI_BEGIN: 2023-05-15: Performance: perf: Add Rotation boosts, based on ShellTransitions.
+         if (mPerf != null) {
+             mPerf.perfHint(BoostFramework.VENDOR_HINT_ROTATION_LATENCY_BOOST, null);
+             mIsLatencyPerfLockAcquired = true;
+         }
+// QTI_END: 2023-05-15: Performance: perf: Add Rotation boosts, based on ShellTransitions.
         for (int i = mTargetWindowTokens.size() - 1; i >= 0; i--) {
             final WindowToken windowToken = mTargetWindowTokens.keyAt(i);
             final Operation op = mTargetWindowTokens.valueAt(i);

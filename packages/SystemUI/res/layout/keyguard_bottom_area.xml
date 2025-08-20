@@ -91,6 +91,17 @@
 
     </LinearLayout>
 
+<!-- QTI_BEGIN: 2023-05-18: Android_UI: SystemUI: Fix Emergency call button wrong position-->
+<!-- QTI_END: 2023-05-18: Android_UI: SystemUI: Fix Emergency call button wrong position-->
+    <include layout="@layout/keyguard_emergency_carrier_area"
+        android:id="@+id/keyguard_selector_fade_container"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="60dp"
+        android:orientation="vertical"
+        android:layout_gravity="bottom|center_horizontal"
+        android:gravity="center_horizontal" />
+
     <com.android.systemui.animation.view.LaunchableImageView
         android:id="@+id/start_button"
         android:layout_height="@dimen/keyguard_affordance_fixed_height"

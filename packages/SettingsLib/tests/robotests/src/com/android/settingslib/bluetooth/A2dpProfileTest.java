@@ -152,7 +152,9 @@ public class A2dpProfileTest {
     private static String KNOWN_CODEC_LABEL = "Use high quality audio: %1$s";
     private static String UNKNOWN_CODEC_LABEL = "Use high quality audio";
     private static String[] CODEC_NAMES =
-            new String[]{"Default", "SBC", "AAC", "aptX", "aptX HD", "LDAC"};
+// QTI_BEGIN: 2019-04-04: Bluetooth: TWS-A2DP: Add TWS+ codec to DevUI support
+            new String[] { "Default", "SBC", "AAC", "aptX", "aptX HD", "LDAC", "aptX Adaptive", "aptX TWS+" };
+// QTI_END: 2019-04-04: Bluetooth: TWS-A2DP: Add TWS+ codec to DevUI support
 
     /**
      * Helper for setting up several tests of getHighQualityAudioOptionLabel

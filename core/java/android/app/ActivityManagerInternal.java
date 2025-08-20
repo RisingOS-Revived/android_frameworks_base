@@ -950,6 +950,11 @@ public abstract class ActivityManagerInternal {
      */
     public abstract @TempAllowListType int getPushMessagingOverQuotaBehavior();
 
+// QTI_BEGIN: 2019-05-01: Performance: IOP: Fix and rebase PreferredApps.
+    // Starts a process as empty.
+    public abstract int startActivityAsUserEmpty(Bundle options);
+// QTI_END: 2019-05-01: Performance: IOP: Fix and rebase PreferredApps.
+
     /**
      * Return the startForeground() grace period after calling startForegroundService().
      */

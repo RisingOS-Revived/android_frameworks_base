@@ -37,6 +37,12 @@ import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.nfc.NfcAdapter;
+// QTI_BEGIN: 2020-04-22: WLAN: wifi: refactor Wi-Fi generation UI enhancements
+import android.net.wifi.ScanResult;
+// QTI_END: 2020-04-22: WLAN: wifi: refactor Wi-Fi generation UI enhancements
+// QTI_BEGIN: 2019-08-26: WLAN: wifi: Get Hotspot Wi-Fi generation from driver
+import android.net.wifi.WifiManager;
+// QTI_END: 2019-08-26: WLAN: wifi: Get Hotspot Wi-Fi generation from driver
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Process;
@@ -783,6 +789,13 @@ public class PhoneStatusBarPolicy
     private final HotspotController.Callback mHotspotCallback = new HotspotController.Callback() {
         @Override
         public void onHotspotChanged(boolean enabled, int numDevices) {
+// QTI_BEGIN: 2020-04-22: WLAN: wifi: refactor Wi-Fi generation UI enhancements
+            mIconController.setIconVisibility(mSlotHotspot, enabled);
+        }
+        @Override
+        public void onHotspotChanged(boolean enabled, int numDevices, int standard) {
+            updateHotspotIcon(standard);
+// QTI_END: 2020-04-22: WLAN: wifi: refactor Wi-Fi generation UI enhancements
             mIconController.setIconVisibility(mSlotHotspot, enabled);
         }
     };
@@ -906,6 +919,38 @@ public class PhoneStatusBarPolicy
             }
         }
     };
+
+// QTI_BEGIN: 2020-04-22: WLAN: wifi: refactor Wi-Fi generation UI enhancements
+    private void updateHotspotIcon(int standard) {
+        if (standard == ScanResult.WIFI_STANDARD_11AX) {
+// QTI_END: 2020-04-22: WLAN: wifi: refactor Wi-Fi generation UI enhancements
+// QTI_BEGIN: 2019-08-26: WLAN: wifi: Get Hotspot Wi-Fi generation from driver
+            mIconController.setIcon(mSlotHotspot, R.drawable.stat_sys_wifi_6_hotspot,
+// QTI_END: 2019-08-26: WLAN: wifi: Get Hotspot Wi-Fi generation from driver
+                mResources.getString(R.string.accessibility_status_bar_hotspot));
+// QTI_BEGIN: 2020-04-22: WLAN: wifi: refactor Wi-Fi generation UI enhancements
+        } else if (standard == ScanResult.WIFI_STANDARD_11AC) {
+// QTI_END: 2020-04-22: WLAN: wifi: refactor Wi-Fi generation UI enhancements
+// QTI_BEGIN: 2019-08-26: WLAN: wifi: Get Hotspot Wi-Fi generation from driver
+            mIconController.setIcon(mSlotHotspot, R.drawable.stat_sys_wifi_5_hotspot,
+// QTI_END: 2019-08-26: WLAN: wifi: Get Hotspot Wi-Fi generation from driver
+                mResources.getString(R.string.accessibility_status_bar_hotspot));
+// QTI_BEGIN: 2020-04-22: WLAN: wifi: refactor Wi-Fi generation UI enhancements
+        } else if (standard == ScanResult.WIFI_STANDARD_11N) {
+// QTI_END: 2020-04-22: WLAN: wifi: refactor Wi-Fi generation UI enhancements
+// QTI_BEGIN: 2019-08-26: WLAN: wifi: Get Hotspot Wi-Fi generation from driver
+            mIconController.setIcon(mSlotHotspot, R.drawable.stat_sys_wifi_4_hotspot,
+// QTI_END: 2019-08-26: WLAN: wifi: Get Hotspot Wi-Fi generation from driver
+                mResources.getString(R.string.accessibility_status_bar_hotspot));
+// QTI_BEGIN: 2019-08-26: WLAN: wifi: Get Hotspot Wi-Fi generation from driver
+        } else {
+            mIconController.setIcon(mSlotHotspot, R.drawable.stat_sys_hotspot,
+// QTI_END: 2019-08-26: WLAN: wifi: Get Hotspot Wi-Fi generation from driver
+                mResources.getString(R.string.accessibility_status_bar_hotspot));
+// QTI_BEGIN: 2019-08-26: WLAN: wifi: Get Hotspot Wi-Fi generation from driver
+        }
+    }
+// QTI_END: 2019-08-26: WLAN: wifi: Get Hotspot Wi-Fi generation from driver
 
     private void onConnectedDisplayAvailabilityChanged(ConnectedDisplayInteractor.State state) {
         boolean visible = state != ConnectedDisplayInteractor.State.DISCONNECTED;

@@ -1130,6 +1130,11 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Global.NTP_TIMEOUT,
                 GlobalSettingsProto.Ntp.TIMEOUT_MS);
+// QTI_BEGIN: 2018-08-11: Frameworks: base: Secondary NTP Server Settings
+        dumpSetting(s, p,
+                Settings.Global.NTP_SERVER_2,
+                GlobalSettingsProto.Ntp.SERVER_2);
+// QTI_END: 2018-08-11: Frameworks: base: Secondary NTP Server Settings
         p.end(ntpToken);
 
         final long uasbToken = p.start(GlobalSettingsProto.USER_ABSENT_SMALL_BATTERY);

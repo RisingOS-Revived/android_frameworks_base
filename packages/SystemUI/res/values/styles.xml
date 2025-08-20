@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- QTI_BEGIN: 2022-12-13: Android_UI: SystemUI: Display combined carrier names-->
+<!-- QTI_END: 2022-12-13: Android_UI: SystemUI: Display combined carrier names-->
 <!-- Copyright (C) 2006 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,6 +14,16 @@
      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
      See the License for the specific language governing permissions and
      limitations under the License.
+-->
+
+<!-- QTI_BEGIN: 2022-12-13: Android_UI: SystemUI: Display combined carrier names-->
+<!-- QTI_END: 2022-12-13: Android_UI: SystemUI: Display combined carrier names-->
+<!--
+**
+** Changes from Qualcomm Innovation Center are provided under the following license:
+** Copyright (c) 2022 Qualcomm Innovation Center, Inc. All rights reserved.
+** SPDX-License-Identifier: BSD-3-Clause-Clear
+*/
 -->
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
@@ -1392,13 +1404,17 @@
 
     <style name="TextAppearance.InternetDialog">
         <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
-        <item name="android:textSize">16sp</item>
+<!-- QTI_BEGIN: 2022-12-13: Android_UI: SystemUI: Display combined carrier names-->
+<!-- QTI_END: 2022-12-13: Android_UI: SystemUI: Display combined carrier names-->
+        <item name="android:textSize">@dimen/internet_dialog_text_size</item>
         <item name="android:textColor">@androidprv:color/materialColorOnSurface</item>
         <item name="android:textDirection">locale</item>
     </style>
 
     <style name="TextAppearance.InternetDialog.Secondary">
-        <item name="android:textSize">14sp</item>
+<!-- QTI_BEGIN: 2022-12-13: Android_UI: SystemUI: Display combined carrier names-->
+<!-- QTI_END: 2022-12-13: Android_UI: SystemUI: Display combined carrier names-->
+        <item name="android:textSize">@dimen/internet_dialog_text_size_second</item>
         <item name="android:textColor">@androidprv:color/materialColorOnSurfaceVariant</item>
     </style>
 

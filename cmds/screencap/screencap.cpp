@@ -110,9 +110,12 @@ static uint32_t dataSpaceToInt(ui::Dataspace d) {
 static status_t notifyMediaScanner(const char* fileName) {
     std::string filePath("file://");
     filePath.append(fileName);
-    char* cmd[] = {(char*)"am", (char*)"broadcast",
+    char *cmd[] = {(char*)"am", (char*)"broadcast",
                    (char*)"-a", (char*)"android.intent.action.MEDIA_SCANNER_SCAN_FILE",
                    (char*)"-d", &filePath[0],
+// QTI_BEGIN: 2023-06-05: Android_UI: screencap: Add async option to media scanner broadcast
+                   (char*) "--async",
+// QTI_END: 2023-06-05: Android_UI: screencap: Add async option to media scanner broadcast
                    nullptr};
 
     int status;
