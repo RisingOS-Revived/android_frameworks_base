@@ -42,7 +42,6 @@ import androidx.test.uiautomator.UiObject2
 import androidx.test.uiautomator.Until
 import com.android.cts.input.BlockingQueueEventVerifier
 import com.android.cts.input.DebugInputRule
-import com.android.cts.input.ShowErrorDialogsRule
 import com.android.cts.input.UinputTouchScreen
 import com.android.cts.input.inputeventmatchers.withMotionAction
 import java.time.Duration
@@ -120,8 +119,6 @@ class AnrTest {
                 remoteInputEvents.add(event)
             }
         }
-
-    @get:Rule val showErrorDialogs = ShowErrorDialogsRule()
 
     @get:Rule val debugInputRule = DebugInputRule()
 

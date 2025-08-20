@@ -71,10 +71,12 @@ object BluetoothLeBroadcastMetadataExt {
      */
     fun BluetoothLeBroadcastMetadata.toQrCodeString(): String {
         val entries = mutableListOf<Pair<String, String>>()
+        try {
         // Generate data elements for directing Broadcast Assistants
-        require(this.broadcastName != null) { "Broadcast name is mandatory for QR code" }
-        entries.add(Pair(KEY_BT_BROADCAST_NAME, Base64.encodeToString(
-            this.broadcastName?.toByteArray(Charsets.UTF_8), Base64.NO_WRAP)))
+        if (this.broadcastName != null) {
+            entries.add(Pair(KEY_BT_BROADCAST_NAME, Base64.encodeToString(
+                this.broadcastName?.toByteArray(Charsets.UTF_8), Base64.NO_WRAP)))
+        }
         entries.add(Pair(KEY_BT_ADVERTISER_ADDRESS_TYPE, this.sourceAddressType.toString()))
         entries.add(Pair(KEY_BT_ADVERTISER_ADDRESS, this.sourceDevice.address.replace(":", "")))
         entries.add(Pair(KEY_BT_BROADCAST_ID, String.format("%X", this.broadcastId.toLong())))
@@ -113,7 +115,9 @@ object BluetoothLeBroadcastMetadataExt {
                     Base64.encodeToString(it.contentMetadata.rawMetadata, Base64.NO_WRAP)))
             }
         }
-
+        } catch (e: Exception) {
+            Log.w(TAG, "toQrCodeString - Exception thrown: ", e)
+        }
         val qrCodeString = SCHEME_BT_BROADCAST_METADATA +
                 entries.toQrCodeString(DELIMITER_ELEMENT) + SUFFIX_QR_CODE
         Log.d(TAG, "Generated QR string : $qrCodeString")
@@ -264,9 +268,6 @@ object BluetoothLeBroadcastMetadataExt {
 
         val adapter = BluetoothAdapter.getDefaultAdapter()
         // Check parsed elements data
-        require(broadcastName != null) {
-            "broadcastName($broadcastName) must present in QR code string"
-        }
         var addr = sourceAddrString
         var addrType = sourceAddrType
         if (sourceAddrString != null) {

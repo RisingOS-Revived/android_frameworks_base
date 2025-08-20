@@ -28,6 +28,9 @@ import android.net.NetworkInfo;
 import android.net.SntpClient;
 import android.os.Build;
 import android.os.SystemClock;
+// QTI_BEGIN: 2018-07-13: Frameworks: frameworks/base: NTP Sync with secondary Server.
+import android.os.SystemProperties;
+// QTI_END: 2018-07-13: Frameworks: frameworks/base: NTP Sync with secondary Server.
 import android.provider.Settings;
 import android.text.TextUtils;
 
@@ -236,6 +239,16 @@ public abstract class NtpTrustedTime implements TrustedTime {
     @Nullable
     private volatile TimeResult mTimeResult;
 
+// QTI_BEGIN: 2018-07-13: Frameworks: frameworks/base: NTP Sync with secondary Server.
+    private boolean mBackupmode = false;
+    private static String mBackupServer = "";
+    private static int mNtpRetries = 0;
+    private static int mNtpRetriesMax = 0;
+// QTI_END: 2018-07-13: Frameworks: frameworks/base: NTP Sync with secondary Server.
+// QTI_BEGIN: 2018-08-11: Frameworks: base: Secondary NTP Server Settings
+    private static final String BACKUP_SERVER = "persist.backup.ntpServer";
+// QTI_END: 2018-08-11: Frameworks: base: Secondary NTP Server Settings
+
     /**
      * The last successful NTP server URI, i.e. the one used to obtain {@link #mTimeResult} when it
      * is non-null.
@@ -252,8 +265,32 @@ public abstract class NtpTrustedTime implements TrustedTime {
     @UnsupportedAppUsage
     public static synchronized NtpTrustedTime getInstance(Context context) {
         if (sSingleton == null) {
+            final Resources res = context.getResources();
+            final ContentResolver resolver = context.getContentResolver();
+
             Context appContext = context.getApplicationContext();
             sSingleton = new NtpTrustedTimeImpl(appContext);
+
+// QTI_BEGIN: 2018-08-11: Frameworks: base: Secondary NTP Server Settings
+            final String sserver_prop = Settings.Global.getString(
+                    resolver, Settings.Global.NTP_SERVER_2);
+
+            final String secondServer_prop = ((null != sserver_prop)
+                                               && (0 < sserver_prop.length()))
+                                               ? sserver_prop : BACKUP_SERVER;
+
+            final String backupServer = SystemProperties.get(secondServer_prop);
+// QTI_END: 2018-08-11: Frameworks: base: Secondary NTP Server Settings
+// QTI_BEGIN: 2018-07-13: Frameworks: frameworks/base: NTP Sync with secondary Server.
+
+            if ((null != backupServer) && (0 < backupServer.length())) {
+                int retryMax = res.getInteger(com.android.internal.R.integer.config_ntpRetry);
+                if (0 < retryMax) {
+                    sSingleton.mNtpRetriesMax = retryMax;
+                    sSingleton.mBackupServer = (backupServer.trim()).replace("\"", "");
+                }
+            }
+// QTI_END: 2018-07-13: Frameworks: frameworks/base: NTP Sync with secondary Server.
         }
         return sSingleton;
     }
@@ -271,6 +308,15 @@ public abstract class NtpTrustedTime implements TrustedTime {
     /** Forces a refresh using the default network. */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public boolean forceRefresh() {
+// QTI_BEGIN: 2018-07-13: Frameworks: frameworks/base: NTP Sync with secondary Server.
+        return hasCache() ? forceSync() : false;
+// QTI_END: 2018-07-13: Frameworks: frameworks/base: NTP Sync with secondary Server.
+// QTI_BEGIN: 2018-04-13: Telephony: NtpTrustedTime:Abstract forceSync and forceRefresh
+    }
+
+    @Override
+    public boolean forceSync() {
+// QTI_END: 2018-04-13: Telephony: NtpTrustedTime:Abstract forceSync and forceRefresh
         synchronized (mRefreshLock) {
             Network network = getDefaultNetwork();
             if (network == null) {
@@ -749,4 +795,34 @@ public abstract class NtpTrustedTime implements TrustedTime {
             return (int) longValue;
         }
     }
+// QTI_BEGIN: 2018-07-13: Frameworks: frameworks/base: NTP Sync with secondary Server.
+
+    public void setBackupmode(boolean mode) {
+        if (isBackupSupported()) {
+            mBackupmode = mode;
+        }
+        if (LOGD) Log.d(TAG, "setBackupmode() set the backup mode to be:" + mBackupmode);
+    }
+
+    private boolean getBackupmode() {
+        return mBackupmode;
+    }
+
+    private boolean isBackupSupported() {
+        return ((0 < mNtpRetriesMax) &&
+                (null != mBackupServer) &&
+                (0 != mBackupServer.length()));
+    }
+
+    private void countInBackupmode() {
+        if (isBackupSupported()) {
+            mNtpRetries++;
+            if (mNtpRetries >= mNtpRetriesMax) {
+                mNtpRetries = 0;
+                setBackupmode(true);
+            }
+        }
+        if (LOGD) Log.d(TAG, "countInBackupmode() func");
+    }
+// QTI_END: 2018-07-13: Frameworks: frameworks/base: NTP Sync with secondary Server.
 }

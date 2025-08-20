@@ -404,6 +404,7 @@ stubs_defaults {
         // Disable CallbackInterface, as Java 8 default interface methods avoid the extensibility
         // issue interfaces had previously.
         "--hide CallbackInterface",
+        "--hide DeprecationMismatch",
         // Disable HiddenSuperclass, as Metalava handles this fine (it should be hidden by default)
         "--hide HiddenSuperclass",
         "--manifest $(location :frameworks-base-core-AndroidManifest.xml)",

@@ -298,6 +298,11 @@ public class BubbleViewInfoTask {
                 return null;
             }
 
+            float[] bubbleBitmapScale = new float[1];
+            info.bubbleBitmap = iconFactory.getBubbleBitmap(
+                    iconFactory.getBubbleDrawable(c, info.shortcutInfo,
+                            b.getIcon()), bubbleBitmapScale);
+
             // set the flyout message but don't load the avatar because we can't pass it on the
             // binder to launcher
             info.flyoutMessage = b.getFlyoutMessage();

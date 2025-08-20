@@ -70,6 +70,7 @@ public class PowerAllowlistBackendTest {
         MockitoAnnotations.initMocks(this);
         mContext = spy(RuntimeEnvironment.application);
         doReturn(mContext).when(mContext).getApplicationContext();
+        doReturn(mDevicePolicyManager).when(mContext).getSystemService(DevicePolicyManager.class);
         doReturn(new String[] {}).when(mDeviceIdleService).getFullPowerWhitelist();
         doReturn(new String[] {}).when(mDeviceIdleService).getSystemPowerWhitelist();
         doReturn(new String[] {}).when(mDeviceIdleService).getSystemPowerWhitelistExceptIdle();

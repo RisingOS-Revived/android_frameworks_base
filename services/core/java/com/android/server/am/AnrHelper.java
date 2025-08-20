@@ -23,6 +23,10 @@ import android.content.pm.ApplicationInfo;
 import android.os.ProfilingServiceHelper;
 import android.os.ProfilingTrigger;
 import android.os.SystemClock;
+// QTI_BEGIN: 2021-06-28: Android_UI: Add smart trace module
+import android.os.Message;
+import android.os.Handler;
+// QTI_END: 2021-06-28: Android_UI: Add smart trace module
 import android.os.Trace;
 import android.util.ArraySet;
 import android.util.Slog;
@@ -30,6 +34,9 @@ import android.util.Slog;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.TimeoutRecord;
+// QTI_BEGIN: 2021-06-28: Android_UI: Add smart trace module
+import com.android.server.FgThread;
+// QTI_END: 2021-06-28: Android_UI: Add smart trace module
 import com.android.server.wm.WindowProcessController;
 
 import java.io.File;
@@ -118,67 +125,129 @@ class AnrHelper {
     void appNotResponding(ProcessRecord anrProcess, TimeoutRecord timeoutRecord) {
         appNotResponding(anrProcess, null /* activityShortComponentName */, null /* aInfo */,
                 null /* parentShortComponentName */, null /* parentProcess */,
-                false /* aboveSystem */, timeoutRecord, /*isContinuousAnr*/ false);
+                false /* aboveSystem */, null/*auxiliaryTaskExecutor*/, timeoutRecord, /*isContinuousAnr*/ false);
     }
 
     void appNotResponding(ProcessRecord anrProcess, String activityShortComponentName,
-            ApplicationInfo aInfo, String parentShortComponentName,
-            WindowProcessController parentProcess, boolean aboveSystem,
-            TimeoutRecord timeoutRecord, boolean isContinuousAnr) {
+// QTI_BEGIN: 2021-06-28: Android_UI: Add smart trace module
+         ApplicationInfo aInfo, String parentShortComponentName,
+// QTI_END: 2021-06-28: Android_UI: Add smart trace module
+         WindowProcessController parentProcess, boolean aboveSystem,
+         ExecutorService auxiliaryTaskExecutor, TimeoutRecord timeoutRecord, boolean isContinuousAnr) {
+// QTI_BEGIN: 2023-03-04: Data: when app hit anr, system should show ANR dialog
+         if (auxiliaryTaskExecutor == null){
+             auxiliaryTaskExecutor = mAuxiliaryTaskExecutor;
+         }
+// QTI_END: 2023-03-04: Data: when app hit anr, system should show ANR dialog
+
+        Future<File> firstPidDumpPromise = mEarlyDumpExecutor.submit(() -> {
+            // the class AnrLatencyTracker is not generally thread safe but the values
+            // recorded/touched by the Temporary dump thread(s) are all volatile/atomic.
+            File tracesFile = StackTracesDumpHelper.dumpStackTracesTempFile(anrProcess.mPid,
+                    timeoutRecord.mLatencyTracker);
+            mTempDumpedPids.remove(anrProcess.mPid);
+            return tracesFile;
+        });
+
+        appNotResponding(new AnrRecord(anrProcess, activityShortComponentName, aInfo,
+                   parentShortComponentName, parentProcess, aboveSystem, timeoutRecord,
+                   isContinuousAnr, firstPidDumpPromise));
+// QTI_BEGIN: 2021-06-28: Android_UI: Add smart trace module
+    }
+
+    void deferAppNotResponding(ProcessRecord anrProcess, String activityShortComponentName,
+        ApplicationInfo aInfo, String parentShortComponentName,
+        WindowProcessController parentProcess, boolean aboveSystem,
+// QTI_END: 2021-06-28: Android_UI: Add smart trace module
+        ExecutorService auxiliaryTaskExecutor, TimeoutRecord timeoutRecord, long delayInMillis,
+        boolean isContinuousAnr) {
+// QTI_BEGIN: 2023-03-04: Data: when app hit anr, system should show ANR dialog
+        if (auxiliaryTaskExecutor == null){
+            auxiliaryTaskExecutor = mAuxiliaryTaskExecutor;
+        }
+// QTI_END: 2023-03-04: Data: when app hit anr, system should show ANR dialog
+
+        Future<File> firstPidDumpPromise = mEarlyDumpExecutor.submit(() -> {
+            // the class AnrLatencyTracker is not generally thread safe but the values
+            // recorded/touched by the Temporary dump thread(s) are all volatile/atomic.
+            File tracesFile = StackTracesDumpHelper.dumpStackTracesTempFile(anrProcess.mPid,
+                    timeoutRecord.mLatencyTracker);
+            mTempDumpedPids.remove(anrProcess.mPid);
+            return tracesFile;
+        });
+// QTI_BEGIN: 2021-06-28: Android_UI: Add smart trace module
+        AnrRecord anrRecord = new AnrRecord(anrProcess, activityShortComponentName, aInfo,
+// QTI_END: 2021-06-28: Android_UI: Add smart trace module
+                parentShortComponentName, parentProcess, aboveSystem, timeoutRecord,
+                isContinuousAnr, firstPidDumpPromise);
+// QTI_BEGIN: 2021-06-28: Android_UI: Add smart trace module
+        Message msg = Message.obtain();
+        msg.what = APP_NOT_RESPONDING_DEFER_MSG;
+        msg.obj = anrRecord;
+        mFgHandler.sendMessageDelayed(msg, delayInMillis);
+    }
+
+    private void appNotResponding(AnrRecord anrRecord) {
+// QTI_END: 2021-06-28: Android_UI: Add smart trace module
         try {
-            timeoutRecord.mLatencyTracker.appNotRespondingStarted();
-            final int incomingPid = anrProcess.mPid;
-            timeoutRecord.mLatencyTracker.waitingOnAnrRecordLockStarted();
+            anrRecord.mTimeoutRecord.mLatencyTracker.appNotRespondingStarted();
+            final int incomingPid = anrRecord.mPid;
+            anrRecord.mTimeoutRecord.mLatencyTracker.waitingOnAnrRecordLockStarted();
             synchronized (mAnrRecords) {
-                timeoutRecord.mLatencyTracker.waitingOnAnrRecordLockEnded();
                 if (incomingPid == 0) {
-                    // Extreme corner case such as zygote is no response
-                    // to return pid for the process.
+                    // Extreme corner case such as zygote is no response to return pid for the process.
+                    ProcessRecord anrProcess = anrRecord.mApp;
                     Slog.i(TAG, "Skip zero pid ANR, process=" + anrProcess.processName);
                     return;
                 }
                 if (mProcessingPid == incomingPid) {
                     Slog.i(TAG,
-                            "Skip duplicated ANR, pid=" + incomingPid + " "
-                            + timeoutRecord.mReason);
+                            "Skip duplicated ANR, pid=" + incomingPid);
                     return;
                 }
                 if (!mTempDumpedPids.add(incomingPid)) {
                     Slog.i(TAG,
                             "Skip ANR being predumped, pid=" + incomingPid + " "
-                            + timeoutRecord.mReason);
+                            + anrRecord.mTimeoutRecord.mReason);
                     return;
                 }
                 for (int i = mAnrRecords.size() - 1; i >= 0; i--) {
                     if (mAnrRecords.get(i).mPid == incomingPid) {
                         Slog.i(TAG,
-                                "Skip queued ANR, pid=" + incomingPid + " "
-                                + timeoutRecord.mReason);
+                                "Skip queued ANR, pid=" + incomingPid);
                         return;
                     }
+                    if (mProcessingPid == incomingPid) {
+                        Slog.i(TAG,
+                                "Skip duplicated ANR, pid=" + incomingPid + " "
+                                + anrRecord.mTimeoutRecord.mReason);
+                        return;
+                    }
+                    anrRecord.mTimeoutRecord.mLatencyTracker.
+                      anrRecordPlacingOnQueueWithSize(mAnrRecords.size());
                 }
+
                 // We dump the main process as soon as we can on a different thread,
                 // this is done as the main process's dump can go stale in a few hundred
                 // milliseconds and the average full ANR dump takes a few seconds.
-                timeoutRecord.mLatencyTracker.earlyDumpRequestSubmittedWithSize(
+                anrRecord.mTimeoutRecord.mLatencyTracker.earlyDumpRequestSubmittedWithSize(
                         mTempDumpedPids.size());
                 Future<File> firstPidDumpPromise = mEarlyDumpExecutor.submit(() -> {
                     // the class AnrLatencyTracker is not generally thread safe but the values
                     // recorded/touched by the Temporary dump thread(s) are all volatile/atomic.
                     File tracesFile = StackTracesDumpHelper.dumpStackTracesTempFile(incomingPid,
-                            timeoutRecord.mLatencyTracker);
+                            anrRecord.mTimeoutRecord.mLatencyTracker);
                     mTempDumpedPids.remove(incomingPid);
                     return tracesFile;
                 });
 
-                timeoutRecord.mLatencyTracker.anrRecordPlacingOnQueueWithSize(mAnrRecords.size());
-                mAnrRecords.add(new AnrRecord(anrProcess, activityShortComponentName, aInfo,
-                        parentShortComponentName, parentProcess, aboveSystem, timeoutRecord,
-                        isContinuousAnr, firstPidDumpPromise));
+// QTI_BEGIN: 2023-03-04: Data: when app hit anr, system should show ANR dialog
+                mAnrRecords.add(anrRecord);
+// QTI_END: 2023-03-04: Data: when app hit anr, system should show ANR dialog
             }
             startAnrConsumerIfNeeded();
         } finally {
-            timeoutRecord.mLatencyTracker.appNotRespondingEnded();
+            anrRecord.mTimeoutRecord.mLatencyTracker.appNotRespondingEnded();
         }
 
     }
@@ -324,4 +393,20 @@ class AnrHelper {
             }
         }
     }
+// QTI_BEGIN: 2021-06-28: Android_UI: Add smart trace module
+
+    static final int APP_NOT_RESPONDING_DEFER_MSG = 4;
+    static final int APP_NOT_RESPONDING_DEFER_TIMEOUT_MILLIS = 10 * 1000;
+    private Handler mFgHandler = new Handler(FgThread.getHandler().getLooper()) {
+        @Override
+        public void handleMessage(Message msg) {
+           switch (msg.what) {
+              case APP_NOT_RESPONDING_DEFER_MSG:
+                   AnrRecord record = (AnrRecord)msg.obj;
+                   appNotResponding((AnrRecord)msg.obj);
+                   break;
+            }
+        }
+    };
+// QTI_END: 2021-06-28: Android_UI: Add smart trace module
 }

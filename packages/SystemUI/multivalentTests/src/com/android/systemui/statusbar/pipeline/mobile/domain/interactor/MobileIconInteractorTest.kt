@@ -75,6 +75,15 @@ class MobileIconInteractorTest : MobileIconInteractorTestBase() {
             connectionRepository,
             context,
             overrides,
+            mock(),
+            mock(),
+            mock(),
+            mock(),
+            mock(),
+            mock(),
+            mock(),
+            mock(),
+            mock(),
         )
 }
 

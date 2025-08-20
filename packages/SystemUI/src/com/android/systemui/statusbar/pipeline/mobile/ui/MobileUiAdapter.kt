@@ -14,8 +14,19 @@
  * limitations under the License.
  */
 
+// QTI_BEGIN: 2023-03-15: Android_UI: SystemUI: Reset the mobile icons when the subscription is changed
+/**
+ * Changes from Qualcomm Innovation Center are provided under the following license:
+ * Copyright (c) 2023 Qualcomm Innovation Center, Inc. All rights reserved.
+ * SPDX-License-Identifier: BSD-3-Clause-Clear
+ */
+
+// QTI_END: 2023-03-15: Android_UI: SystemUI: Reset the mobile icons when the subscription is changed
 package com.android.systemui.statusbar.pipeline.mobile.ui
 
+// QTI_BEGIN: 2023-03-15: Android_UI: SystemUI: Reset the mobile icons when the subscription is changed
+import android.telephony.TelephonyManager
+// QTI_END: 2023-03-15: Android_UI: SystemUI: Reset the mobile icons when the subscription is changed
 import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.systemui.CoreStartable
 import com.android.systemui.dagger.SysUISingleton
@@ -47,9 +58,15 @@ constructor(
     val mobileIconsViewModel: MobileIconsViewModel,
     private val logger: MobileViewLogger,
     @Application private val scope: CoroutineScope,
+// QTI_BEGIN: 2023-03-15: Android_UI: SystemUI: Reset the mobile icons when the subscription is changed
+    private val telephonyManager: TelephonyManager,
+// QTI_END: 2023-03-15: Android_UI: SystemUI: Reset the mobile icons when the subscription is changed
 ) : CoreStartable {
     private var isCollecting: Boolean = false
     private var lastValue: List<Int>? = null
+// QTI_BEGIN: 2023-03-15: Android_UI: SystemUI: Reset the mobile icons when the subscription is changed
+    private var isMultiSimEnabled: Boolean = telephonyManager.isMultiSimEnabled()
+// QTI_END: 2023-03-15: Android_UI: SystemUI: Reset the mobile icons when the subscription is changed
 
     private var shadeCarrierGroupController: ShadeCarrierGroupController? = null
 
@@ -86,4 +103,10 @@ constructor(
         pw.println("isCollecting=$isCollecting")
         pw.println("Last values sent to icon controller: $lastValue")
     }
+// QTI_BEGIN: 2023-03-15: Android_UI: SystemUI: Reset the mobile icons when the subscription is changed
+
+    private fun isMultiSimConfigChanged(): Boolean {
+        return isMultiSimEnabled != telephonyManager.isMultiSimEnabled()
+    }
+// QTI_END: 2023-03-15: Android_UI: SystemUI: Reset the mobile icons when the subscription is changed
 }

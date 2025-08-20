@@ -2916,6 +2916,22 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces,
                 mNotificationShadeWindowController.batchApplyWindowLayoutParams(
                         this::startLockscreenTransitionFromAod);
             }
+            mNotificationShadeWindowController.batchApplyWindowLayoutParams(()-> {
+                // stopDozing() starts the LOCKSCREEN_TRANSITION_FROM_AOD animation.
+                mDozeServiceHost.stopDozing();
+                // This is intentionally below the stopDozing call above, since it avoids that we're
+                // unnecessarily animating the wakeUp transition. Animations should only be enabled
+                // once we fully woke up.
+                updateRevealEffect(true /* wakingUp */);
+                updateNotificationPanelTouchState();
+                mShadeTouchableRegionManager.updateTouchableRegion();
+
+                // If we are waking up during the screen off animation, we should undo making the
+                // expanded visible (we did that so the LightRevealScrim would be visible).
+                if (mScreenOffAnimationController.shouldHideLightRevealScrimOnWakeUp()) {
+                    mShadeController.makeExpandedInvisible();
+                }
+            });
             mWakeUpCoordinator.setFullyAwake(true);
             mWakeUpCoordinator.setWakingUp(false);
             if (mKeyguardStateController.isOccluded()
@@ -2987,6 +3003,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces,
         @Override
         public void onScreenTurnedOff() {
             Trace.beginSection("CentralSurfaces#onScreenTurnedOff");
+            mDozeServiceHost.updateDozing();
             mFalsingCollector.onScreenOff();
             mScrimController.onScreenTurnedOff();
             if (mCloseQsBeforeScreenOff) {

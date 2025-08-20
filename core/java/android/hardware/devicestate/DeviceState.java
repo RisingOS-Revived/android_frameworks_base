@@ -439,7 +439,6 @@ public final class DeviceState {
                 return new DeviceState.Configuration[size];
             }
         };
-
         /** @hide */
         @TestApi
         public static final class Builder {

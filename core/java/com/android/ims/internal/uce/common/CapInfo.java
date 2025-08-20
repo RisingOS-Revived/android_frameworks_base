@@ -20,10 +20,12 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
+// QTI_BEGIN: 2020-12-10: Data: ims: Version support for uce feature tags
 import android.os.Bundle;
 
 import java.util.Map;
 import java.util.HashMap;
+// QTI_END: 2020-12-10: Data: ims: Version support for uce feature tags
 
 /** Class for capability discovery information.
  *  @hide */
@@ -92,6 +94,7 @@ public class CapInfo implements Parcelable {
     /** Time used to compute when to query again. */
     private long mCapTimestamp = 0;
 
+// QTI_BEGIN: 2020-12-10: Data: ims: Version support for uce feature tags
     private Map<String, String> mCapInfoMap = new HashMap<String, String>();
 
     /** IM session feature tag key. */
@@ -181,6 +184,7 @@ public class CapInfo implements Parcelable {
     public static final String MMTEL_CALLCOMPOSER = "+g.gsma.callcomposer";
 
 
+// QTI_END: 2020-12-10: Data: ims: Version support for uce feature tags
 
     /**
      * Constructor for the CapInfo class.
@@ -192,7 +196,9 @@ public class CapInfo implements Parcelable {
 
     /**
      * Checks whether IM is supported.
+// QTI_BEGIN: 2020-12-10: Data: ims: Version support for uce feature tags
      * @deprecated Use {@link #isCapabilitySupported(String)} instead.
+// QTI_END: 2020-12-10: Data: ims: Version support for uce feature tags
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public boolean isImSupported() {
@@ -201,7 +207,9 @@ public class CapInfo implements Parcelable {
 
     /**
      * Sets IM as supported or not supported.
+// QTI_BEGIN: 2020-12-10: Data: ims: Version support for uce feature tags
      * @deprecated Use {@link #addCapability(String, String)} instead.
+// QTI_END: 2020-12-10: Data: ims: Version support for uce feature tags
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void setImSupported(boolean imSupported) {
@@ -210,7 +218,9 @@ public class CapInfo implements Parcelable {
 
     /**
      * Checks whether FT Thumbnail is supported.
+// QTI_BEGIN: 2020-12-10: Data: ims: Version support for uce feature tags
      * @deprecated Use {@link #isCapabilitySupported(String)} instead.
+// QTI_END: 2020-12-10: Data: ims: Version support for uce feature tags
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public boolean isFtThumbSupported() {
@@ -219,7 +229,9 @@ public class CapInfo implements Parcelable {
 
     /**
      * Sets FT thumbnail as supported or not supported.
+// QTI_BEGIN: 2020-12-10: Data: ims: Version support for uce feature tags
      * @deprecated Use {@link #addCapability(String, String)} instead.
+// QTI_END: 2020-12-10: Data: ims: Version support for uce feature tags
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void setFtThumbSupported(boolean ftThumbSupported) {
@@ -228,7 +240,9 @@ public class CapInfo implements Parcelable {
 
     /**
      * Checks whether FT Store and Forward is supported
+// QTI_BEGIN: 2020-12-10: Data: ims: Version support for uce feature tags
      * @deprecated Use {@link #isCapabilitySupported(String)} instead.
+// QTI_END: 2020-12-10: Data: ims: Version support for uce feature tags
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public boolean isFtSnFSupported() {
@@ -237,34 +251,46 @@ public class CapInfo implements Parcelable {
 
     /**
      * Sets FT Store and Forward as supported or not supported.
+// QTI_BEGIN: 2020-12-10: Data: ims: Version support for uce feature tags
      * @deprecated Use {@link #addCapability(String, String)} instead.
+// QTI_END: 2020-12-10: Data: ims: Version support for uce feature tags
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void setFtSnFSupported(boolean  ftSnFSupported) {
         this.mFtSnFSupported =  ftSnFSupported;
     }
 
-   /**
-    * Checks whether File transfer HTTP is supported.
-    * @deprecated Use {@link #isCapabilitySupported(String)} instead.
-    */
-   @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-   public boolean isFtHttpSupported() {
+// QTI_BEGIN: 2020-12-10: Data: ims: Version support for uce feature tags
+    /**
+     * Checks whether File transfer HTTP is supported.
+     * @deprecated Use {@link #isCapabilitySupported(String)} instead.
+     */
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    public boolean isFtHttpSupported() {
+// QTI_END: 2020-12-10: Data: ims: Version support for uce feature tags
        return  mFtHttpSupported;
-   }
+// QTI_BEGIN: 2020-12-10: Data: ims: Version support for uce feature tags
+    }
+// QTI_END: 2020-12-10: Data: ims: Version support for uce feature tags
 
    /**
     * Sets File transfer HTTP as supported or not supported.
+// QTI_BEGIN: 2020-12-10: Data: ims: Version support for uce feature tags
      * @deprecated Use {@link #addCapability(String, String)} instead.
+// QTI_END: 2020-12-10: Data: ims: Version support for uce feature tags
     */
    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
    public void setFtHttpSupported(boolean  ftHttpSupported) {
        this.mFtHttpSupported =  ftHttpSupported;
-   }
+// QTI_BEGIN: 2020-12-10: Data: ims: Version support for uce feature tags
+    }
+// QTI_END: 2020-12-10: Data: ims: Version support for uce feature tags
 
     /**
      * Checks whether FT is supported.
+// QTI_BEGIN: 2020-12-10: Data: ims: Version support for uce feature tags
      * @deprecated Use {@link #isCapabilitySupported(String)} instead.
+// QTI_END: 2020-12-10: Data: ims: Version support for uce feature tags
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public boolean isFtSupported() {
@@ -273,7 +299,9 @@ public class CapInfo implements Parcelable {
 
     /**
      * Sets FT as supported or not supported.
+// QTI_BEGIN: 2020-12-10: Data: ims: Version support for uce feature tags
      * @deprecated Use {@link #addCapability(String, String)} instead.
+// QTI_END: 2020-12-10: Data: ims: Version support for uce feature tags
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void setFtSupported(boolean ftSupported) {
@@ -281,8 +309,9 @@ public class CapInfo implements Parcelable {
     }
 
     /**
-     * Checks whether IS is supported.
+// QTI_BEGIN: 2020-12-10: Data: ims: Version support for uce feature tags
      * @deprecated Use {@link #isCapabilitySupported(String)} instead.
+// QTI_END: 2020-12-10: Data: ims: Version support for uce feature tags
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public boolean isIsSupported() {
@@ -290,8 +319,9 @@ public class CapInfo implements Parcelable {
     }
 
     /**
-     * Sets IS as supported or not supported.
+// QTI_BEGIN: 2020-12-10: Data: ims: Version support for uce feature tags
      * @deprecated Use {@link #addCapability(String, String)} instead.
+// QTI_END: 2020-12-10: Data: ims: Version support for uce feature tags
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void setIsSupported(boolean isSupported) {
@@ -299,8 +329,9 @@ public class CapInfo implements Parcelable {
     }
 
     /**
-     * Checks whether video sharing is supported during a CS call.
+// QTI_BEGIN: 2020-12-10: Data: ims: Version support for uce feature tags
      * @deprecated Use {@link #isCapabilitySupported(String)} instead.
+// QTI_END: 2020-12-10: Data: ims: Version support for uce feature tags
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public boolean isVsDuringCSSupported() {
@@ -308,9 +339,9 @@ public class CapInfo implements Parcelable {
     }
 
     /**
-     * Sets video sharing as supported or not supported during a CS
-     * call.
+// QTI_BEGIN: 2020-12-10: Data: ims: Version support for uce feature tags
      * @deprecated Use {@link #addCapability(String, String)} instead.
+// QTI_END: 2020-12-10: Data: ims: Version support for uce feature tags
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void setVsDuringCSSupported(boolean vsDuringCSSupported) {
@@ -318,9 +349,11 @@ public class CapInfo implements Parcelable {
     }
 
     /**
+// QTI_BEGIN: 2020-12-10: Data: ims: Version support for uce feature tags
      * Checks whether video sharing outside a voice call is
      *  supported.
      * @deprecated Use {@link #isCapabilitySupported(String)} instead.
+// QTI_END: 2020-12-10: Data: ims: Version support for uce feature tags
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public boolean isVsSupported() {
@@ -329,7 +362,9 @@ public class CapInfo implements Parcelable {
 
     /**
      * Sets video sharing as supported or not supported.
+// QTI_BEGIN: 2020-12-10: Data: ims: Version support for uce feature tags
      * @deprecated Use {@link #addCapability(String, String)} instead.
+// QTI_END: 2020-12-10: Data: ims: Version support for uce feature tags
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void setVsSupported(boolean vsSupported) {
@@ -338,7 +373,9 @@ public class CapInfo implements Parcelable {
 
     /**
      * Checks whether social presence is supported.
+// QTI_BEGIN: 2020-12-10: Data: ims: Version support for uce feature tags
      * @deprecated Use {@link #isCapabilitySupported(String)} instead.
+// QTI_END: 2020-12-10: Data: ims: Version support for uce feature tags
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public boolean isSpSupported() {
@@ -347,7 +384,9 @@ public class CapInfo implements Parcelable {
 
     /**
      * Sets social presence as supported or not supported.
+// QTI_BEGIN: 2020-12-10: Data: ims: Version support for uce feature tags
      * @deprecated Use {@link #addCapability(String, String)} instead.
+// QTI_END: 2020-12-10: Data: ims: Version support for uce feature tags
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void setSpSupported(boolean spSupported) {
@@ -357,7 +396,9 @@ public class CapInfo implements Parcelable {
     /**
      * Checks whether capability discovery via presence is
      * supported.
+// QTI_BEGIN: 2020-12-10: Data: ims: Version support for uce feature tags
      * @deprecated Use {@link #isCapabilitySupported(String)} instead.
+// QTI_END: 2020-12-10: Data: ims: Version support for uce feature tags
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public boolean isCdViaPresenceSupported() {
@@ -367,7 +408,9 @@ public class CapInfo implements Parcelable {
     /**
      * Sets capability discovery via presence as supported or not
      * supported.
+// QTI_BEGIN: 2020-12-10: Data: ims: Version support for uce feature tags
      * @deprecated Use {@link #addCapability(String, String)} instead.
+// QTI_END: 2020-12-10: Data: ims: Version support for uce feature tags
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void setCdViaPresenceSupported(boolean cdViaPresenceSupported) {
@@ -376,7 +419,9 @@ public class CapInfo implements Parcelable {
 
     /**
      * Checks whether IP voice call is supported.
+// QTI_BEGIN: 2020-12-10: Data: ims: Version support for uce feature tags
      * @deprecated Use {@link #isCapabilitySupported(String)} instead.
+// QTI_END: 2020-12-10: Data: ims: Version support for uce feature tags
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public boolean isIpVoiceSupported() {
@@ -385,7 +430,9 @@ public class CapInfo implements Parcelable {
 
     /**
      * Sets IP voice call as supported or not supported.
+// QTI_BEGIN: 2020-12-10: Data: ims: Version support for uce feature tags
      * @deprecated Use {@link #addCapability(String, String)} instead.
+// QTI_END: 2020-12-10: Data: ims: Version support for uce feature tags
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void setIpVoiceSupported(boolean ipVoiceSupported) {
@@ -394,7 +441,9 @@ public class CapInfo implements Parcelable {
 
     /**
      * Checks whether IP video call is supported.
+// QTI_BEGIN: 2020-12-10: Data: ims: Version support for uce feature tags
      * @deprecated Use {@link #isCapabilitySupported(String)} instead.
+// QTI_END: 2020-12-10: Data: ims: Version support for uce feature tags
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public boolean isIpVideoSupported() {
@@ -403,7 +452,9 @@ public class CapInfo implements Parcelable {
 
     /**
      * Sets IP video call as supported or not supported.
+// QTI_BEGIN: 2020-12-10: Data: ims: Version support for uce feature tags
      * @deprecated Use {@link #addCapability(String, String)} instead.
+// QTI_END: 2020-12-10: Data: ims: Version support for uce feature tags
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void setIpVideoSupported(boolean ipVideoSupported) {
@@ -413,7 +464,9 @@ public class CapInfo implements Parcelable {
    /**
     * Checks whether Geo location Pull using File Transfer is
     * supported.
+// QTI_BEGIN: 2020-12-10: Data: ims: Version support for uce feature tags
      * @deprecated Use {@link #isCapabilitySupported(String)} instead.
+// QTI_END: 2020-12-10: Data: ims: Version support for uce feature tags
     */
    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
    public boolean isGeoPullFtSupported() {
@@ -423,16 +476,22 @@ public class CapInfo implements Parcelable {
    /**
     * Sets Geo location Pull using File Transfer as supported or
     * not supported.
+// QTI_BEGIN: 2020-12-10: Data: ims: Version support for uce feature tags
      * @deprecated Use {@link #addCapability(String, String)} instead.
+// QTI_END: 2020-12-10: Data: ims: Version support for uce feature tags
     */
    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
    public void setGeoPullFtSupported(boolean geoPullFtSupported) {
        this.mGeoPullFtSupported = geoPullFtSupported;
-   }
+// QTI_BEGIN: 2020-12-10: Data: ims: Version support for uce feature tags
+    }
+// QTI_END: 2020-12-10: Data: ims: Version support for uce feature tags
 
     /**
      * Checks whether Geo Pull is supported.
+// QTI_BEGIN: 2020-12-10: Data: ims: Version support for uce feature tags
      * @deprecated Use {@link #isCapabilitySupported(String)} instead.
+// QTI_END: 2020-12-10: Data: ims: Version support for uce feature tags
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public boolean isGeoPullSupported() {
@@ -441,7 +500,9 @@ public class CapInfo implements Parcelable {
 
     /**
      * Sets Geo Pull as supported or not supported.
+// QTI_BEGIN: 2020-12-10: Data: ims: Version support for uce feature tags
      * @deprecated Use {@link #addCapability(String, String)} instead.
+// QTI_END: 2020-12-10: Data: ims: Version support for uce feature tags
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void setGeoPullSupported(boolean geoPullSupported) {
@@ -450,7 +511,9 @@ public class CapInfo implements Parcelable {
 
     /**
      * Checks whether Geo Push is supported.
+// QTI_BEGIN: 2020-12-10: Data: ims: Version support for uce feature tags
      * @deprecated Use {@link #isCapabilitySupported(String)} instead.
+// QTI_END: 2020-12-10: Data: ims: Version support for uce feature tags
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public boolean isGeoPushSupported() {
@@ -459,7 +522,9 @@ public class CapInfo implements Parcelable {
 
     /**
      * Sets Geo Push as supported or not supported.
+// QTI_BEGIN: 2020-12-10: Data: ims: Version support for uce feature tags
      * @deprecated Use {@link #addCapability(String, String)} instead.
+// QTI_END: 2020-12-10: Data: ims: Version support for uce feature tags
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void setGeoPushSupported(boolean geoPushSupported) {
@@ -468,7 +533,9 @@ public class CapInfo implements Parcelable {
 
     /**
      * Checks whether short messaging is supported.
+// QTI_BEGIN: 2020-12-10: Data: ims: Version support for uce feature tags
      * @deprecated Use {@link #isCapabilitySupported(String)} instead.
+// QTI_END: 2020-12-10: Data: ims: Version support for uce feature tags
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public boolean isSmSupported() {
@@ -477,7 +544,9 @@ public class CapInfo implements Parcelable {
 
     /**
      * Sets short messaging as supported or not supported.
+// QTI_BEGIN: 2020-12-10: Data: ims: Version support for uce feature tags
      * @deprecated Use {@link #addCapability(String, String)} instead.
+// QTI_END: 2020-12-10: Data: ims: Version support for uce feature tags
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void setSmSupported(boolean smSupported) {
@@ -486,32 +555,40 @@ public class CapInfo implements Parcelable {
 
     /**
      * Checks whether store/forward and group chat are supported.
+// QTI_BEGIN: 2020-12-10: Data: ims: Version support for uce feature tags
      * @deprecated Use {@link #isCapabilitySupported(String)} instead.
+// QTI_END: 2020-12-10: Data: ims: Version support for uce feature tags
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public boolean isFullSnFGroupChatSupported() {
         return mFullSnFGroupChatSupported;
     }
 
+// QTI_BEGIN: 2020-12-10: Data: ims: Version support for uce feature tags
     /**
      * @deprecated Use {@link #isCapabilitySupported(String)} instead.
      */
+// QTI_END: 2020-12-10: Data: ims: Version support for uce feature tags
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public boolean isRcsIpVoiceCallSupported() {
         return mRcsIpVoiceCallSupported;
     }
 
+// QTI_BEGIN: 2020-12-10: Data: ims: Version support for uce feature tags
     /**
      * @deprecated Use {@link #isCapabilitySupported(String)} instead.
      */
+// QTI_END: 2020-12-10: Data: ims: Version support for uce feature tags
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public boolean isRcsIpVideoCallSupported() {
         return mRcsIpVideoCallSupported;
     }
 
+// QTI_BEGIN: 2020-12-10: Data: ims: Version support for uce feature tags
     /**
      * @deprecated Use {@link #isCapabilitySupported(String)} instead.
      */
+// QTI_END: 2020-12-10: Data: ims: Version support for uce feature tags
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public boolean isRcsIpVideoOnlyCallSupported() {
         return mRcsIpVideoOnlyCallSupported;
@@ -519,32 +596,40 @@ public class CapInfo implements Parcelable {
 
     /**
      * Sets store/forward and group chat supported or not supported.
+// QTI_BEGIN: 2020-12-10: Data: ims: Version support for uce feature tags
      * @deprecated Use {@link #addCapability(String, String)} instead.
+// QTI_END: 2020-12-10: Data: ims: Version support for uce feature tags
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void setFullSnFGroupChatSupported(boolean fullSnFGroupChatSupported) {
         this.mFullSnFGroupChatSupported = fullSnFGroupChatSupported;
     }
 
+// QTI_BEGIN: 2020-12-10: Data: ims: Version support for uce feature tags
     /**
      * @deprecated Use {@link #addCapability(String, String)} instead.
      */
+// QTI_END: 2020-12-10: Data: ims: Version support for uce feature tags
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void setRcsIpVoiceCallSupported(boolean rcsIpVoiceCallSupported) {
         this.mRcsIpVoiceCallSupported = rcsIpVoiceCallSupported;
     }
+// QTI_BEGIN: 2020-12-10: Data: ims: Version support for uce feature tags
 
     /**
      * @deprecated Use {@link #addCapability(String, String)} instead.
      */
+// QTI_END: 2020-12-10: Data: ims: Version support for uce feature tags
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void setRcsIpVideoCallSupported(boolean rcsIpVideoCallSupported) {
         this.mRcsIpVideoCallSupported = rcsIpVideoCallSupported;
     }
+// QTI_BEGIN: 2020-12-10: Data: ims: Version support for uce feature tags
 
     /**
      * @deprecated Use {@link #addCapability(String, String)} instead.
      */
+// QTI_END: 2020-12-10: Data: ims: Version support for uce feature tags
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void setRcsIpVideoOnlyCallSupported(boolean rcsIpVideoOnlyCallSupported) {
         this.mRcsIpVideoOnlyCallSupported = rcsIpVideoOnlyCallSupported;
@@ -552,7 +637,9 @@ public class CapInfo implements Parcelable {
 
     /**
      * Checks whether Geo Push via SMS is supported.
+// QTI_BEGIN: 2020-12-10: Data: ims: Version support for uce feature tags
      * @deprecated Use {@link #isCapabilitySupported(String)} instead.
+// QTI_END: 2020-12-10: Data: ims: Version support for uce feature tags
      */
     public boolean isGeoSmsSupported() {
         return mGeoSmsSupported;
@@ -560,7 +647,9 @@ public class CapInfo implements Parcelable {
 
     /**
      * Sets Geolocation Push via SMS as supported or not supported.
+// QTI_BEGIN: 2020-12-10: Data: ims: Version support for uce feature tags
      * @deprecated Use {@link #addCapability(String, String)} instead.
+// QTI_END: 2020-12-10: Data: ims: Version support for uce feature tags
      */
     public void setGeoSmsSupported(boolean geoSmsSupported) {
          this.mGeoSmsSupported = geoSmsSupported;
@@ -568,7 +657,9 @@ public class CapInfo implements Parcelable {
 
     /**
      * Checks whether RCS call composer is supported.
+// QTI_BEGIN: 2020-12-10: Data: ims: Version support for uce feature tags
      * @deprecated Use {@link #isCapabilitySupported(String)} instead.
+// QTI_END: 2020-12-10: Data: ims: Version support for uce feature tags
      */
     public boolean isCallComposerSupported() {
         return mCallComposerSupported;
@@ -576,7 +667,9 @@ public class CapInfo implements Parcelable {
 
     /**
      * Sets call composer as supported or not supported.
+// QTI_BEGIN: 2020-12-10: Data: ims: Version support for uce feature tags
      * @deprecated Use {@link #addCapability(String, String)} instead.
+// QTI_END: 2020-12-10: Data: ims: Version support for uce feature tags
      */
     public void setCallComposerSupported(boolean callComposerSupported) {
         this.mCallComposerSupported = callComposerSupported;
@@ -584,7 +677,9 @@ public class CapInfo implements Parcelable {
 
     /**
      * Checks whether post call is supported.
+// QTI_BEGIN: 2020-12-10: Data: ims: Version support for uce feature tags
      * @deprecated Use {@link #isCapabilitySupported(String)} instead.
+// QTI_END: 2020-12-10: Data: ims: Version support for uce feature tags
      */
     public boolean isPostCallSupported(){
         return mPostCallSupported;
@@ -592,15 +687,21 @@ public class CapInfo implements Parcelable {
 
     /**
      * Sets post call as supported or not supported.
+// QTI_BEGIN: 2020-12-10: Data: ims: Version support for uce feature tags
      * @deprecated Use {@link #addCapability(String, String)} instead.
+// QTI_END: 2020-12-10: Data: ims: Version support for uce feature tags
      */
+// QTI_BEGIN: 2020-12-10: Data: ims: Version support for uce feature tags
     public void setPostCallSupported(boolean postCallSupported) {
         this.mPostCallSupported = postCallSupported;
     }
+// QTI_END: 2020-12-10: Data: ims: Version support for uce feature tags
 
     /**
      * Checks whether shared map is supported.
+// QTI_BEGIN: 2020-12-10: Data: ims: Version support for uce feature tags
      * @deprecated Use {@link #isCapabilitySupported(String)} instead.
+// QTI_END: 2020-12-10: Data: ims: Version support for uce feature tags
      */
     public boolean isSharedMapSupported() {
         return mSharedMapSupported;
@@ -608,7 +709,9 @@ public class CapInfo implements Parcelable {
 
     /**
      * Sets shared map as supported or not supported.
+// QTI_BEGIN: 2020-12-10: Data: ims: Version support for uce feature tags
      * @deprecated Use {@link #addCapability(String, String)} instead.
+// QTI_END: 2020-12-10: Data: ims: Version support for uce feature tags
      */
     public void setSharedMapSupported(boolean sharedMapSupported) {
         this.mSharedMapSupported = sharedMapSupported;
@@ -616,7 +719,9 @@ public class CapInfo implements Parcelable {
 
     /**
      * Checks whether shared sketch is supported.
+// QTI_BEGIN: 2020-12-10: Data: ims: Version support for uce feature tags
      * @deprecated Use {@link #isCapabilitySupported(String)} instead.
+// QTI_END: 2020-12-10: Data: ims: Version support for uce feature tags
      */
     public boolean isSharedSketchSupported() {
         return mSharedSketchSupported;
@@ -624,7 +729,9 @@ public class CapInfo implements Parcelable {
 
     /**
      * Sets shared sketch as supported or not supported.
+// QTI_BEGIN: 2020-12-10: Data: ims: Version support for uce feature tags
      * @deprecated Use {@link #addCapability(String, String)} instead.
+// QTI_END: 2020-12-10: Data: ims: Version support for uce feature tags
      */
     public void setSharedSketchSupported(boolean sharedSketchSupported) {
         this.mSharedSketchSupported = sharedSketchSupported;
@@ -632,7 +739,9 @@ public class CapInfo implements Parcelable {
 
     /**
      * Checks whether chatbot communication is supported.
+// QTI_BEGIN: 2020-12-10: Data: ims: Version support for uce feature tags
      * @deprecated Use {@link #isCapabilitySupported(String)} instead.
+// QTI_END: 2020-12-10: Data: ims: Version support for uce feature tags
      */
     public boolean isChatbotSupported() {
         return mChatbotSupported;
@@ -640,7 +749,9 @@ public class CapInfo implements Parcelable {
 
     /**
      * Sets chatbot communication as supported or not supported.
+// QTI_BEGIN: 2020-12-10: Data: ims: Version support for uce feature tags
      * @deprecated Use {@link #addCapability(String, String)} instead.
+// QTI_END: 2020-12-10: Data: ims: Version support for uce feature tags
      */
     public void setChatbotSupported(boolean chatbotSupported) {
         this.mChatbotSupported = chatbotSupported;
@@ -648,7 +759,9 @@ public class CapInfo implements Parcelable {
 
     /**
      * Checks whether chatbot role is supported.
+// QTI_BEGIN: 2020-12-10: Data: ims: Version support for uce feature tags
      * @deprecated Use {@link #isCapabilitySupported(String)} instead.
+// QTI_END: 2020-12-10: Data: ims: Version support for uce feature tags
      */
     public boolean isChatbotRoleSupported() {
         return mChatbotRoleSupported;
@@ -656,7 +769,9 @@ public class CapInfo implements Parcelable {
 
     /**
      * Sets chatbot role as supported or not supported.
+// QTI_BEGIN: 2020-12-10: Data: ims: Version support for uce feature tags
      * @deprecated Use {@link #addCapability(String, String)} instead.
+// QTI_END: 2020-12-10: Data: ims: Version support for uce feature tags
      */
     public void setChatbotRoleSupported(boolean chatbotRoleSupported) {
         this.mChatbotRoleSupported = chatbotRoleSupported;
@@ -664,7 +779,9 @@ public class CapInfo implements Parcelable {
 
     /**
      * Checks whether standalone chatbot communication is supported.
+// QTI_BEGIN: 2020-12-10: Data: ims: Version support for uce feature tags
      * @deprecated Use {@link #isCapabilitySupported(String)} instead.
+// QTI_END: 2020-12-10: Data: ims: Version support for uce feature tags
      */
     public boolean isSmChatbotSupported() {
         return mSmChatbotSupported;
@@ -672,7 +789,9 @@ public class CapInfo implements Parcelable {
 
     /**
      * Sets standalone chatbot communication as supported or not supported.
+// QTI_BEGIN: 2020-12-10: Data: ims: Version support for uce feature tags
      * @deprecated Use {@link #addCapability(String, String)} instead.
+// QTI_END: 2020-12-10: Data: ims: Version support for uce feature tags
      */
     public void setSmChatbotSupported(boolean smChatbotSupported) {
         this.mSmChatbotSupported = smChatbotSupported;
@@ -680,7 +799,9 @@ public class CapInfo implements Parcelable {
 
     /**
      * Checks whether Mmtel based call composer is supported.
+// QTI_BEGIN: 2020-12-10: Data: ims: Version support for uce feature tags
      * @deprecated Use {@link #isCapabilitySupported(String)} instead.
+// QTI_END: 2020-12-10: Data: ims: Version support for uce feature tags
      */
     public boolean isMmtelCallComposerSupported() {
         return mMmtelCallComposerSupported;
@@ -688,7 +809,9 @@ public class CapInfo implements Parcelable {
 
     /**
      * Sets Mmtel based call composer as supported or not supported.
+// QTI_BEGIN: 2020-12-10: Data: ims: Version support for uce feature tags
      * @deprecated Use {@link #addCapability(String, String)} instead.
+// QTI_END: 2020-12-10: Data: ims: Version support for uce feature tags
      */
     public void setMmtelCallComposerSupported(boolean mmtelCallComposerSupported) {
         this.mMmtelCallComposerSupported = mmtelCallComposerSupported;
@@ -718,6 +841,7 @@ public class CapInfo implements Parcelable {
         this.mCapTimestamp = capTimestamp;
     }
 
+// QTI_BEGIN: 2020-12-10: Data: ims: Version support for uce feature tags
     /**
      * Adds the feature tag string with supported versions to
      * the mCapInfoMap.
@@ -796,6 +920,7 @@ public class CapInfo implements Parcelable {
        return mCapInfoMap.containsKey(featureTag);
     }
 
+// QTI_END: 2020-12-10: Data: ims: Version support for uce feature tags
     public int describeContents() {
         // TODO Auto-generated method stub
         return 0;
@@ -835,12 +960,14 @@ public class CapInfo implements Parcelable {
         dest.writeInt(mRcsIpVideoOnlyCallSupported ? 1 : 0);
         dest.writeStringArray(mExts);
         dest.writeLong(mCapTimestamp);
+// QTI_BEGIN: 2020-12-10: Data: ims: Version support for uce feature tags
 
         Bundle capInfoBundle = new Bundle();
         for (Map.Entry<String, String> entry : mCapInfoMap.entrySet()) {
           capInfoBundle.putString(entry.getKey(), entry.getValue());
         }
         dest.writeBundle(capInfoBundle);
+// QTI_END: 2020-12-10: Data: ims: Version support for uce feature tags
     }
 
     public static final Parcelable.Creator<CapInfo> CREATOR = new Parcelable.Creator<CapInfo>() {
@@ -893,10 +1020,12 @@ public class CapInfo implements Parcelable {
 
         mExts = source.createStringArray();
         mCapTimestamp = source.readLong();
+// QTI_BEGIN: 2020-12-10: Data: ims: Version support for uce feature tags
 
         Bundle capInfoBundle = source.readBundle();
         for (String key: capInfoBundle.keySet()) {
           mCapInfoMap.put(key, capInfoBundle.getString(key));
         }
+// QTI_END: 2020-12-10: Data: ims: Version support for uce feature tags
     }
 }

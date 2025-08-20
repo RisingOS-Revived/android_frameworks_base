@@ -16,7 +16,9 @@
   -->
 
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
+<!-- QTI_BEGIN: 2022-11-22: Telephony: Add DDS cases's handling for DSDA-->
+<!-- QTI_END: 2022-11-22: Telephony: Add DDS cases's handling for DSDA-->
+    <item android:drawable="@drawable/settingslib_thumb_disabled" android:state_enabled="false"/>
     <item android:drawable="@drawable/settingslib_thumb_on" android:state_checked="true"/>
     <item android:drawable="@drawable/settingslib_thumb_off" android:state_checked="false"/>
-    <item android:drawable="@drawable/settingslib_thumb_disabled" android:state_enabled="false"/>
 </selector>

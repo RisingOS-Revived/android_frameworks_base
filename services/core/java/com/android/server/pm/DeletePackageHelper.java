@@ -58,6 +58,7 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.text.TextUtils;
 import android.util.ArraySet;
+import android.util.BoostFramework;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.Slog;
@@ -350,6 +351,17 @@ final class DeletePackageHelper {
             packageInstallerService.onInstallerPackageDeleted(uninstalledPs.getAppId(), removeUser);
         }
 
+        if (res && packageName != null) {
+            BoostFramework ux_perf = new BoostFramework();
+            if (ux_perf != null) {
+                if (ux_perf.board_first_api_lvl < BoostFramework.VENDOR_T_API_LEVEL &&
+                    ux_perf.board_api_lvl < BoostFramework.VENDOR_T_API_LEVEL) {
+                    ux_perf.perfUXEngine_events(BoostFramework.UXE_EVENT_PKG_UNINSTALL, 0, packageName, userId);
+                } else {
+                    ux_perf.perfEvent(BoostFramework.VENDOR_HINT_PKG_UNINSTALL, packageName, 2, userId, 0);
+                }
+            }
+        }
         return res ? DELETE_SUCCEEDED : PackageManager.DELETE_FAILED_INTERNAL_ERROR;
     }
 

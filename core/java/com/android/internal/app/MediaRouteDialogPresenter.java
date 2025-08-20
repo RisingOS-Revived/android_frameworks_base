@@ -86,7 +86,12 @@ public abstract class MediaRouteDialogPresenter {
     public static Dialog createDialog(Context context, int routeTypes,
             View.OnClickListener extendedSettingsClickListener, int theme,
             boolean showProgressBarWhenEmpty) {
-        if (shouldShowChooserDialog(context, routeTypes)) {
+        final MediaRouter router = context.getSystemService(MediaRouter.class);
+
+        MediaRouter.RouteInfo route = router.getSelectedRoute();
+// QTI_BEGIN: 2022-12-06: Android_UI: SystemUI: Check whether the selected WFD route is available
+        if (shouldShowChooserDialog(context, routeTypes) || route.getStatusCode() == MediaRouter.RouteInfo.STATUS_NOT_AVAILABLE) {
+// QTI_END: 2022-12-06: Android_UI: SystemUI: Check whether the selected WFD route is available
             final MediaRouteChooserDialog d = new MediaRouteChooserDialog(context, theme,
                     showProgressBarWhenEmpty);
             d.setRouteTypes(routeTypes);

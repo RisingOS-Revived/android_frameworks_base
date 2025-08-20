@@ -651,6 +651,11 @@ public class MediaOutputAdapterLegacy extends MediaOutputAdapterBase {
             }
         }
 
+        private void endAnimateCornerAndVolume() {
+            mVolumeAnimator.end();
+            mCornerAnimator.end();
+        }
+
         private void initAnimator() {
             mCornerAnimator = ValueAnimator.ofFloat(mInactiveRadius, mActiveRadius);
             mCornerAnimator.setDuration(ANIM_DURATION);

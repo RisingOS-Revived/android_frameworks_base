@@ -136,6 +136,7 @@ import com.android.keyguard.ViewMediatorCallback;
 import com.android.keyguard.mediator.ScreenOnCoordinator;
 import com.android.systemui.CoreStartable;
 import com.android.systemui.DejankUtils;
+import com.android.systemui.Dependency;
 import com.android.systemui.EventLogTags;
 import com.android.systemui.animation.ActivityTransitionAnimator;
 import com.android.systemui.animation.TransitionAnimator;
@@ -467,6 +468,12 @@ public class KeyguardViewMediator implements CoreStartable,
      * Index is the slotId - in case of multiple SIM cards.
      */
     private final SparseIntArray mLastSimStates = new SparseIntArray();
+// QTI_BEGIN: 2020-04-23: Android_UI: SystemUI: there is unexpected SIM PIN input dialog.
+    private static SparseIntArray mUnlockTrackSimStates = new SparseIntArray();
+// QTI_END: 2020-04-23: Android_UI: SystemUI: there is unexpected SIM PIN input dialog.
+// QTI_BEGIN: 2021-06-08: Android_UI: SystemUI: no PIN lock screen when reset SIM.
+    private static final int STATE_INVALID = -1;
+// QTI_END: 2021-06-08: Android_UI: SystemUI: no PIN lock screen when reset SIM.
 
     /**
      * Indicates if a SIM card had the SIM PIN enabled during the initialization, before
@@ -562,12 +569,6 @@ public class KeyguardViewMediator implements CoreStartable,
      * committed when finished going to sleep.
      */
     private boolean mPendingLock;
-
-    /**
-     * When starting to go away, flag a need to show the PIN lock so the keyguard can be brought
-     * back.
-     */
-    private boolean mPendingPinLock = false;
 
     /**
      * Whether a power button gesture (such as double tap for camera) has been detected. This is
@@ -719,19 +720,6 @@ public class KeyguardViewMediator implements CoreStartable,
     KeyguardUpdateMonitorCallback mUpdateCallback = new KeyguardUpdateMonitorCallback() {
 
         @Override
-        public void onKeyguardVisibilityChanged(boolean visible) {
-            synchronized (KeyguardViewMediator.this) {
-                if (!visible && mPendingPinLock) {
-                    Log.i(TAG, "PIN lock requested, starting keyguard");
-
-                    // Bring the keyguard back in order to show the PIN lock
-                    mPendingPinLock = false;
-                    doKeyguardLocked(null);
-                }
-            }
-        }
-
-        @Override
         public void onDeviceProvisioned() {
             sendUserPresentBroadcast();
         }
@@ -760,13 +748,49 @@ public class KeyguardViewMediator implements CoreStartable,
                 lastSimStateWasLocked = (lastState == TelephonyManager.SIM_STATE_PIN_REQUIRED
                         || lastState == TelephonyManager.SIM_STATE_PUK_REQUIRED);
                 mLastSimStates.append(slotId, simState);
+
+// QTI_BEGIN: 2021-06-08: Android_UI: SystemUI: no PIN lock screen when reset SIM.
+                int trackState = mUnlockTrackSimStates.get(slotId, STATE_INVALID);
+                //update the mUnlockTrackSimStates
+// QTI_END: 2021-06-08: Android_UI: SystemUI: no PIN lock screen when reset SIM.
+// QTI_BEGIN: 2020-04-23: Android_UI: SystemUI: there is unexpected SIM PIN input dialog.
+                if(simState == TelephonyManager.SIM_STATE_READY){
+// QTI_END: 2020-04-23: Android_UI: SystemUI: there is unexpected SIM PIN input dialog.
+// QTI_BEGIN: 2021-06-08: Android_UI: SystemUI: no PIN lock screen when reset SIM.
+                    if(trackState == TelephonyManager.SIM_STATE_LOADED){
+                        return;
+                    }else{
+                        mUnlockTrackSimStates.put(slotId, simState);
+                   }
+                }else{
+// QTI_END: 2021-06-08: Android_UI: SystemUI: no PIN lock screen when reset SIM.
+// QTI_BEGIN: 2020-07-17: Android_UI: SystemUI: no PUK lock screen after 3 wrong PIN retries
+                    if(simState != TelephonyManager.SIM_STATE_PIN_REQUIRED) {
+// QTI_END: 2020-07-17: Android_UI: SystemUI: no PUK lock screen after 3 wrong PIN retries
+// QTI_BEGIN: 2020-04-23: Android_UI: SystemUI: there is unexpected SIM PIN input dialog.
+                        mUnlockTrackSimStates.put(slotId, simState);
+// QTI_END: 2020-04-23: Android_UI: SystemUI: there is unexpected SIM PIN input dialog.
+// QTI_BEGIN: 2021-06-08: Android_UI: SystemUI: no PIN lock screen when reset SIM.
+                    }
+                }
+
+                //check the SIM_STATE_PIN_REQUIRED
+                if(trackState == TelephonyManager.SIM_STATE_READY){
+                    if(simState == TelephonyManager.SIM_STATE_PIN_REQUIRED) {
+// QTI_END: 2021-06-08: Android_UI: SystemUI: no PIN lock screen when reset SIM.
+// QTI_BEGIN: 2020-08-11: Android_UI: SystemUI: Screen locked after PIN unlocked
+                        return;
+// QTI_END: 2020-08-11: Android_UI: SystemUI: Screen locked after PIN unlocked
+// QTI_BEGIN: 2020-04-23: Android_UI: SystemUI: there is unexpected SIM PIN input dialog.
+                    }
+                }
+// QTI_END: 2020-04-23: Android_UI: SystemUI: there is unexpected SIM PIN input dialog.
             }
 
             switch (simState) {
                 case TelephonyManager.SIM_STATE_NOT_READY:
                 case TelephonyManager.SIM_STATE_ABSENT:
                 case TelephonyManager.SIM_STATE_UNKNOWN:
-                    mPendingPinLock = false;
                     // only force lock screen in case of missing sim if user hasn't
                     // gone through setup wizard
                     synchronized (KeyguardViewMediator.this) {
@@ -806,7 +830,6 @@ public class KeyguardViewMediator implements CoreStartable,
                 case TelephonyManager.SIM_STATE_PUK_REQUIRED:
                     synchronized (KeyguardViewMediator.this) {
                         mSimWasLocked.append(slotId, true);
-                        mPendingPinLock = true;
                         if (!mShowing) {
                             Log.d(TAG,
                                     "INTENT_VALUE_ICC_LOCKED and keygaurd isn't "
@@ -1486,10 +1509,6 @@ public class KeyguardViewMediator implements CoreStartable,
         @Override
         public void onPrimaryBouncerShowingChanged() {
             synchronized (KeyguardViewMediator.this) {
-                if (mKeyguardStateController.isPrimaryBouncerShowing()
-                        && !mKeyguardStateController.isKeyguardGoingAway()) {
-                    mPendingPinLock = false;
-                }
                 adjustStatusBarLocked(mKeyguardStateController.isPrimaryBouncerShowing(), false);
             }
         }
@@ -2327,6 +2346,12 @@ public class KeyguardViewMediator implements CoreStartable,
         }
     }
 
+// QTI_BEGIN: 2020-04-23: Android_UI: SystemUI: there is unexpected SIM PIN input dialog.
+    public static int getUnlockTrackSimState(int slotId) {
+        return mUnlockTrackSimStates.get(slotId);
+    }
+// QTI_END: 2020-04-23: Android_UI: SystemUI: there is unexpected SIM PIN input dialog.
+
     public boolean isHiding() {
         return mHiding;
     }
@@ -2352,8 +2377,9 @@ public class KeyguardViewMediator implements CoreStartable,
             if (mOccluded != isOccluded) {
                 mOccluded = isOccluded;
                 if (!KeyguardWmStateRefactor.isEnabled()) {
-                    mKeyguardViewControllerLazy.get().setOccluded(isOccluded, animate
-                            && mDeviceInteractive);
+                     mKeyguardViewControllerLazy.get().setOccluded(isOccluded,
+                        (Dependency.get(KeyguardUpdateMonitor.class).isSimPinSecure()?false:animate)
+                        && mDeviceInteractive);
                 }
                 adjustStatusBarLocked();
             }
@@ -4054,7 +4080,6 @@ public class KeyguardViewMediator implements CoreStartable,
         pw.print("  mPendingReset: "); pw.println(mPendingReset);
         pw.print("  mPendingLock: "); pw.println(mPendingLock);
         pw.print("  wakeAndUnlocking: "); pw.println(mWakeAndUnlocking);
-        pw.print("  mPendingPinLock: "); pw.println(mPendingPinLock);
         pw.print("  mPowerGestureIntercepted: "); pw.println(mPowerGestureIntercepted);
     }
 

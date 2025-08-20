@@ -78,6 +78,9 @@ import android.util.IntArray;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
+// QTI_BEGIN: 2019-05-01: Performance: IOP: Fix and rebase PreferredApps.
+import android.util.BoostFramework;
+// QTI_END: 2019-05-01: Performance: IOP: Fix and rebase PreferredApps.
 import android.view.InsetsState;
 import android.view.MotionEvent;
 import android.view.WindowManagerPolicyConstants.PointerEventListener;
@@ -217,6 +220,9 @@ class RecentTasks {
     private final HashMap<ComponentName, ActivityInfo> mTmpAvailActCache = new HashMap<>();
     private final HashMap<String, ApplicationInfo> mTmpAvailAppCache = new HashMap<>();
     private final SparseBooleanArray mTmpQuietProfileUserIds = new SparseBooleanArray();
+// QTI_BEGIN: 2019-05-01: Performance: IOP: Fix and rebase PreferredApps.
+    private final BoostFramework mUxPerf = new BoostFramework();
+// QTI_END: 2019-05-01: Performance: IOP: Fix and rebase PreferredApps.
     private final Rect mTmpRect = new Rect();
 
     // TODO(b/127498985): This is currently a rough heuristic for interaction inside an app
@@ -1322,6 +1328,28 @@ class RecentTasks {
     void remove(Task task) {
         mTasks.remove(task);
         notifyTaskRemoved(task, false /* wasTrimmed */, false /* killProcess */);
+// QTI_BEGIN: 2019-05-01: Performance: IOP: Fix and rebase PreferredApps.
+        if (task != null) {
+// QTI_END: 2019-05-01: Performance: IOP: Fix and rebase PreferredApps.
+            final Intent intent = task.getBaseIntent();
+            if (intent == null) return;
+            final ComponentName componentName = intent.getComponent();
+            if (componentName == null) return;
+
+            final String taskPkgName = componentName.getPackageName();
+// QTI_BEGIN: 2019-05-01: Performance: IOP: Fix and rebase PreferredApps.
+            if (mUxPerf != null) {
+// QTI_END: 2019-05-01: Performance: IOP: Fix and rebase PreferredApps.
+                if (mUxPerf.board_first_api_lvl < BoostFramework.VENDOR_T_API_LEVEL &&
+                    mUxPerf.board_api_lvl < BoostFramework.VENDOR_T_API_LEVEL) {
+                    mUxPerf.perfUXEngine_events(BoostFramework.UXE_EVENT_KILL, 0, taskPkgName, 0);
+                } else {
+                    mUxPerf.perfEvent(BoostFramework.VENDOR_HINT_KILL, taskPkgName, 2, 0, 0);
+                }
+// QTI_BEGIN: 2019-05-01: Performance: IOP: Fix and rebase PreferredApps.
+            }
+        }
+// QTI_END: 2019-05-01: Performance: IOP: Fix and rebase PreferredApps.
     }
 
     /**

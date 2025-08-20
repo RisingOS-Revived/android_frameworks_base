@@ -944,7 +944,6 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
         updateSurface();
     }
 
-
     /**
      * Sets the desired amount of HDR headroom to be used when HDR content is presented on this
      * SurfaceView. This is expressed as the ratio of maximum HDR white point over the SDR
@@ -988,6 +987,28 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
         invalidate();
     }
 
+// QTI_BEGIN: 2020-05-06: SecureSystems: SurfaceView: Add API to allow protected content presentation
+    /**
+     * Control whether the surface view's content should flow through
+     * protected hardware path to display disallowing access from non-secure
+     * execution environments.
+     *
+     * <p>Note that this must be set before the surface view's containing
+     * window is attached to the window manager.
+     *
+     * @param isProtected True if the surface view is protected.
+     *
+     * @hide
+     */
+    public void setProtected(boolean isProtected) {
+        if (isProtected) {
+            mSurfaceFlags |= SurfaceControl.PROTECTED_APP;
+        } else {
+            mSurfaceFlags &= ~SurfaceControl.PROTECTED_APP;
+        }
+    }
+
+// QTI_END: 2020-05-06: SecureSystems: SurfaceView: Add API to allow protected content presentation
     private void updateOpaqueFlag() {
         if (!PixelFormat.formatHasAlpha(mRequestedFormat)) {
             mSurfaceFlags |= SurfaceControl.OPAQUE;

@@ -42,6 +42,9 @@ import android.graphics.Path;
 import android.graphics.Rect;
 import android.os.Parcel;
 import android.os.Parcelable;
+// QTI_BEGIN: 2020-09-17: Display: DisplayCutout: Add support to enable cutout dynamically.
+import android.os.SystemProperties;
+// QTI_END: 2020-09-17: Display: DisplayCutout: Add support to enable cutout dynamically.
 import android.text.TextUtils;
 import android.util.DisplayUtils;
 import android.util.Pair;
@@ -1232,6 +1235,13 @@ public final class DisplayCutout {
         if (TextUtils.isEmpty(spec) && waterfallInsets.equals(Insets.NONE)) {
             return NULL_PAIR;
         }
+// QTI_BEGIN: 2020-09-17: Display: DisplayCutout: Add support to enable cutout dynamically.
+        int disableRoundedCorner =
+            SystemProperties.getInt("vendor.display.disable_rounded_corner", 0);
+        if (disableRoundedCorner == 1) {
+            return NULL_PAIR;
+        }
+// QTI_END: 2020-09-17: Display: DisplayCutout: Add support to enable cutout dynamically.
 
         final float physicalPixelDisplaySizeRatio = DisplayUtils.getPhysicalPixelDisplaySizeRatio(
                 physicalDisplayWidth, physicalDisplayHeight, displayWidth, displayHeight);

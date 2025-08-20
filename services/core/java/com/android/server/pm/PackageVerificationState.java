@@ -43,6 +43,16 @@ class PackageVerificationState {
 
     private boolean mRequiredVerificationPassed;
 
+// QTI_BEGIN: 2018-04-09: Secure Systems: SEEMP: framework instrumentation and AppProtect features
+    private int mOptionalVerifierUid;
+
+    private boolean mHasOptionalVerifier;
+
+    private boolean mOptionalVerificationComplete;
+
+    private boolean mOptionalVerificationPassed;
+
+// QTI_END: 2018-04-09: Secure Systems: SEEMP: framework instrumentation and AppProtect features
     /**
      * Create a new package verification state where {@code requiredVerifierUid} is the user ID for
      * the package that must reply affirmative before things can continue.
@@ -81,6 +91,13 @@ class PackageVerificationState {
         mSufficientVerifierUids.put(uid, true);
     }
 
+// QTI_BEGIN: 2018-04-09: Secure Systems: SEEMP: framework instrumentation and AppProtect features
+    public void addOptionalVerifier(int uid) {
+        mOptionalVerifierUid = uid;
+        mHasOptionalVerifier = true;
+    }
+
+// QTI_END: 2018-04-09: Secure Systems: SEEMP: framework instrumentation and AppProtect features
     /** Returns true if the uid a sufficient verifier. */
     boolean checkSufficientVerifierUid(int uid) {
         return mSufficientVerifierUids.get(uid, false);
@@ -133,6 +150,17 @@ class PackageVerificationState {
             if (mUnrespondedRequiredVerifierUids.size() == 0) {
                 mRequiredVerificationComplete = true;
             }
+// QTI_BEGIN: 2018-04-09: Secure Systems: SEEMP: framework instrumentation and AppProtect features
+        } else if (mHasOptionalVerifier && uid == mOptionalVerifierUid) {
+            mOptionalVerificationComplete = true;
+            switch (code) {
+                case PackageManager.VERIFICATION_ALLOW:
+                    mOptionalVerificationPassed = true;
+                    break;
+                default:
+                    mOptionalVerificationPassed = false;
+            }
+// QTI_END: 2018-04-09: Secure Systems: SEEMP: framework instrumentation and AppProtect features
         } else if (mSufficientVerifierUids.get(uid)) {
             if (code == PackageManager.VERIFICATION_ALLOW) {
                 mSufficientVerificationPassed = true;
@@ -164,7 +192,13 @@ class PackageVerificationState {
      * @return {@code true} when verification is considered complete
      */
     boolean isVerificationComplete() {
-        if (!mRequiredVerificationComplete) {
+        if (mRequiredVerifierUids.size() > 0 && !mRequiredVerificationComplete) {
+// QTI_BEGIN: 2018-04-09: Secure Systems: SEEMP: framework instrumentation and AppProtect features
+            return false;
+        }
+
+        if (mHasOptionalVerifier && !mOptionalVerificationComplete) {
+// QTI_END: 2018-04-09: Secure Systems: SEEMP: framework instrumentation and AppProtect features
             return false;
         }
 
@@ -182,7 +216,13 @@ class PackageVerificationState {
      * @return {@code true} if installation should be allowed
      */
     boolean isInstallAllowed() {
-        if (!mRequiredVerificationComplete || !mRequiredVerificationPassed) {
+        if (mRequiredVerifierUids.size() > 0 && (!mRequiredVerificationComplete || !mRequiredVerificationPassed)) {
+// QTI_BEGIN: 2018-04-09: Secure Systems: SEEMP: framework instrumentation and AppProtect features
+            return false;
+        }
+
+        if (mHasOptionalVerifier && !mOptionalVerificationPassed) {
+// QTI_END: 2018-04-09: Secure Systems: SEEMP: framework instrumentation and AppProtect features
             return false;
         }
 

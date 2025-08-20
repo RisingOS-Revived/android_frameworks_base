@@ -93,7 +93,7 @@ class ExtendedRemoteDisplayHelper {
      * @param listener The listener to invoke when displays are connected or disconnected.
      * @param handler The handler on which to invoke the listener.
      * @param context The current service context.
-     *  */
+     */
     public static Object listen(String iface, RemoteDisplay.Listener listener,
             Handler handler, Context context) {
         Object extRemoteDisplay = null;

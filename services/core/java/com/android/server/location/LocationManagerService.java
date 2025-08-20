@@ -261,6 +261,13 @@ public class LocationManagerService extends ILocationManager.Stub implements
 
     private final GeofenceManager mGeofenceManager;
     private volatile @Nullable GnssManagerService mGnssManagerService = null;
+
+// QTI_BEGIN: 2018-04-10: Core: NLP Combo feature
+    private String mComboNlpPackageName;
+    private String mComboNlpReadyMarker;
+    private String mComboNlpScreenMarker;
+// QTI_END: 2018-04-10: Core: NLP Combo feature
+
     private ProxyGeocodeProvider mGeocodeProvider;
 
     private @Nullable ProxyPopulationDensityProvider mPopulationDensityProvider = null;
@@ -537,6 +544,15 @@ public class LocationManagerService extends ILocationManager.Stub implements
             Log.e(TAG, "no geocoder provider found");
         }
 
+        mComboNlpPackageName = mContext.getResources().getString(
+// QTI_BEGIN: 2018-04-10: Core: NLP Combo feature
+            com.android.internal.R.string.config_comboNetworkLocationProvider);
+        if (mComboNlpPackageName != null) {
+            mComboNlpReadyMarker = mComboNlpPackageName + ".nlp:ready";
+            mComboNlpScreenMarker = mComboNlpPackageName + ".nlp:screen";
+        }
+
+// QTI_END: 2018-04-10: Core: NLP Combo feature
         if (Flags.populationDensityProvider()) {
             long startTime = System.currentTimeMillis();
             setProxyPopulationDensityProvider(

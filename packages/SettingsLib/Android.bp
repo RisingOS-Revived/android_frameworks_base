@@ -6,18 +6,17 @@ package {
     //   SPDX-license-identifier-Apache-2.0
     default_applicable_licenses: ["frameworks_base_license"],
 }
-
 android_library {
     name: "SettingsLib",
     defaults: [
         "SettingsLibAvatarPickerDefaults",
         "SettingsLintDefaults",
     ],
-
     static_libs: [
         "androidx.localbroadcastmanager_localbroadcastmanager",
         "androidx.room_room-runtime",
         "androidx.sqlite_sqlite",
+        "WifiTrackerLib",
         "guava",
         "zxing-core",
 
@@ -62,6 +61,17 @@ android_library {
         "SettingsLibTwoTargetPreference",
         "SettingsLibUsageProgressBarPreference",
         "SettingsLibUtils",
+        "SettingsLibEmergencyNumber",
+        "SettingsLibTopIntroPreference",
+        "SettingsLibBannerMessagePreference",
+        "SettingsLibFooterPreference",
+        "SettingsLibUsageProgressBarPreference",
+        "SettingsLibCollapsingToolbarBaseActivity",
+        "SettingsLibTwoTargetPreference",
+        "SettingsLibSettingsTransition",
+        "SettingsLibButtonPreference",
+        "SettingsLibDeviceStateRotationLock",
+        "SettingsLibProfileSelector",
         "SettingsLibZeroStatePreference",
         "settingslib_media_flags_lib",
     ],
@@ -71,9 +81,7 @@ android_library {
         "wifi_framework_aconfig_flags_lib",
     ],
     plugins: ["androidx.room_room-compiler-plugin"],
-    use_resource_processor: true,
     resource_dirs: ["res"],
-
     srcs: [
         "src/**/*.java",
         "src/**/*.kt",
@@ -99,7 +107,6 @@ java_defaults {
         "SettingsLib",
     ],
 }
-
 aconfig_declarations {
     name: "settingslib_media_flags",
     package: "com.android.settingslib.media.flags",
@@ -108,7 +115,6 @@ aconfig_declarations {
         "aconfig/settingslib_media_flag_declarations.aconfig",
     ],
 }
-
 java_aconfig_library {
     name: "settingslib_media_flags_lib",
     aconfig_declarations: "settingslib_media_flags",

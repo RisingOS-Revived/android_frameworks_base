@@ -590,6 +590,9 @@ public class Instrumentation {
      */
     @NonNull
     public Activity startActivitySync(@NonNull Intent intent, @Nullable Bundle options) {
+// QTI_BEGIN: 2018-04-09: Secure Systems: SEEMP: framework instrumentation and AppProtect features
+        android.util.SeempLog.record_str(376, intent.toString());
+// QTI_END: 2018-04-09: Secure Systems: SEEMP: framework instrumentation and AppProtect features
         if (DEBUG_START_ACTIVITY) {
             Log.d(TAG, "startActivity: intent=" + intent + " options=" + options, new Throwable());
         }
@@ -1972,6 +1975,9 @@ public class Instrumentation {
     public ActivityResult execStartActivity(
             Context who, IBinder contextThread, IBinder token, Activity target,
             Intent intent, int requestCode, Bundle options) {
+// QTI_BEGIN: 2018-04-09: Secure Systems: SEEMP: framework instrumentation and AppProtect features
+        android.util.SeempLog.record_str(377, intent.toString());
+// QTI_END: 2018-04-09: Secure Systems: SEEMP: framework instrumentation and AppProtect features
         if (DEBUG_START_ACTIVITY) {
             Log.d(TAG, "startActivity: who=" + who + " source=" + target + " intent=" + intent
                     + " requestCode=" + requestCode + " options=" + options, new Throwable());
@@ -2056,6 +2062,9 @@ public class Instrumentation {
     public int execStartActivitiesAsUser(Context who, IBinder contextThread,
             IBinder token, Activity target, Intent[] intents, Bundle options,
             int userId) {
+// QTI_BEGIN: 2018-04-09: Secure Systems: SEEMP: framework instrumentation and AppProtect features
+        android.util.SeempLog.record_str(378, intents.toString());
+// QTI_END: 2018-04-09: Secure Systems: SEEMP: framework instrumentation and AppProtect features
         if (DEBUG_START_ACTIVITY) {
             StringJoiner joiner = new StringJoiner(", ");
             for (Intent i : intents) {
@@ -2148,6 +2157,9 @@ public class Instrumentation {
     public ActivityResult execStartActivity(
         Context who, IBinder contextThread, IBinder token, String target,
         Intent intent, int requestCode, Bundle options) {
+// QTI_BEGIN: 2018-04-09: Secure Systems: SEEMP: framework instrumentation and AppProtect features
+        android.util.SeempLog.record_str(377, intent.toString());
+// QTI_END: 2018-04-09: Secure Systems: SEEMP: framework instrumentation and AppProtect features
         if (DEBUG_START_ACTIVITY) {
             Log.d(TAG, "startActivity: who=" + who + " target=" + target
                     + " intent=" + intent + " requestCode=" + requestCode
@@ -2228,6 +2240,9 @@ public class Instrumentation {
     public ActivityResult execStartActivity(
             Context who, IBinder contextThread, IBinder token, String resultWho,
             Intent intent, int requestCode, Bundle options, UserHandle user) {
+// QTI_BEGIN: 2018-04-09: Secure Systems: SEEMP: framework instrumentation and AppProtect features
+        android.util.SeempLog.record_str(377, intent.toString());
+// QTI_END: 2018-04-09: Secure Systems: SEEMP: framework instrumentation and AppProtect features
         if (DEBUG_START_ACTIVITY) {
             Log.d(TAG, "startActivity: who=" + who + " user=" + user + " intent=" + intent
                     + " requestCode=" + requestCode + " resultWho=" + resultWho
@@ -2348,6 +2363,9 @@ public class Instrumentation {
     public void execStartActivityFromAppTask(
             Context who, IBinder contextThread, IAppTask appTask,
             Intent intent, Bundle options) {
+// QTI_BEGIN: 2018-04-09: Secure Systems: SEEMP: framework instrumentation and AppProtect features
+        android.util.SeempLog.record_str(380, intent.toString());
+// QTI_END: 2018-04-09: Secure Systems: SEEMP: framework instrumentation and AppProtect features
         if (DEBUG_START_ACTIVITY) {
             Log.d(TAG, "startActivity: who=" + who + " intent=" + intent
                     + " options=" + options, new Throwable());

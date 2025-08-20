@@ -1,3 +1,8 @@
+/**
+ * Changes from Qualcomm Innovation Center are provided under the following license:
+ * Copyright (c) 2023 Qualcomm Innovation Center, Inc. All rights reserved.
+ * SPDX-License-Identifier: BSD-3-Clause-Clear
+ */
 package com.android.systemui.qs.tiles.dialog;
 
 import static com.android.systemui.qs.tiles.dialog.InternetDetailsContentController.MAX_WIFI_ENTRY_COUNT;
@@ -399,7 +404,7 @@ public class InternetDialogDelegateLegacyTest extends SysuiTestCase {
     public void updateDialog_mobileDataIsEnabled_checkMobileDataSwitch() {
         doReturn(true).when(mInternetDetailsContentController).hasActiveSubIdOnDds();
         when(mInternetDetailsContentController.isCarrierNetworkActive()).thenReturn(true);
-        when(mInternetDetailsContentController.isMobileDataEnabled()).thenReturn(true);
+        when(mInternetDetailsContentController.isMobileDataEnabled(anyInt())).thenReturn(true);
         mMobileToggleSwitch.setChecked(false);
         mInternetDialogDelegateLegacy.updateDialog(true);
         mBgExecutor.runAllReady();
@@ -414,7 +419,7 @@ public class InternetDialogDelegateLegacyTest extends SysuiTestCase {
     public void updateDialog_mobileDataIsNotChanged_checkMobileDataSwitch() {
         doReturn(true).when(mInternetDetailsContentController).hasActiveSubIdOnDds();
         when(mInternetDetailsContentController.isCarrierNetworkActive()).thenReturn(true);
-        when(mInternetDetailsContentController.isMobileDataEnabled()).thenReturn(false);
+        when(mInternetDetailsContentController.isMobileDataEnabled(anyInt())).thenReturn(false);
         mMobileToggleSwitch.setChecked(false);
         mInternetDialogDelegateLegacy.updateDialog(true);
         mBgExecutor.runAllReady();

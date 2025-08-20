@@ -116,6 +116,7 @@ class LocationBasedMobileIconViewModelTest : SysuiTestCase() {
                 testScope.backgroundScope,
                 context,
                 flags,
+                mock(),
             )
 
         interactor =
@@ -133,6 +134,15 @@ class LocationBasedMobileIconViewModelTest : SysuiTestCase() {
                 repository,
                 context,
                 MobileIconCarrierIdOverridesFake(),
+                mock(),
+                mock(),
+                mock(),
+                mock(),
+                mock(),
+                mock(),
+                mock(),
+                mock(),
+                mock(),
             )
 
         commonImpl =

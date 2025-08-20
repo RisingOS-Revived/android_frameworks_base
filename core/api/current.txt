@@ -24883,6 +24883,7 @@ package android.media {
     field public static final int AMR_WB = 2; // 0x2
     field public static final int DEFAULT = 0; // 0x0
     field public static final int HE_AAC = 4; // 0x4
+    field public static final int HE_AAC_PS = 8; // 0x8
     field public static final int OPUS = 7; // 0x7
     field public static final int VORBIS = 6; // 0x6
   }
@@ -24949,6 +24950,7 @@ package android.media {
     field public static final int H264 = 2; // 0x2
     field public static final int HEVC = 5; // 0x5
     field public static final int MPEG_4_SP = 3; // 0x3
+    field public static final int MVHEVC = 9; // 0x9
     field public static final int VP8 = 4; // 0x4
     field public static final int VP9 = 6; // 0x6
   }

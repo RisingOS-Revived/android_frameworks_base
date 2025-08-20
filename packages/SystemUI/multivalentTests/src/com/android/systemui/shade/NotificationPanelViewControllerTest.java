@@ -44,6 +44,7 @@ import android.view.View;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
+import com.android.keyguard.EmergencyButtonController;
 import com.android.systemui.DejankUtils;
 import com.android.systemui.Flags;
 import com.android.systemui.flags.DisableSceneContainer;

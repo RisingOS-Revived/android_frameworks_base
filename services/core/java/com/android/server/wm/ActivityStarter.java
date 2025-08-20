@@ -133,6 +133,9 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.service.voice.IVoiceInteractionSession;
 import android.text.TextUtils;
+// QTI_BEGIN: 2019-01-29: Core: Revert "Temporarily revert am, wm, and policy servers to upstream QP1A.181202.001"
+import android.util.BoostFramework;
+// QTI_END: 2019-01-29: Core: Revert "Temporarily revert am, wm, and policy servers to upstream QP1A.181202.001"
 import android.util.Pools.SynchronizedPool;
 import android.util.Slog;
 import android.widget.Toast;
@@ -1628,7 +1631,9 @@ class ActivityStarter {
         final Task targetTask = r.getTask() != null
                 ? r.getTask()
                 : mTargetTask;
+// QTI_BEGIN: 2021-09-27: Frameworks: RESTRICT AUTOMERGE Avoid the scenario Where taskdisplayarea is null
         if (startedActivityRootTask == null || targetTask == null || !targetTask.isAttached()) {
+// QTI_END: 2021-09-27: Frameworks: RESTRICT AUTOMERGE Avoid the scenario Where taskdisplayarea is null
             return;
         }
 
@@ -1932,6 +1937,7 @@ class ActivityStarter {
         // Compute if there is an existing task that should be used for.
         final Task targetTask = reusedTask != null ? reusedTask : computeTargetTask();
         final boolean newTask = targetTask == null;
+
         mTargetTask = targetTask;
 
         computeLaunchParams(r, sourceRecord, targetTask);
@@ -2520,7 +2526,9 @@ class ActivityStarter {
             // removed from calling performClearTaskLocked (For example, if it is being brought out
             // of history or if it is finished immediately), thus disassociating the task. Keep the
             // task-overlay activity because the targetTask will be reused to launch new activity.
+// QTI_BEGIN: 2024-03-28: Core: Revert PhoneLink in framework/base
             targetTask.performClearTaskForReuse(true /* excludingTaskOverlay*/);
+// QTI_END: 2024-03-28: Core: Revert PhoneLink in framework/base
             targetTask.setIntent(mStartActivity);
             mAddingToTask = true;
             mIsTaskCleared = true;
@@ -3201,6 +3209,9 @@ class ActivityStarter {
 
     /** Places {@link #mStartActivity} in {@code task} or an embedded {@link TaskFragment}. */
     private void addOrReparentStartingActivity(@NonNull Task task, String reason) {
+// QTI_BEGIN: 2023-09-19: Performance: Perf: Activity boost optimization.
+        mStartActivity.acquireActivityBoost();
+// QTI_END: 2023-09-19: Performance: Perf: Activity boost optimization.
         TaskFragment newParent = task;
         if (mInTaskFragment != null) {
             int embeddingCheckResult = canEmbedActivity(mInTaskFragment, mStartActivity, task);

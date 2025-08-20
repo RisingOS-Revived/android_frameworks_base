@@ -29,7 +29,9 @@ public class PresSipResponse implements Parcelable {
     private int mSipResponseCode = 0;
     private int mRetryAfter = 0;
     private String mReasonPhrase = "";
+// QTI_BEGIN: 2020-12-10: Data: ims: Version support for uce feature tags
     private String mReasonHeader = "";
+// QTI_END: 2020-12-10: Data: ims: Version support for uce feature tags
 
     /**
      * Gets the Presence command ID.
@@ -123,6 +125,7 @@ public class PresSipResponse implements Parcelable {
         this.mRetryAfter = retryAfter;
     }
 
+// QTI_BEGIN: 2020-12-10: Data: ims: Version support for uce feature tags
     /**
      * Gets the reason header associated with the SIP response
      * code.
@@ -140,6 +143,7 @@ public class PresSipResponse implements Parcelable {
         this.mReasonHeader = reasonHeader;
     }
 
+// QTI_END: 2020-12-10: Data: ims: Version support for uce feature tags
     /**
      * Constructor for the PresSipResponse class.
      * @hide
@@ -159,7 +163,9 @@ public class PresSipResponse implements Parcelable {
         dest.writeString(mReasonPhrase);
         dest.writeParcelable(mCmdId, flags);
         dest.writeInt(mRetryAfter);
+// QTI_BEGIN: 2020-12-10: Data: ims: Version support for uce feature tags
         dest.writeString(mReasonHeader);
+// QTI_END: 2020-12-10: Data: ims: Version support for uce feature tags
     }
 
     /** @hide */
@@ -187,6 +193,8 @@ public class PresSipResponse implements Parcelable {
         mReasonPhrase = source.readString();
         mCmdId = source.readParcelable(PresCmdId.class.getClassLoader(), com.android.ims.internal.uce.presence.PresCmdId.class);
         mRetryAfter = source.readInt();
+// QTI_BEGIN: 2020-12-10: Data: ims: Version support for uce feature tags
         mReasonHeader = source.readString();
+// QTI_END: 2020-12-10: Data: ims: Version support for uce feature tags
     }
 }

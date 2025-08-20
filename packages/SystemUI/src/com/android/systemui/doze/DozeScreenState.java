@@ -58,7 +58,7 @@ public class DozeScreenState implements DozeMachine.Part {
      * Delay entering low power mode when animating to make sure that we'll have
      * time to move all elements into their final positions while still at 60 fps.
      */
-    private static final int ENTER_DOZE_DELAY = 4000;
+    private static final int ENTER_DOZE_DELAY = /* QTI_BEGIN */ 2000; /* QTI_END */
     /**
      * Hide wallpaper earlier when entering low power mode. The gap between
      * hiding the wallpaper and changing the display mode is necessary to hide

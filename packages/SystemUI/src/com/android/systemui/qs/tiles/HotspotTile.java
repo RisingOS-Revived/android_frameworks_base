@@ -16,9 +16,18 @@
 
 package com.android.systemui.qs.tiles;
 
+// QTI_BEGIN: 2019-08-26: WLAN: wifi: Get Hotspot Wi-Fi generation from driver
+import android.content.Context;
+// QTI_END: 2019-08-26: WLAN: wifi: Get Hotspot Wi-Fi generation from driver
 import static com.android.systemui.util.PluralMessageFormaterKt.icuMessageFormat;
 
 import android.content.Intent;
+// QTI_BEGIN: 2020-04-22: WLAN: wifi: refactor Wi-Fi generation UI enhancements
+import android.net.wifi.ScanResult;
+// QTI_END: 2020-04-22: WLAN: wifi: refactor Wi-Fi generation UI enhancements
+// QTI_BEGIN: 2019-08-26: WLAN: wifi: Get Hotspot Wi-Fi generation from driver
+import android.net.wifi.WifiManager;
+// QTI_END: 2019-08-26: WLAN: wifi: Get Hotspot Wi-Fi generation from driver
 import android.os.Handler;
 import android.os.Looper;
 import android.os.UserManager;
@@ -53,12 +62,23 @@ import javax.inject.Inject;
 /** Quick settings tile: Hotspot **/
 public class HotspotTile extends SecureQSTile<BooleanState> {
 
+// QTI_BEGIN: 2019-08-26: WLAN: wifi: Get Hotspot Wi-Fi generation from driver
+    private final Icon mWifi4EnabledStatic = ResourceIcon.get(R.drawable.ic_wifi_4_hotspot);
+// QTI_END: 2019-08-26: WLAN: wifi: Get Hotspot Wi-Fi generation from driver
+// QTI_BEGIN: 2019-05-01: WLAN: wifi: Hotspot Wi-Fi generation UI enahancements
+    private final Icon mWifi5EnabledStatic = ResourceIcon.get(R.drawable.ic_wifi_5_hotspot);
+    private final Icon mWifi6EnabledStatic = ResourceIcon.get(R.drawable.ic_wifi_6_hotspot);
+// QTI_END: 2019-05-01: WLAN: wifi: Hotspot Wi-Fi generation UI enahancements
+
     public static final String TILE_SPEC = "hotspot";
     private final HotspotController mHotspotController;
     private final DataSaverController mDataSaverController;
 
     private final HotspotAndDataSaverCallbacks mCallbacks = new HotspotAndDataSaverCallbacks();
     private boolean mListening;
+// QTI_BEGIN: 2019-08-26: WLAN: wifi: Get Hotspot Wi-Fi generation from driver
+    private WifiManager mWifiManager;
+// QTI_END: 2019-08-26: WLAN: wifi: Get Hotspot Wi-Fi generation from driver
 
     @Inject
     public HotspotTile(
@@ -81,6 +101,9 @@ public class HotspotTile extends SecureQSTile<BooleanState> {
         mDataSaverController = dataSaverController;
         mHotspotController.observe(this, mCallbacks);
         mDataSaverController.observe(this, mCallbacks);
+// QTI_BEGIN: 2019-08-26: WLAN: wifi: Get Hotspot Wi-Fi generation from driver
+        mWifiManager = (WifiManager) mContext.getSystemService(Context.WIFI_SERVICE);
+// QTI_END: 2019-08-26: WLAN: wifi: Get Hotspot Wi-Fi generation from driver
     }
 
     @Override

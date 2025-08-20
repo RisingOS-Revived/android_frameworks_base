@@ -239,6 +239,8 @@ public final class DozeServiceHost implements DozeHost {
             if (mCentralSurfaces != null) {
                 mCentralSurfaces.updateIsKeyguard();
             }
+        } else {
+            mDozingRequested = true;
         }
     }
 

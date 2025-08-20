@@ -27,7 +27,9 @@ public class PresTupleInfo implements Parcelable {
     private String mFeatureTag = "";
     private String mContactUri = "";
     private String mTimestamp = "";
+// QTI_BEGIN: 2020-12-10: Data: ims: Version support for uce feature tags
     private String mVersion = "";
+// QTI_END: 2020-12-10: Data: ims: Version support for uce feature tags
 
 
     /**
@@ -80,6 +82,7 @@ public class PresTupleInfo implements Parcelable {
         this.mTimestamp = timestamp;
     }
 
+// QTI_BEGIN: 2020-12-10: Data: ims: Version support for uce feature tags
     /**
      * Gets the version.
      * @hide
@@ -96,6 +99,7 @@ public class PresTupleInfo implements Parcelable {
         this.mVersion = version;
     }
 
+// QTI_END: 2020-12-10: Data: ims: Version support for uce feature tags
     /**
      * Constructor for the PresTupleInfo class.
      * @hide
@@ -113,7 +117,9 @@ public class PresTupleInfo implements Parcelable {
         dest.writeString(mFeatureTag);
         dest.writeString(mContactUri);
         dest.writeString(mTimestamp);
+// QTI_BEGIN: 2020-12-10: Data: ims: Version support for uce feature tags
         dest.writeString(mVersion);
+// QTI_END: 2020-12-10: Data: ims: Version support for uce feature tags
     }
 
     /** @hide */
@@ -139,6 +145,8 @@ public class PresTupleInfo implements Parcelable {
         mFeatureTag = source.readString();
         mContactUri = source.readString();
         mTimestamp = source.readString();
+// QTI_BEGIN: 2020-12-10: Data: ims: Version support for uce feature tags
         mVersion = source.readString();
+// QTI_END: 2020-12-10: Data: ims: Version support for uce feature tags
     }
 }

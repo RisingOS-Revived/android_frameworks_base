@@ -120,7 +120,12 @@ public class ScreenDecorations implements
             SystemProperties.getBoolean("debug.disable_screen_decorations", false);
     private static final boolean DEBUG_SCREENSHOT_ROUNDED_CORNERS =
             SystemProperties.getBoolean("debug.screenshot_rounded_corners", false);
+// QTI_BEGIN: 2020-03-12: Display: SystemUI: Add support to enable RC & NOTCH dynamically.
 
+    private static int mDisableRoundedCorner =
+            SystemProperties.getInt("vendor.display.disable_rounded_corner", 0);
+
+// QTI_END: 2020-03-12: Display: SystemUI: Add support to enable RC & NOTCH dynamically.
     private static final boolean sToolkitSetFrameRateReadOnly =
             android.view.flags.Flags.toolkitSetFrameRateReadOnly();
     private boolean mDebug = DEBUG_SCREENSHOT_ROUNDED_CORNERS;
@@ -657,12 +662,8 @@ public class ScreenDecorations implements
             List<DecorProvider> decorProviders = getProviders(mHwcScreenDecorationSupport != null);
             removeRedundantOverlayViews(decorProviders);
 
-            if (mHwcScreenDecorationSupport != null) {
-                createHwcOverlay();
-            } else {
-                removeHwcOverlay();
-            }
-
+            // Overlays are added in 2 steps: first the standard overlays. Then, if applicable, the
+            // HWC overlays. This ensures that the HWC overlays are always on top
             boolean[] hasCreatedOverlay = new boolean[BOUNDS_POSITION_LENGTH];
             final boolean shouldOptimizeVisibility = shouldOptimizeVisibility();
             Integer bound;
@@ -677,6 +678,13 @@ public class ScreenDecorations implements
                 if (!hasCreatedOverlay[i]) {
                     removeOverlay(i);
                 }
+            }
+
+            // Adding the HWC overlays second so they are on top by default
+            if (mHwcScreenDecorationSupport != null) {
+                createHwcOverlay();
+            } else {
+                removeHwcOverlay();
             }
 
             if (shouldOptimizeVisibility) {
@@ -1278,6 +1286,12 @@ public class ScreenDecorations implements
     }
 
     static boolean shouldDrawCutout(Context context) {
+// QTI_BEGIN: 2020-03-12: Display: SystemUI: Add support to enable RC & NOTCH dynamically.
+        if (mDisableRoundedCorner == 1) {
+           return false;
+        }
+
+// QTI_END: 2020-03-12: Display: SystemUI: Add support to enable RC & NOTCH dynamically.
         return DisplayCutout.getFillBuiltInDisplayCutout(
                 context.getResources(), context.getDisplay().getUniqueId());
     }

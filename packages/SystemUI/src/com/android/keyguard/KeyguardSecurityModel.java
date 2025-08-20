@@ -23,6 +23,9 @@ import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 
 import com.android.internal.widget.LockPatternUtils;
+// QTI_BEGIN: 2020-04-23: Android_UI: SystemUI: there is unexpected SIM PIN input dialog.
+import com.android.systemui.keyguard.KeyguardViewMediator;
+// QTI_END: 2020-04-23: Android_UI: SystemUI: there is unexpected SIM PIN input dialog.
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 
@@ -60,15 +63,18 @@ public class KeyguardSecurityModel {
     }
 
     public SecurityMode getSecurityMode(int userId) {
+// QTI_BEGIN: 2020-07-17: Android_UI: SystemUI: no PUK lock screen after 3 wrong PIN retries
         if (mIsPukScreenAvailable && SubscriptionManager.isValidSubscriptionId(
+// QTI_END: 2020-07-17: Android_UI: SystemUI: no PUK lock screen after 3 wrong PIN retries
                 mKeyguardUpdateMonitor.getNextSubIdForState(
                         TelephonyManager.SIM_STATE_PUK_REQUIRED))) {
             return SecurityMode.SimPuk;
         }
 
-        if (SubscriptionManager.isValidSubscriptionId(
-                mKeyguardUpdateMonitor.getNextSubIdForState(
-                        TelephonyManager.SIM_STATE_PIN_REQUIRED))) {
+        int subId = mKeyguardUpdateMonitor.getUnlockedSubIdForState(TelephonyManager.SIM_STATE_PIN_REQUIRED);
+// QTI_BEGIN: 2020-04-23: Android_UI: SystemUI: there is unexpected SIM PIN input dialog.
+        if (SubscriptionManager.isValidSubscriptionId((subId))){
+// QTI_END: 2020-04-23: Android_UI: SystemUI: there is unexpected SIM PIN input dialog.
             return SecurityMode.SimPin;
         }
 

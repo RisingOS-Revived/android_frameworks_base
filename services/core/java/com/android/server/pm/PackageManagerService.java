@@ -175,6 +175,9 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 import android.util.Xml;
+// QTI_BEGIN: 2018-10-31: Core: IOP/UXE: This change is related to IOP and UXE Feature.
+import android.util.BoostFramework;
+// QTI_END: 2018-10-31: Core: IOP/UXE: This change is related to IOP and UXE Feature.
 import android.view.Display;
 
 import com.android.internal.R;
@@ -976,6 +979,9 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     int mNextInstallToken = 1;  // nonzero; will be wrapped back to 1 when ++ overflows
 
     final @NonNull String[] mRequiredVerifierPackages;
+// QTI_BEGIN: 2018-04-09: Secure Systems: SEEMP: framework instrumentation and AppProtect features
+    final @Nullable String mOptionalVerifierPackage;
+// QTI_END: 2018-04-09: Secure Systems: SEEMP: framework instrumentation and AppProtect features
     final @NonNull String mRequiredInstallerPackage;
     final @NonNull String mRequiredUninstallerPackage;
     final @NonNull String mRequiredPermissionControllerPackage;
@@ -1922,6 +1928,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         mProtectedPackages = testParams.protectedPackages;
         mSeparateProcesses = testParams.separateProcesses;
         mRequiredVerifierPackages = testParams.requiredVerifierPackages;
+        mOptionalVerifierPackage = testParams.optionalVerifierPackage;
         mRequiredInstallerPackage = testParams.requiredInstallerPackage;
         mRequiredUninstallerPackage = testParams.requiredUninstallerPackage;
         mRequiredPermissionControllerPackage = testParams.requiredPermissionControllerPackage;
@@ -2071,6 +2078,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 ApplicationInfo.FLAG_SYSTEM, ApplicationInfo.PRIVATE_FLAG_PRIVILEGED);
         mSettings.addSharedUserLPw("android.uid.uwb", UWB_UID,
                 ApplicationInfo.FLAG_SYSTEM, ApplicationInfo.PRIVATE_FLAG_PRIVILEGED);
+
         final ArrayMap<String, Integer> oemDefinedUids = systemConfig.getOemDefinedUids();
         final int numOemDefinedUids = oemDefinedUids.size();
         for (int i = 0; i < numOemDefinedUids; i++) {
@@ -2149,6 +2157,18 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         mStorageEventHelper = new StorageEventHelper(this, mDeletePackageHelper,
                 mRemovePackageHelper);
 
+// QTI_BEGIN: 2025-02-12: Core: Add provision to disable applications for QSPA enabled targets
+        t.traceBegin("readListOfTelephonyPackagesToBeDisabled");
+        mInstallPackageHelper.readListOfTelephonyPackagesToBeDisabled();
+        t.traceEnd();
+
+// QTI_END: 2025-02-12: Core: Add provision to disable applications for QSPA enabled targets
+// QTI_BEGIN: 2024-11-13: Telephony: Add provision to prevent installation of some apps
+        t.traceBegin("readListOfPackagesToBeDisabled");
+        mInstallPackageHelper.readListOfPackagesToBeDisabled();
+        t.traceEnd();
+
+// QTI_END: 2024-11-13: Telephony: Add provision to prevent installation of some apps
         synchronized (mLock) {
             // Create the computer as soon as the state objects have been installed.  The
             // cached computer is the same as the live computer until the end of the
@@ -2452,6 +2472,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             EventLog.writeEvent(EventLogTags.BOOT_PROGRESS_PMS_READY,
                     SystemClock.uptimeMillis());
 
+            mOptionalVerifierPackage = getOptionalVerifierLPr(computer);
             ComponentName intentFilterVerifierComponent =
                     getIntentFilterVerifierComponentNameLPr(computer);
             ComponentName domainVerificationAgent =
@@ -2637,6 +2658,26 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         throw new RuntimeException(
                 "There must be no more than " + REQUIRED_VERIFIERS_MAX_COUNT + " verifiers; found "
                         + matches);
+    }
+
+    private @Nullable String getOptionalVerifierLPr(@NonNull Computer computer) {
+        final Intent intent = new Intent("com.qualcomm.qti.intent.action.PACKAGE_NEEDS_OPTIONAL_VERIFICATION");
+
+        final List<ResolveInfo> matches = mResolveIntentHelper.queryIntentReceiversInternal(computer,
+                intent, PACKAGE_MIME_TYPE,
+                MATCH_SYSTEM_ONLY | MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE,
+                UserHandle.USER_SYSTEM, Binder.getCallingUid());
+        if (matches.size() >= 1) {
+            String optionalVerifierName = mContext.getResources().getString(R.string.config_optionalPackageVerifierName);
+            if (TextUtils.isEmpty(optionalVerifierName))
+                return null;
+            for (int i = 0; i < matches.size(); i++) {
+                if (matches.get(i).getComponentInfo().packageName.contains(optionalVerifierName)) {
+                    return matches.get(i).getComponentInfo().packageName;
+                }
+            }
+        }
+        return null;
     }
 
     @NonNull
@@ -4380,6 +4421,9 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         }, overlayFilter);
 
         mModuleInfoProvider.systemReady();
+// QTI_BEGIN: 2020-04-03: Performance: Add support for UxPerformance to receive context information.
+        new BoostFramework(mContext, true);
+// QTI_END: 2020-04-03: Performance: Add support for UxPerformance to receive context information.
 
         // Installer service might attempt to install some packages that have been staged for
         // installation on reboot. Make sure this is the last component to be call since the

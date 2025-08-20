@@ -1,3 +1,9 @@
+/**
+ * Changes from Qualcomm Innovation Center are provided under the following license:
+ * Copyright (c) 2022 Qualcomm Innovation Center, Inc. All rights reserved.
+ * SPDX-License-Identifier: BSD-3-Clause-Clear
+ */
+
 package com.android.systemui.qs.tiles.dialog;
 
 import static android.net.wifi.sharedconnectivity.app.NetworkProviderInfo.DEVICE_TYPE_PHONE;
@@ -79,6 +85,7 @@ import com.android.systemui.statusbar.policy.LocationController;
 import com.android.systemui.toast.SystemUIToast;
 import com.android.systemui.toast.ToastFactory;
 import com.android.systemui.util.CarrierConfigTracker;
+import com.android.systemui.util.CarrierNameCustomization;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.settings.GlobalSettings;
 import com.android.systemui.util.time.FakeSystemClock;
@@ -184,6 +191,8 @@ public class InternetDetailsContentControllerTest extends SysuiTestCase {
     private SignalStrength mSignalStrength;
     @Mock
     private WifiConfiguration mWifiConfiguration;
+    @Mock
+    private CarrierNameCustomization mCarrierNameCustomization;
 
     private FakeFeatureFlags mFlags = new FakeFeatureFlags();
 
@@ -234,7 +243,8 @@ public class InternetDetailsContentControllerTest extends SysuiTestCase {
                 mConnectivityManager, mHandler, mExecutor, mBroadcastDispatcher,
                 mock(KeyguardUpdateMonitor.class), mGlobalSettings, mKeyguardStateController,
                 mWindowManager, mToastFactory, mWorkerHandler, mCarrierConfigTracker,
-                mLocationController, mDialogTransitionAnimator, mWifiStateWorker, mFlags);
+                mLocationController, mDialogTransitionAnimator, mWifiStateWorker, mFlags,
+                mCarrierNameCustomization);
         mSubscriptionManager.addOnSubscriptionsChangedListener(mExecutor,
                 mInternetDetailsContentController.mOnSubscriptionsChangedListener);
         mInternetDetailsContentController.onStart(mInternetDialogCallback, true);
@@ -952,7 +962,7 @@ public class InternetDetailsContentControllerTest extends SysuiTestCase {
         mSubIdTelephonyDisplayInfoMap.put(SUB_ID2, info2);
 
         doReturn(SUB_ID2).when(spyController).getActiveAutoSwitchNonDdsSubId();
-        doReturn(true).when(spyController).isMobileDataEnabled();
+        doReturn(true).when(spyController).isMobileDataEnabled(SUB_ID);
         doReturn(true).when(spyController).activeNetworkIsCellular();
         String dds = spyController.getMobileNetworkSummary(SUB_ID);
         String nonDds = spyController.getMobileNetworkSummary(SUB_ID2);
@@ -966,7 +976,7 @@ public class InternetDetailsContentControllerTest extends SysuiTestCase {
     @Test
     public void getMobileNetworkSummary_flagOff() {
         InternetDetailsContentController spyController = spy(mInternetDetailsContentController);
-        doReturn(true).when(spyController).isMobileDataEnabled();
+        doReturn(true).when(spyController).isMobileDataEnabled(SUB_ID);
         doReturn(true).when(spyController).activeNetworkIsCellular();
         String dds = spyController.getMobileNetworkSummary(SUB_ID);
 
@@ -1070,7 +1080,7 @@ public class InternetDetailsContentControllerTest extends SysuiTestCase {
                 TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_NONE);
 
         mSubIdTelephonyDisplayInfoMap.put(SUB_ID, info);
-        doReturn(true).when(spyController).isMobileDataEnabled();
+        doReturn(true).when(spyController).isMobileDataEnabled(SUB_ID);
         doReturn(true).when(spyController).activeNetworkIsCellular();
         spyController.mCarrierNetworkChangeMode = true;
         String dds = spyController.getMobileNetworkSummary(SUB_ID);

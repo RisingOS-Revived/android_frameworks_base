@@ -46,6 +46,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Stack;
 
+import android.os.SystemProperties;
+
 /**
  * UsbAlsaManager manages USB audio and MIDI devices.
  */
@@ -54,9 +56,9 @@ public final class UsbAlsaManager {
     private static final boolean DEBUG = false;
 
     // Flag to turn on/off multi-peripheral select mode
-    // Set to true to have multi-devices mode
-    private static final boolean IS_MULTI_MODE = SystemProperties.getBoolean(
-            "ro.audio.multi_usb_mode", false /*def*/);
+
+    // Set to true to have single-device-only mode
+    private static boolean mIsSingleMode = true;
 
     private static final String ALSA_DIRECTORY = "/dev/snd/";
 
@@ -172,6 +174,10 @@ public final class UsbAlsaManager {
     private synchronized void selectAlsaDevice(UsbAlsaDevice alsaDevice) {
         if (DEBUG) {
             Slog.d(TAG, "selectAlsaDevice() " + alsaDevice);
+        }
+
+        if ("true".equals(SystemProperties.get("vendor.audio.gaming.enabled", "false"))) {
+            mIsSingleMode = false;
         }
 
         // FIXME Does not yet handle the case where the setting is changed
@@ -338,7 +344,7 @@ public final class UsbAlsaManager {
                                       isInputHeadset, isOutputHeadset, isDock);
             alsaDevice.setDeviceNameAndDescription(
                     usbDevice.getProductName(), cardRec.getCardDescription());
-            if (IS_MULTI_MODE) {
+            if (mIsSingleMode) {
                 deselectCurrentDevice(alsaDevice.getInputDeviceType());
                 deselectCurrentDevice(alsaDevice.getOutputDeviceType());
             } else {
@@ -419,7 +425,7 @@ public final class UsbAlsaManager {
         if (alsaDevice != null) {
             waitForAlsaDevice(alsaDevice.getCardNum(), false /*isAdded*/);
             deselectAlsaDevice(alsaDevice);
-            if (IS_MULTI_MODE) {
+            if (mIsSingleMode) {
                 selectDefaultDevice(alsaDevice.getOutputDeviceType());
                 selectDefaultDevice(alsaDevice.getInputDeviceType());
             } else {

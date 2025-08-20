@@ -164,6 +164,40 @@ open class WifiUtils {
             }
         }
 
+// QTI_BEGIN: 2024-04-22: WLAN: SettingsLib: Add WifiGeneration symbols to refactored WifiUtils.kt
+        val WIFI_4_PIE = intArrayOf(
+                    com.android.internal.R.drawable.ic_wifi_4_signal_0,
+                    com.android.internal.R.drawable.ic_wifi_4_signal_1,
+                    com.android.internal.R.drawable.ic_wifi_4_signal_2,
+                    com.android.internal.R.drawable.ic_wifi_4_signal_3,
+                    com.android.internal.R.drawable.ic_wifi_4_signal_4
+        )
+
+        val WIFI_5_PIE = intArrayOf(
+                    com.android.internal.R.drawable.ic_wifi_5_signal_0,
+                    com.android.internal.R.drawable.ic_wifi_5_signal_1,
+                    com.android.internal.R.drawable.ic_wifi_5_signal_2,
+                    com.android.internal.R.drawable.ic_wifi_5_signal_3,
+                    com.android.internal.R.drawable.ic_wifi_5_signal_4
+        )
+
+        val WIFI_6_PIE = intArrayOf(
+                    com.android.internal.R.drawable.ic_wifi_6_signal_0,
+                    com.android.internal.R.drawable.ic_wifi_6_signal_1,
+                    com.android.internal.R.drawable.ic_wifi_6_signal_2,
+                    com.android.internal.R.drawable.ic_wifi_6_signal_3,
+                    com.android.internal.R.drawable.ic_wifi_6_signal_4
+        )
+
+        val WIFI_7_PIE = intArrayOf(
+                    com.android.internal.R.drawable.ic_wifi_7_signal_0,
+                    com.android.internal.R.drawable.ic_wifi_7_signal_1,
+                    com.android.internal.R.drawable.ic_wifi_7_signal_2,
+                    com.android.internal.R.drawable.ic_wifi_7_signal_3,
+                    com.android.internal.R.drawable.ic_wifi_7_signal_4
+        )
+
+// QTI_END: 2024-04-22: WLAN: SettingsLib: Add WifiGeneration symbols to refactored WifiUtils.kt
         @JvmStatic
         fun buildLoggingSummary(accessPoint: AccessPoint, config: WifiConfiguration?): String {
             val summary = StringBuilder()
@@ -387,6 +421,13 @@ open class WifiUtils {
             } else context.getString(R.string.wifi_unmetered_label)
         }
 
+// QTI_BEGIN: 2024-04-22: WLAN: SettingsLib: Add WifiGeneration symbols to refactored WifiUtils.kt
+        @JvmStatic
+        fun getInternetIconResource(level: Int, noInternet: Boolean): Int {
+            return getInternetIconResource(level, noInternet, 0 /* standard */)
+        }
+
+// QTI_END: 2024-04-22: WLAN: SettingsLib: Add WifiGeneration symbols to refactored WifiUtils.kt
         /**
          * Returns the Internet icon resource for a given RSSI level.
          *
@@ -394,7 +435,9 @@ open class WifiUtils {
          * @param noInternet True if a connected Wi-Fi network cannot access the Internet
          */
         @JvmStatic
-        fun getInternetIconResource(level: Int, noInternet: Boolean): Int {
+// QTI_BEGIN: 2024-04-22: WLAN: SettingsLib: Add WifiGeneration symbols to refactored WifiUtils.kt
+        fun getInternetIconResource(level: Int, noInternet: Boolean, standard: Int): Int {
+// QTI_END: 2024-04-22: WLAN: SettingsLib: Add WifiGeneration symbols to refactored WifiUtils.kt
             var wifiLevel = level
             if (wifiLevel < 0) {
                 Log.e(TAG, "Wi-Fi level is out of range! level:$level")
@@ -403,7 +446,21 @@ open class WifiUtils {
                 Log.e(TAG, "Wi-Fi level is out of range! level:$level")
                 wifiLevel = WIFI_PIE.size - 1
             }
-            return if (noInternet) NO_INTERNET_WIFI_PIE[wifiLevel] else WIFI_PIE[wifiLevel]
+// QTI_BEGIN: 2024-04-22: WLAN: SettingsLib: Add WifiGeneration symbols to refactored WifiUtils.kt
+
+            if (noInternet) {
+                    return NO_INTERNET_WIFI_PIE[wifiLevel]
+            }
+
+            val result = when (standard) {
+                    ScanResult.WIFI_STANDARD_11N -> WIFI_4_PIE[wifiLevel]
+                    ScanResult.WIFI_STANDARD_11AC -> WIFI_5_PIE[wifiLevel]
+                    ScanResult.WIFI_STANDARD_11AX -> WIFI_6_PIE[wifiLevel]
+                    ScanResult.WIFI_STANDARD_11BE -> WIFI_7_PIE[wifiLevel]
+                    else -> WIFI_PIE[wifiLevel]
+            }
+            return result
+// QTI_END: 2024-04-22: WLAN: SettingsLib: Add WifiGeneration symbols to refactored WifiUtils.kt
         }
 
         /**

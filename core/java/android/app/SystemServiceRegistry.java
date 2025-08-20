@@ -1688,6 +1688,7 @@ public final class SystemServiceRegistry {
                         return new AmbientContextManager(ctx.getOuterContext(), manager);
                     }});
 
+
         registerService(Context.WEARABLE_SENSING_SERVICE, WearableSensingManager.class,
                 new CachedServiceFetcher<WearableSensingManager>() {
                     @Override

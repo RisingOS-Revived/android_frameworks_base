@@ -16,6 +16,13 @@
  * limitations under the License.
  */
 -->
+<!-- QTI_BEGIN: 2024-11-12: Telephony: QSPA framework implementation-->
+<!-- QTI_END: 2024-11-12: Telephony: QSPA framework implementation-->
+<!--
+ * Changes from Qualcomm Innovation Center, Inc. are provided under the following license:
+ * Copyright (c) 2024 Qualcomm Innovation Center, Inc. All rights reserved.
+ * SPDX-License-Identifier: BSD-3-Clause-Clear
+-->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.android.carrierdefaultapp">
 
@@ -29,6 +36,13 @@
     <uses-permission android:name="android.permission.SUBSTITUTE_NOTIFICATION_APP_NAME" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS" />
+
+<!-- QTI_BEGIN: 2024-11-12: Telephony: QSPA framework implementation-->
+<!-- QTI_END: 2024-11-12: Telephony: QSPA framework implementation-->
+    <overlay
+        android:targetPackage="com.android.carrierdefaultapp"
+        android:requiredSystemPropertyName="ro.boot.vendor.qspa.modem"
+        android:requiredSystemPropertyValue="enabled"/>
 
     <application
         android:label="@string/app_name"

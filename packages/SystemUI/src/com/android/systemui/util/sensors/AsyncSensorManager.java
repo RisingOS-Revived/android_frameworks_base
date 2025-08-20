@@ -86,7 +86,18 @@ public class AsyncSensorManager extends SensorManager
     protected boolean registerListenerImpl(SensorEventListener listener,
             Sensor sensor, int delayUs, Handler handler, int maxReportLatencyUs,
             int reservedFlags) {
+// QTI_BEGIN: 2019-10-30: Android_UI: SystemUI: Fix Wifi and Sensor NPE issue
+        if ( sensor == null ) {
+            Log.e(TAG, "sensor cannot be null \n" + Log.getStackTraceString(new Throwable()));
+            return false;
+        }
+// QTI_END: 2019-10-30: Android_UI: SystemUI: Fix Wifi and Sensor NPE issue
         mExecutor.execute(() -> {
+// QTI_BEGIN: 2019-10-30: Android_UI: SystemUI: Fix Wifi and Sensor NPE issue
+            if ( sensor == null ) {
+                Log.e(TAG, "sensor cannot be null");
+            }
+// QTI_END: 2019-10-30: Android_UI: SystemUI: Fix Wifi and Sensor NPE issue
             if (!mInner.registerListener(listener, sensor, delayUs, maxReportLatencyUs, handler)) {
                 Log.e(TAG, "Registering " + listener + " for " + sensor + " failed.");
             }
@@ -133,8 +144,15 @@ public class AsyncSensorManager extends SensorManager
         }
         if (sensor == null) {
             throw new IllegalArgumentException("sensor cannot be null");
+// QTI_BEGIN: 2019-10-30: Android_UI: SystemUI: Fix Wifi and Sensor NPE issue
         }
+// QTI_END: 2019-10-30: Android_UI: SystemUI: Fix Wifi and Sensor NPE issue
         mExecutor.execute(() -> {
+// QTI_BEGIN: 2019-10-30: Android_UI: SystemUI: Fix Wifi and Sensor NPE issue
+            if ( sensor == null ) {
+                Log.e(TAG, "sensor cannot be null");
+            }
+// QTI_END: 2019-10-30: Android_UI: SystemUI: Fix Wifi and Sensor NPE issue
             if (!mInner.requestTriggerSensor(listener, sensor)) {
                 Log.e(TAG, "Requesting " + listener + " for " + sensor + " failed.");
             }
