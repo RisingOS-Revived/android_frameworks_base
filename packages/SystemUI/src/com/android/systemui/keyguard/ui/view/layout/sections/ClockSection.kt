@@ -191,8 +191,6 @@ constructor(
         val guideline =
             if (keyguardClockViewModel.clockShouldBeCentered.value) PARENT_ID
             else R.id.split_shade_guideline
-        val dateWeatherBelowSmallClock =
-            KeyguardSmartspaceViewModel.dateWeatherBelowSmallClock(context.resources.configuration)
         constraints.apply {
             connect(customR.id.lockscreen_clock_view_large, START, PARENT_ID, START)
             connect(customR.id.lockscreen_clock_view_large, END, guideline, END)
@@ -241,7 +239,7 @@ constructor(
             setTransformPivot(customR.id.lockscreen_clock_view_large, Float.NaN, Float.NaN)
 
             val smallClockBottom =
-                keyguardClockViewModel.getSmallClockTopMargin() +
+                smallClockTopMargin +
                     context.resources.getDimensionPixelSize(customR.dimen.small_clock_height)
             val marginBetweenSmartspaceAndNotification =
                 context.resources.getDimensionPixelSize(
@@ -253,16 +251,9 @@ constructor(
                         0
                     }
 
-            if (dateWeatherBelowSmallClock) {
-                clockInteractor.setNotificationStackDefaultTop(
-                    (smallClockBottom +
-                        marginBetweenSmartspaceAndNotification).toFloat()
-                )
-            } else {
-                clockInteractor.setNotificationStackDefaultTop(
-                    (smallClockBottom + marginBetweenSmartspaceAndNotification).toFloat()
-                )
-            }
+            clockInteractor.setNotificationStackDefaultTop(
+                (smallClockBottom + marginBetweenSmartspaceAndNotification).toFloat()
+            )
         }
 
         constrainWeatherClockDateIconsBarrier(constraints)
