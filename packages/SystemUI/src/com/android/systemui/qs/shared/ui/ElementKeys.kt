@@ -25,6 +25,7 @@ object ElementKeys {
     val GridAnchor = ElementKey("QuickSettingsGridAnchor")
     val FooterActions = ElementKey("FooterActions")
     val BrightnessSlider = ElementKey("BrightnessSlider")
+    val CustomControls = ElementKey("CustomControls")
 
     fun TileSpec.toElementKey(positionInGrid: Int) =
         ElementKey(this.spec, TileIdentity(this, positionInGrid))
