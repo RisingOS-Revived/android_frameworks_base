@@ -15,6 +15,10 @@
   ~ limitations under the License
   -->
 <resources>
+    <integer name="quick_settings_infinite_grid_num_columns_landscape">6</integer>
+    <integer name="quick_settings_paginated_grid_num_rows_landscape">2</integer>
+    <integer name="quick_qs_paginated_grid_num_rows_landscape">1</integer>
+
     <integer name="media_player_fade">55</integer>
     <integer name="biometric_dialog_text_gravity">8388611</integer> <!-- gravity start -->
     <integer name="biometric_prompt_content_list_item_max_lines_if_two_column">3</integer>
