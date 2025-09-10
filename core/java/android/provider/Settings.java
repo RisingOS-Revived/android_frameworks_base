@@ -6719,12 +6719,6 @@ public final class Settings {
         public static final String SMART_5G = "smart_5g";
 
         /**
-         * Swipe to screenshot
-         * @hide
-         */
-        public static final String SWIPE_TO_SCREENSHOT = "swipe_to_screenshot";
-
-        /**
          * @hide
          */
         public static final String WIFI_STANDARD_ICON = "wifi_standard_icon";
@@ -7658,7 +7652,6 @@ public final class Settings {
 // QTI_END: 2020-05-15: Telephony: FR30706: Add a playing tone setting.
             PRIVATE_SETTINGS.add(MOUSE_SCROLLING_SPEED);
             // CustomFeatures additions
-            PRIVATE_SETTINGS.add(SWIPE_TO_SCREENSHOT);
             PRIVATE_SETTINGS.add(INCREASING_RING);
             PRIVATE_SETTINGS.add(INCREASING_RING_START_VOLUME);
             PRIVATE_SETTINGS.add(INCREASING_RING_RAMP_UP_TIME);
