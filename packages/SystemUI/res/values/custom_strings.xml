@@ -185,4 +185,10 @@
     <string name="usage_data">used today</string>
     <string name="usage_data_default_suffix">Data</string>
     <string name="usage_wifi_default_suffix">Wi-Fi</string>
+
+    <!-- Flashlight strength dialog -->
+    <string name="flashlight_strength_dialog_title">Flashlight brightness</string>
+    <string name="flashlight_strength_off">Off</string>
+    <string name="flashlight_turn_on">Turn On</string>
+    <string name="flashlight_turn_off">Turn Off</string>
 </resources>
