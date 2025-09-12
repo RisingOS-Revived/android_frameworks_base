@@ -34,7 +34,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ProvideTextStyle
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -42,7 +41,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.res.integerResource
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.animation.scene.ContentScope
 import com.android.compose.modifiers.padding
 import com.android.systemui.common.ui.compose.PagerDots
@@ -80,9 +78,7 @@ constructor(
             }
 
         val columns = viewModel.columns
-        val rows by viewModel.rows.collectAsStateWithLifecycle(
-            initialValue = integerResource(R.integer.quick_settings_paginated_grid_num_rows)
-        )
+        val rows = integerResource(R.integer.quick_settings_paginated_grid_num_rows)
 
         val pages =
             remember(tiles, columns, rows) {
