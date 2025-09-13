@@ -49,6 +49,7 @@ import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.SlideableQSTile;
 import com.android.systemui.res.R;
 import com.android.systemui.statusbar.policy.FlashlightController;
+import com.android.systemui.statusbar.policy.FlashlightStrengthController;
 
 import javax.inject.Inject;
 
@@ -156,7 +157,8 @@ public class FlashlightStrengthTile extends FlashlightTile implements SlideableQ
             StatusBarStateController statusBarStateController,
             ActivityStarter activityStarter,
             QSLogger qsLogger,
-            FlashlightController flashlightController) {
+            FlashlightController flashlightController,
+            FlashlightStrengthController flashlightStrengthController) {
         super(
                 host,
                 qsEventLogger,
@@ -167,7 +169,8 @@ public class FlashlightStrengthTile extends FlashlightTile implements SlideableQ
                 statusBarStateController,
                 activityStarter,
                 qsLogger,
-                flashlightController);
+                flashlightController,
+                flashlightStrengthController);
         mCameraManager = (CameraManager) mContext.getSystemService(Context.CAMERA_SERVICE);
         mFlashlightController = flashlightController;
         mBgLooper = backgroundLooper;
