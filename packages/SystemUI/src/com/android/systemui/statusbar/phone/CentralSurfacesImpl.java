@@ -126,7 +126,6 @@ import com.android.systemui.Prefs;
 import com.android.systemui.accessibility.floatingmenu.AccessibilityFloatingMenuController;
 import com.android.systemui.animation.ActivityTransitionAnimator;
 import com.android.systemui.assist.AssistManager;
-import com.android.systemui.assistant.AssistantOverlayReceiver;
 import com.android.systemui.back.domain.interactor.BackActionInteractor;
 import com.android.systemui.biometrics.AuthRippleController;
 import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor;
@@ -431,7 +430,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces,
     DozeServiceHost mDozeServiceHost;
     private final LightRevealScrim mLightRevealScrim;
     private PowerButtonReveal mPowerButtonReveal;
-    private AssistantOverlayReceiver mAssistantReceiver;
 
     private OnGoingActionProgressController mOnGoingActionProgressController = null;
 
@@ -1619,8 +1617,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces,
         filter.addAction(lineageos.content.Intent.ACTION_SCREEN_CAMERA_GESTURE);
         mBroadcastDispatcher.registerReceiver(mBroadcastReceiver, filter, null, UserHandle.ALL);
         mGameSpaceManager.observe();
-        mAssistantReceiver = new AssistantOverlayReceiver();
-        mAssistantReceiver.register(mContext);
     }
 
     @Override
