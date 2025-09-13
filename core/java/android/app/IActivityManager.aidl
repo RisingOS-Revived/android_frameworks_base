@@ -1045,9 +1045,4 @@ interface IActivityManager {
     boolean isSwipeToScreenshotGestureActive();
 
     boolean shouldForceLongScreen(in String packageName);
-            
-    /**
-     *  Should disable touch if three fingers swipe enabled
-     */
-    boolean isThreeFingersSwipeActive();
 }
