@@ -192,4 +192,7 @@
     <string name="flashlight_strength_off">Off</string>
     <string name="flashlight_turn_on">Turn On</string>
     <string name="flashlight_turn_off">Turn Off</string>
+
+    <!-- Data disabled icon -->
+    <string name="data_disabled_icon_title">Data disabled icon</string>
 </resources>
