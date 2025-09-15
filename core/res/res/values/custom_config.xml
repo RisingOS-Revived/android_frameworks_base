@@ -293,4 +293,10 @@
     <!-- Overlays that to be enabled in FHD+ resolution -->
     <string-array name="config_fhdResolutionOverlays" translatable="false">
     </string-array>
+
+    <!-- Force Fullscreen apps -->
+    <string-array name="config_fullscreenCutoutApps">
+        <!-- List the package name here -->
+        <item>com.amazon.avod.thirdpartyclient</item>
+    </string-array>
 </resources>
