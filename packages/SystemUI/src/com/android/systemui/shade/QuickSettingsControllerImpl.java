@@ -217,6 +217,12 @@ public class QuickSettingsControllerImpl implements QuickSettingsController, Dum
     /** pointerId of the pointer we're currently tracking */
     private int mTrackingPointer;
 
+    /** Time when tracking started, used for timeout detection */
+    private long mTrackingStartTime;
+
+    /** Maximum time to allow tracking before auto-reset (5 seconds) */
+    private static final long MAX_TRACKING_DURATION = 5000;
+
     /** Indicates QS is at its max height */
     private boolean mFullyExpanded;
     private boolean mExpandedWhenExpandingStarted;
@@ -602,6 +608,40 @@ public class QuickSettingsControllerImpl implements QuickSettingsController, Dum
                 || y <= mQs.getView().getY() + mQs.getView().getHeight();
     }
 
+    /**
+     * Resets the tracking state to prevent stuck QS panel issues.
+     * This should be called when the panel becomes unresponsive.
+     */
+    public void resetTrackingState() {
+        setTracking(false);
+        mTrackingPointer = -1;
+        if (mQsVelocityTracker != null) {
+            mQsVelocityTracker.recycle();
+            mQsVelocityTracker = null;
+        }
+        mConflictingExpansionGesture = false;
+
+        // Clear any stuck visual effects that might cause the white circle
+        if (mQs != null && mQs.getView() != null) {
+            mQs.getView().clearAnimation();
+            mQs.getView().invalidate();
+        }
+    }
+
+    /**
+     * Checks if tracking has been active for too long and resets if necessary.
+     * This prevents the QS panel from getting stuck in a tracking state.
+     */
+    private void checkTrackingTimeout() {
+        if (isTracking() && mTrackingStartTime > 0) {
+            long currentTime = System.currentTimeMillis();
+            if (currentTime - mTrackingStartTime > MAX_TRACKING_DURATION) {
+                mShadeLog.d("QS tracking timeout detected, resetting state");
+                resetTrackingState();
+            }
+        }
+    }
+
     /** Returns whether or not event should open QS */
     @VisibleForTesting
     boolean isOpenQsEvent(MotionEvent event) {
@@ -671,6 +711,11 @@ public class QuickSettingsControllerImpl implements QuickSettingsController, Dum
 
     private void setTracking(boolean tracking) {
         mShadeRepository.setLegacyQsTracking(tracking);
+        if (tracking) {
+            mTrackingStartTime = System.currentTimeMillis();
+        } else {
+            mTrackingStartTime = 0;
+        }
     }
 
     private boolean isQsFragmentCreated() {
@@ -1672,12 +1717,15 @@ public class QuickSettingsControllerImpl implements QuickSettingsController, Dum
     /** handles touches in Qs panel area */
     boolean handleTouch(MotionEvent event, boolean isFullyCollapsed,
             boolean isShadeOrQsHeightAnimationRunning) {
+        // Check for tracking timeout to prevent stuck states
+        checkTrackingTimeout();
+
         boolean isSwipeDisabled = NTForbiddenSwipeDownQSController.Companion.get().getForbiddenSwipeDownQS();
         if (isSplitShadeAndTouchXOutsideQs(event.getX())) {
             return false;
         }
         boolean isInStatusBar = event.getY(event.getActionIndex()) < mStatusBarMinHeight;
-        if (ShadeExpandsOnStatusBarLongPress.isEnabled() && isInStatusBar 
+        if (ShadeExpandsOnStatusBarLongPress.isEnabled() && isInStatusBar
                 && !isSwipeDisabled) {
             mStatusBarLongPressGestureDetector.get().handleTouch(event);
         }
@@ -1766,8 +1814,16 @@ public class QuickSettingsControllerImpl implements QuickSettingsController, Dum
     private void onTouch(MotionEvent event) {
         int pointerIndex = event.findPointerIndex(mTrackingPointer);
         if (pointerIndex < 0) {
-            pointerIndex = 0;
-            mTrackingPointer = event.getPointerId(pointerIndex);
+            // If we can't find the tracking pointer, try to recover gracefully
+            if (event.getPointerCount() > 0) {
+                pointerIndex = 0;
+                mTrackingPointer = event.getPointerId(pointerIndex);
+            } else {
+                // No valid pointers, reset tracking state to prevent stuck state
+                setTracking(false);
+                mTrackingPointer = -1;
+                return;
+            }
         }
         final float y = event.getY(pointerIndex);
         final float x = event.getX(pointerIndex);
@@ -1836,8 +1892,16 @@ public class QuickSettingsControllerImpl implements QuickSettingsController, Dum
     boolean onIntercept(MotionEvent event) {
         int pointerIndex = event.findPointerIndex(mTrackingPointer);
         if (pointerIndex < 0) {
-            pointerIndex = 0;
-            mTrackingPointer = event.getPointerId(pointerIndex);
+            // If we can't find the tracking pointer, try to recover gracefully
+            if (event.getPointerCount() > 0) {
+                pointerIndex = 0;
+                mTrackingPointer = event.getPointerId(pointerIndex);
+            } else {
+                // No valid pointers, reset tracking state to prevent stuck state
+                setTracking(false);
+                mTrackingPointer = -1;
+                return false;
+            }
         }
         final float x = event.getX(pointerIndex);
         final float y = event.getY(pointerIndex);
