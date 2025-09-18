@@ -69,11 +69,12 @@ public class QSAnimator implements QSHost.Callback, PagedTileLayout.PageListener
         OnAttachStateChangeListener, TunerService.Tunable {
 
     private static final String TAG = "QSAnimator";
+    private static final boolean DEBUG = false; // Set to false for production
 
     public static final String QS_TILE_UI_STYLE =
             "system:" + Settings.System.QS_TILE_UI_STYLE;
 
-    private static final int ANIMATORS_UPDATE_DELAY_MS = 100;
+    private static final int ANIMATORS_UPDATE_DELAY_MS = 16; // 60fps instead of 10fps
     private static final float EXPANDED_TILE_DELAY = .86f;
     //Non first page delays
     private static final float QS_TILE_LABEL_FADE_OUT_START = 0.15f;
@@ -181,7 +182,7 @@ public class QSAnimator implements QSHost.Callback, PagedTileLayout.PageListener
         if (tileLayout instanceof PagedTileLayout) {
             mPagedLayout = ((PagedTileLayout) tileLayout);
         } else {
-            Log.w(TAG, "QS Not using page layout");
+            if (DEBUG) Log.w(TAG, "QS Not using page layout");
         }
         mQsPanelController.setPageListener(this);
     }
@@ -307,6 +308,7 @@ public class QSAnimator implements QSHost.Callback, PagedTileLayout.PageListener
     }
 
     private void updateAnimators() {
+        if (!mNeedsAnimatorUpdate) return;
         mNeedsAnimatorUpdate = false;
         TouchAnimator.Builder firstPageBuilder = new Builder();
         TouchAnimator.Builder translationYBuilder = new Builder();
@@ -320,7 +322,16 @@ public class QSAnimator implements QSHost.Callback, PagedTileLayout.PageListener
         int count = 0;
 
         clearAnimationState();
-        mNonFirstPageQSAnimators.clear();
+        // Reuse collections instead of clearing to reduce GC pressure
+        if (mNonFirstPageQSAnimators.size() > 0) {
+            for (int i = 0; i < mNonFirstPageQSAnimators.size(); i++) {
+                Pair<HeightExpansionAnimator, TouchAnimator> pair = mNonFirstPageQSAnimators.valueAt(i);
+                if (pair != null && pair.first != null) {
+                    pair.first.resetViewsHeights();
+                }
+            }
+            mNonFirstPageQSAnimators.clear();
+        }
         mAllViews.clear();
         mAnimatedQsViews.clear();
         mQQSTileHeightAnimator = null;
@@ -338,7 +349,7 @@ public class QSAnimator implements QSHost.Callback, PagedTileLayout.PageListener
                 QSTileView tileView = mQsPanelController.getTileView(tile);
 
                 if (tileView == null) {
-                    Log.e(TAG, "tileView is null " + tile.getTileSpec());
+                    if (DEBUG) Log.e(TAG, "tileView is null " + tile.getTileSpec());
                     continue;
                 }
                 // Only animate tiles in the first page
@@ -522,7 +533,7 @@ public class QSAnimator implements QSHost.Callback, PagedTileLayout.PageListener
             // specs should not be empty in a valid secondary page, as we scrolled to it.
             // We may crash later on because there's a null animator.
             specs = mHost.getSpecs();
-            Log.e(TAG, "Trying to create animators for empty page " + page + ". Tiles: " + specs);
+            if (DEBUG) Log.e(TAG, "Trying to create animators for empty page " + page + ". Tiles: " + specs);
             // return null;
         }
 
@@ -823,8 +834,10 @@ public class QSAnimator implements QSHost.Callback, PagedTileLayout.PageListener
             };
 
     private final Runnable mUpdateAnimators = () -> {
-        updateAnimators();
-        setCurrentPosition();
+        if (mNeedsAnimatorUpdate) {
+            updateAnimators();
+            setCurrentPosition();
+        }
     };
 
     private static class HeightExpansionAnimator {
@@ -839,8 +852,16 @@ public class QSAnimator implements QSHost.Callback, PagedTileLayout.PageListener
                     @Override
                     public void onAnimationUpdate(ValueAnimator valueAnimator) {
                         float t = valueAnimator.getAnimatedFraction();
+                        
+                        // Skip redundant updates for better performance
+                        if (Math.abs(t - mLastT) < 0.001f) {
+                            return;
+                        }
+                        
                         final int viewCount = mViews.size();
                         int height = (Integer) valueAnimator.getAnimatedValue();
+                        
+                        // Batch view updates for better performance
                         for (int i = 0; i < viewCount; i++) {
                             View v = mViews.get(i);
                             if (v instanceof HeightOverrideable) {
@@ -849,11 +870,13 @@ public class QSAnimator implements QSHost.Callback, PagedTileLayout.PageListener
                                 v.setBottom(v.getTop() + height);
                             }
                         }
-                        if (t == 0f) {
+                        
+                        // Optimize listener calls
+                        if (t == 0f && mLastT != 0f) {
                             mListener.onAnimationAtStart();
-                        } else if (t == 1f) {
+                        } else if (t == 1f && mLastT != 1f) {
                             mListener.onAnimationAtEnd();
-                        } else if (mLastT <= 0 || mLastT == 1) {
+                        } else if (t > 0f && t < 1f && (mLastT <= 0 || mLastT >= 1)) {
                             mListener.onAnimationStarted();
                         }
                         mLastT = t;

@@ -63,6 +63,12 @@ public class TouchAnimator {
 
     public void setPosition(float fraction) {
         if (Float.isNaN(fraction)) return;
+        
+        // Early exit if fraction hasn't changed significantly (reduce jitter)
+        if (Math.abs(fraction - mLastT) < 0.001f) {
+            return;
+        }
+        
         float t = MathUtils.constrain((fraction - mStartDelay) / mSpan, 0, 1);
         if (mInterpolator != null) {
             t = mInterpolator.getInterpolation(t);
@@ -70,16 +76,26 @@ public class TouchAnimator {
         if (t == mLastT) {
             return;
         }
+        
+        // Cache listener state to avoid redundant calls
+        boolean wasAtStart = mLastT <= 0;
+        boolean wasAtEnd = mLastT >= 1;
+        boolean isAtStart = t <= 0;
+        boolean isAtEnd = t >= 1;
+        
         if (mListener != null) {
-            if (t == 1) {
+            if (isAtEnd && !wasAtEnd) {
                 mListener.onAnimationAtEnd();
-            } else if (t == 0) {
+            } else if (isAtStart && !wasAtStart) {
                 mListener.onAnimationAtStart();
-            } else if (mLastT <= 0 || mLastT == 1) {
+            } else if (!isAtStart && !isAtEnd && (wasAtStart || wasAtEnd)) {
                 mListener.onAnimationStarted();
             }
-            mLastT = t;
         }
+        
+        mLastT = t;
+        
+        // Batch property updates for better performance
         for (int i = 0; i < mTargets.length; i++) {
             mKeyframeSets[i].setValue(t, mTargets[i]);
         }
@@ -222,6 +238,16 @@ public class TouchAnimator {
         }
 
         void setValue(float fraction, Object target) {
+            // Optimize for common cases (start/end positions)
+            if (fraction <= 0) {
+                interpolate(1, 0, target);
+                return;
+            }
+            if (fraction >= 1) {
+                interpolate(mSize - 1, 1, target);
+                return;
+            }
+            
             int i = MathUtils.constrain((int) Math.ceil(fraction / mFrameWidth), 1, mSize - 1);
             float amount = (fraction - mFrameWidth * (i - 1)) / mFrameWidth;
             interpolate(i, amount, target);
