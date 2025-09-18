@@ -29,6 +29,9 @@ import androidx.viewpager.widget.ViewPager;
 
 import com.android.systemui.res.R;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class QsControlsPageIndicator extends LinearLayout {
     private Context mContext;
     private int mTotalPages;
@@ -37,6 +40,10 @@ public class QsControlsPageIndicator extends LinearLayout {
 
     private int mAccentColor;
     private int mBgColor;
+    
+    // Performance optimization: Cache indicators to avoid recreation
+    private final List<ImageView> mIndicatorViews = new ArrayList<>();
+    private boolean mIndicatorsCreated = false;
 
     public QsControlsPageIndicator(Context context) {
         super(context);
@@ -61,15 +68,28 @@ public class QsControlsPageIndicator extends LinearLayout {
     }
 
     public void updateColors(boolean isNightMode) {
-        mAccentColor = mContext.getColor(isNightMode
+        int newAccentColor = mContext.getColor(isNightMode
                 ? R.color.qs_controls_active_color_dark
                 : R.color.lockscreen_widget_active_color_light);
 
-        mBgColor = mContext.getColor(isNightMode
+        int newBgColor = mContext.getColor(isNightMode
                 ? R.color.qs_controls_inactive_color_dark
                 : R.color.qs_controls_inactive_color_light);
-
-        createIndicators();
+        
+        // Only update if colors actually changed
+        if (newAccentColor != mAccentColor || newBgColor != mBgColor) {
+            mAccentColor = newAccentColor;
+            mBgColor = newBgColor;
+            updateIndicatorColors();
+        }
+    }
+    
+    private void updateIndicatorColors() {
+        for (int i = 0; i < mIndicatorViews.size(); i++) {
+            ImageView indicator = mIndicatorViews.get(i);
+            boolean isSelected = i == mSelectedPageIndex;
+            indicator.setImageTintList(ColorStateList.valueOf(isSelected ? mAccentColor : mBgColor));
+        }
     }
 
     public void setupWithViewPager(ViewPager viewPager) {
@@ -112,7 +132,15 @@ public class QsControlsPageIndicator extends LinearLayout {
     }
 
     private void createIndicators() {
+        // Only recreate if page count changed or indicators haven't been created
+        if (mIndicatorsCreated && mIndicatorViews.size() == mTotalPages) {
+            updateIndicatorColors();
+            return;
+        }
+        
         removeAllViews();
+        mIndicatorViews.clear();
+        
         int indicatorSize = getResources().getDimensionPixelSize(R.dimen.qs_controls_page_indicator_size);
         int indicatorMargin = getResources().getDimensionPixelSize(R.dimen.qs_controls_page_indicator_margin);
 
@@ -125,8 +153,12 @@ public class QsControlsPageIndicator extends LinearLayout {
                     ? R.drawable.viewpager_dot_selected
                     : R.drawable.viewpager_dot_unselected);
             indicator.setImageTintList(ColorStateList.valueOf(i == mSelectedPageIndex ? mAccentColor : mBgColor));
+            
+            mIndicatorViews.add(indicator);
             addView(indicator);
         }
+        
+        mIndicatorsCreated = true;
     }
 
     private void handlePageScrolled(int position, float positionOffset) {
@@ -135,14 +167,20 @@ public class QsControlsPageIndicator extends LinearLayout {
 
 
     private void selectIndicator(int position) {
-        if (position >= 0 && position < getChildCount()) {
-            for (int i = 0; i < getChildCount(); i++) {
-                ImageView indicator = (ImageView) getChildAt(i);
+        if (position >= 0 && position < mIndicatorViews.size()) {
+            // Use cached views instead of getChildAt() for better performance
+            for (int i = 0; i < mIndicatorViews.size(); i++) {
+                ImageView indicator = mIndicatorViews.get(i);
                 boolean isSelected = i == position;
-                indicator.setImageResource(isSelected
-                        ? R.drawable.viewpager_dot_selected
-                        : R.drawable.viewpager_dot_unselected);
-                indicator.setImageTintList(ColorStateList.valueOf(isSelected ? mAccentColor : mBgColor));
+                
+                // Only update if state actually changed to avoid unnecessary operations
+                if (isSelected != (indicator.getTag() != null && (Boolean) indicator.getTag())) {
+                    indicator.setImageResource(isSelected
+                            ? R.drawable.viewpager_dot_selected
+                            : R.drawable.viewpager_dot_unselected);
+                    indicator.setImageTintList(ColorStateList.valueOf(isSelected ? mAccentColor : mBgColor));
+                    indicator.setTag(isSelected); // Cache selection state
+                }
             }
         }
     }
