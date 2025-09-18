@@ -157,15 +157,32 @@ public class QsControlsView extends FrameLayout {
     private TextView mMediaTitle, mMediaArtist;
     private ImageView mMediaPrevBtn, mMediaPlayBtn, mMediaNextBtn, mMediaAlbumArtBg, mPlayerIcon;
     
+    // Cache frequently accessed tile views to avoid findViewById calls
+    private ImageView mInternetBtnIcon, mInternetBtnArrow;
+    private TextView mInternetBtnText;
+    private ImageView mBtBtnIcon, mBtBtnArrow;
+    private TextView mBtBtnText;
+    
     private MediaController mController;
     private MediaMetadata mMediaMetadata;
     private boolean mInflated = false;
     private Bitmap mAlbumArt = null;
+    private Bitmap mCachedScaledBitmap = null;
+    private String mLastAlbumArtKey = null;
     
     private boolean isClearingMetadata = false;
     
     private Handler mHandler;
     private Runnable mMediaUpdater;
+    
+    // Performance optimization: Cache frequently used values
+    private int mCachedAccentColor = -1;
+    private int mCachedBgColor = -1;
+    private int mCachedTintColor = -1;
+    private int mCachedContainerColor = -1;
+    private boolean mIsNightModeCached = false;
+    private long mLastColorUpdateTime = 0;
+    private static final long COLOR_UPDATE_THROTTLE_MS = 100;
 
     protected final CellSignalCallback mCellSignalCallback = new CellSignalCallback();
     protected final WifiSignalCallback mWifiSignalCallback = new WifiSignalCallback();
@@ -258,6 +275,14 @@ public class QsControlsView extends FrameLayout {
         mInternetButton = mConnectivityLayout.findViewById(R.id.internet_btn);
         mBtButton = mConnectivityLayout.findViewById(R.id.bt_btn);
         
+        // Cache tile view components to avoid repeated findViewById calls
+        mInternetBtnIcon = mInternetButton.findViewById(R.id.internet_btn_icon);
+        mInternetBtnText = mInternetButton.findViewById(R.id.internet_btn_text);
+        mInternetBtnArrow = mInternetButton.findViewById(R.id.internet_btn_arrow);
+        mBtBtnIcon = mBtButton.findViewById(R.id.bt_btn_icon);
+        mBtBtnText = mBtButton.findViewById(R.id.bt_btn_text);
+        mBtBtnArrow = mBtButton.findViewById(R.id.bt_btn_arrow);
+        
         // Initialize components in the widgets layout
         mTorch = mWidgetsLayout.findViewById(R.id.qs_flashlight);
         mClockTimer = mWidgetsLayout.findViewById(R.id.qs_clock_timer);
@@ -307,13 +332,15 @@ public class QsControlsView extends FrameLayout {
         // Initialize battery status views
         initializeBatteryViews();
         
-        // Initialize handler for media updates
+        // Initialize handler for media updates with better performance
         mHandler = new Handler();
         mMediaUpdater = new Runnable() {
             @Override
             public void run() {
-                updateMediaController();
-                mHandler.postDelayed(this, 1000);
+                if (isAttachedToWindow() && getVisibility() == View.VISIBLE) {
+                    updateMediaController();
+                    mHandler.postDelayed(this, 2000); // Reduced frequency from 1s to 2s
+                }
             }
         };
         updateMediaController();
@@ -413,6 +440,21 @@ public class QsControlsView extends FrameLayout {
             } catch (IllegalArgumentException e) {
                 // Receiver not registered
             }
+        }
+        
+        // Clean up media handler to prevent memory leaks
+        if (mHandler != null && mMediaUpdater != null) {
+            mHandler.removeCallbacks(mMediaUpdater);
+        }
+        
+        // Clean up cached bitmaps
+        if (mCachedScaledBitmap != null && !mCachedScaledBitmap.isRecycled()) {
+            mCachedScaledBitmap.recycle();
+            mCachedScaledBitmap = null;
+        }
+        if (mAlbumArt != null && !mAlbumArt.isRecycled()) {
+            mAlbumArt.recycle();
+            mAlbumArt = null;
         }
     }
 
@@ -551,9 +593,17 @@ public class QsControlsView extends FrameLayout {
     private void updateMediaMetadata() {
         Bitmap albumArt = mMediaMetadata == null ? null : mMediaMetadata.getBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART);
         if (albumArt != null) {
-            new ProcessArtworkTask().execute(albumArt);
+            // Create a unique key for this bitmap to enable caching
+            String bitmapKey = String.valueOf(albumArt.hashCode()) + "_" + albumArt.getWidth() + "x" + albumArt.getHeight();
+            new ProcessArtworkTask(bitmapKey).execute(albumArt);
         } else {
             mMediaAlbumArtBg.setImageBitmap(null);
+            // Clear cached bitmap when no media
+            if (mCachedScaledBitmap != null && !mCachedScaledBitmap.isRecycled()) {
+                mCachedScaledBitmap.recycle();
+                mCachedScaledBitmap = null;
+                mLastAlbumArtKey = null;
+            }
         }
         updateMediaViews();
     }
@@ -586,18 +636,50 @@ public class QsControlsView extends FrameLayout {
     }
 
     private class ProcessArtworkTask extends AsyncTask<Bitmap, Void, Bitmap> {
+        private final String mBitmapKey;
+        
+        ProcessArtworkTask(String bitmapKey) {
+            mBitmapKey = bitmapKey;
+        }
+        
         protected Bitmap doInBackground(Bitmap... bitmaps) {
             Bitmap bitmap = bitmaps[0];
             if (bitmap == null) {
                 return null;
             }
+            
+            // Check if we already have this bitmap cached
+            if (mBitmapKey.equals(mLastAlbumArtKey) && mCachedScaledBitmap != null) {
+                return mCachedScaledBitmap;
+            }
+            
             int width = mMediaAlbumArtBg.getWidth();
             int height = mMediaAlbumArtBg.getHeight();
-            return getScaledRoundedBitmap(bitmap, width, height);
+            
+            if (width <= 0 || height <= 0) {
+                return null;
+            }
+            
+            Bitmap result = getScaledRoundedBitmap(bitmap, width, height);
+            
+            // Cache the result
+            if (result != null) {
+                mCachedScaledBitmap = result;
+                mLastAlbumArtKey = mBitmapKey;
+            }
+            
+            return result;
         }
+        
         protected void onPostExecute(Bitmap result) {
-            if (result == null) return;
+            if (result == null || !mBitmapKey.equals(mLastAlbumArtKey)) return;
+            
             if (mAlbumArt == null || mAlbumArt != result) {
+                // Recycle old bitmap to free memory
+                if (mAlbumArt != null && !mAlbumArt.isRecycled() && mAlbumArt != result) {
+                    mAlbumArt.recycle();
+                }
+                
                 mAlbumArt = result;
                 final int mediaFadeLevel = mContext.getResources().getInteger(R.integer.media_player_fade);
                 final int fadeFilter = ColorUtils.blendARGB(Color.TRANSPARENT, mNotifManager == null ? Color.BLACK : mNotifManager.getMediaBgColor(), mediaFadeLevel / 100f);
@@ -751,8 +833,8 @@ public class QsControlsView extends FrameLayout {
             view.setVisibility(View.VISIBLE);
         }
 
-        // Debugging log - print the number of widget views
-        android.util.Log.d("QsControlsView", "Page count: " + mWidgetViews.size() + ", Selected: " + selectedPosition);
+        // Remove debug logging in production for better performance
+        // android.util.Log.d("QsControlsView", "Page count: " + mWidgetViews.size() + ", Selected: " + selectedPosition);
 
         // Update corresponding layouts based on position
         mMediaLayout.setVisibility(selectedPosition == 0 ? View.VISIBLE : View.GONE);
@@ -763,10 +845,34 @@ public class QsControlsView extends FrameLayout {
     }
 
     public void updateColors() {
-        mAccentColor = mContext.getResources().getColor(isNightMode() ? R.color.qs_controls_active_color_dark : R.color.lockscreen_widget_active_color_light);
-        mBgColor = mContext.getResources().getColor(isNightMode() ? R.color.qs_controls_bg_color_dark : R.color.qs_controls_bg_color_light);
-        mTintColor = mContext.getResources().getColor(isNightMode() ? R.color.qs_controls_bg_color_light : R.color.qs_controls_bg_color_dark);
-        mContainerColor = mContext.getResources().getColor(isNightMode() ? R.color.qs_controls_container_bg_color_dark : R.color.qs_controls_container_bg_color_light);
+        // Throttle color updates to improve performance
+        long currentTime = System.currentTimeMillis();
+        if (currentTime - mLastColorUpdateTime < COLOR_UPDATE_THROTTLE_MS) {
+            return;
+        }
+        mLastColorUpdateTime = currentTime;
+        
+        boolean isNightMode = isNightMode();
+        if (mIsNightModeCached == isNightMode && mCachedAccentColor != -1) {
+            // Use cached values if night mode hasn't changed
+            mAccentColor = mCachedAccentColor;
+            mBgColor = mCachedBgColor;
+            mTintColor = mCachedTintColor;
+            mContainerColor = mCachedContainerColor;
+        } else {
+            // Update and cache colors
+            mAccentColor = mContext.getResources().getColor(isNightMode ? R.color.qs_controls_active_color_dark : R.color.lockscreen_widget_active_color_light);
+            mBgColor = mContext.getResources().getColor(isNightMode ? R.color.qs_controls_bg_color_dark : R.color.qs_controls_bg_color_light);
+            mTintColor = mContext.getResources().getColor(isNightMode ? R.color.qs_controls_bg_color_light : R.color.qs_controls_bg_color_dark);
+            mContainerColor = mContext.getResources().getColor(isNightMode ? R.color.qs_controls_container_bg_color_dark : R.color.qs_controls_container_bg_color_light);
+            
+            // Cache the values
+            mCachedAccentColor = mAccentColor;
+            mCachedBgColor = mBgColor;
+            mCachedTintColor = mTintColor;
+            mCachedContainerColor = mContainerColor;
+            mIsNightModeCached = isNightMode;
+        }
         updateConnectivityTiles();
 	updateTiles();
         if (mAccessBg != null && mMediaCard != null && mWidgetsBg != null && mWeatherBg != null && mConnectivityBg != null) {
@@ -873,10 +979,10 @@ public class QsControlsView extends FrameLayout {
             }
         }
 
-        // Log for debugging
-        if (isCollectingMainViews) {
-            android.util.Log.d("QsControlsView", "Collected " + viewList.size() + " main views");
-        }
+        // Remove debug logging in production for better performance
+        // if (isCollectingMainViews) {
+        //     android.util.Log.d("QsControlsView", "Collected " + viewList.size() + " main views");
+        // }
     }
 
     private void toggleFlashlight() {
@@ -970,9 +1076,8 @@ public class QsControlsView extends FrameLayout {
     private void toggleBluetoothState() {
         mBluetoothController.setBluetoothEnabled(!isBluetoothEnabled());
         updateBtState();
-        post(() -> {
-            updateBtState();
-        });
+        // Use postDelayed with small delay for better state synchronization
+        postDelayed(this::updateBtState, 50);
     }
     
     private void updateConnectivityTiles() {
@@ -981,8 +1086,8 @@ public class QsControlsView extends FrameLayout {
     }
     
     private void showBluetoothDialog(View view) {
-        post(() -> 
-            mBluetoothDetailsContentViewModel.showDialog(Expandable.fromView(view)));
+        // Use method reference for better performance
+        post(() -> mBluetoothDetailsContentViewModel.showDialog(Expandable.fromView(view)));
         VibrationUtils.triggerVibration(mContext, 2);
     }
     
@@ -996,27 +1101,26 @@ public class QsControlsView extends FrameLayout {
     private void updateTileButtonState(LaunchableLinearLayout tile, boolean active,
                     int activeResource, int inactiveResource, 
                     String activeString, String inactiveString) {
-        post(new Runnable() {
-            @Override
-            public void run() {
+        // Use cached views for better performance
+        post(() -> {
                 if (tile != null) {
-                    ImageView tileIcon = null;
-                    TextView tileLabel = null;
+                    ImageView tileIcon;
+                    TextView tileLabel;
                     if (tile.getId() == R.id.internet_btn) {
-                        tileIcon = tile.findViewById(R.id.internet_btn_icon);
-                        tileLabel = tile.findViewById(R.id.internet_btn_text);
+                        tileIcon = mInternetBtnIcon;
+                        tileLabel = mInternetBtnText;
                     } else if (tile.getId() == R.id.bt_btn) {
-                        tileIcon = tile.findViewById(R.id.bt_btn_icon);
-                        tileLabel = tile.findViewById(R.id.bt_btn_text);
+                        tileIcon = mBtBtnIcon;
+                        tileLabel = mBtBtnText;
+                    } else {
+                        return; // Unknown tile
                     }
-                    if (tileIcon != null && tileLabel != null) {
-                        tileIcon.setImageDrawable(mContext.getDrawable(active ? activeResource : inactiveResource));
-                        tileLabel.setText(active ? activeString : inactiveString);
-                        setButtonActiveState(tile, active);
-                    }
+                    
+                    tileIcon.setImageDrawable(mContext.getDrawable(active ? activeResource : inactiveResource));
+                    tileLabel.setText(active ? activeString : inactiveString);
+                    setButtonActiveState(tile, active);
                 }
-            }
-        });
+            });
     }
     
     private void setButtonActiveState(LaunchableLinearLayout tile, boolean active) {
@@ -1024,17 +1128,19 @@ public class QsControlsView extends FrameLayout {
         int tintColor = active ? mBgColor : mTintColor;
         
         if (tile != null) {
-            ImageView tileIcon = null;
-            ImageView chevron = null;
-            TextView tileLabel = null;
+            ImageView tileIcon;
+            ImageView chevron;
+            TextView tileLabel;
             if (tile.getId() == R.id.internet_btn) {
-                tileIcon = tile.findViewById(R.id.internet_btn_icon);
-                tileLabel = tile.findViewById(R.id.internet_btn_text);
-                chevron = tile.findViewById(R.id.internet_btn_arrow);
+                tileIcon = mInternetBtnIcon;
+                tileLabel = mInternetBtnText;
+                chevron = mInternetBtnArrow;
             } else if (tile.getId() == R.id.bt_btn) {
-                tileIcon = tile.findViewById(R.id.bt_btn_icon);
-                tileLabel = tile.findViewById(R.id.bt_btn_text);
-                chevron = tile.findViewById(R.id.bt_btn_arrow);
+                tileIcon = mBtBtnIcon;
+                tileLabel = mBtBtnText;
+                chevron = mBtBtnArrow;
+            } else {
+                return; // Unknown tile
             }
             
             if (chevron != null) {
