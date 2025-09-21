@@ -27,6 +27,7 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
+import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.UserHandle;
@@ -45,6 +46,7 @@ import androidx.annotation.StyleRes;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.app.animation.Interpolators;
+import com.android.settingslib.Utils;
 import com.android.settingslib.graph.CircleBatteryDrawable;
 import com.android.settingslib.graph.FullCircleBatteryDrawable;
 import com.android.settingslib.graph.RLandscapeBatteryDrawable;
@@ -1067,29 +1069,128 @@ public class BatteryMeterView extends LinearLayout implements DarkReceiver {
             return;
         }
 
-        if (DarkIconDispatcher.isInAreas(areas, this)) {
-            if (darkIntensity < 0.5) {
-                mUnifiedBatteryColors = BatteryColors.DARK_THEME_COLORS;
-            } else {
-                mUnifiedBatteryColors = BatteryColors.LIGHT_THEME_COLORS;
-            }
+        // Check if accent color tinting is enabled
+        boolean useAccentColor = Settings.System.getIntForUser(
+                getContext().getContentResolver(),
+                Settings.System.TINT_STATUSBAR_ICONS_WITH_ACCENT,
+                0,
+                UserHandle.USER_CURRENT) == 1;
 
+        if (useAccentColor) {
+            // Use system accent color for battery tinting
+            int accentColor = Utils.getColorAccentDefaultColor(getContext());
+            // Use default colors but apply accent color directly to the drawable
+            mUnifiedBatteryColors = BatteryColors.LIGHT_THEME_COLORS;
+            // Apply accent color directly to the unified battery drawable
+            // We'll use the existing setColors method with a custom approach
             mUnifiedBattery.setColors(mUnifiedBatteryColors);
-        } else  {
-            // Same behavior as the legacy code when not isInArea
-            mUnifiedBatteryColors = BatteryColors.DARK_THEME_COLORS;
-            mUnifiedBattery.setColors(mUnifiedBatteryColors);
+            // Apply accent color directly to the drawable components
+            applyAccentColorToDrawableComponents(accentColor);
+        } else {
+            // Use default behavior
+            if (DarkIconDispatcher.isInAreas(areas, this)) {
+                if (darkIntensity < 0.5) {
+                    mUnifiedBatteryColors = BatteryColors.DARK_THEME_COLORS;
+                } else {
+                    mUnifiedBatteryColors = BatteryColors.LIGHT_THEME_COLORS;
+                }
+            } else  {
+                // Same behavior as the legacy code when not isInArea
+                mUnifiedBatteryColors = BatteryColors.DARK_THEME_COLORS;
+            }
         }
+
+        mUnifiedBattery.setColors(mUnifiedBatteryColors);
     }
 
     private void onDarkChangedLegacy(ArrayList<Rect> areas, float darkIntensity, int tint) {
-        float intensity = DarkIconDispatcher.isInAreas(areas, this) ? darkIntensity : 0;
-        int nonAdaptedSingleToneColor = mDualToneHandler.getSingleColor(intensity);
-        int nonAdaptedForegroundColor = mDualToneHandler.getFillColor(intensity);
-        int nonAdaptedBackgroundColor = mDualToneHandler.getBackgroundColor(intensity);
+        // Check if accent color tinting is enabled
+        boolean useAccentColor = Settings.System.getIntForUser(
+                getContext().getContentResolver(),
+                Settings.System.TINT_STATUSBAR_ICONS_WITH_ACCENT,
+                0,
+                UserHandle.USER_CURRENT) == 1;
 
-        updateColors(nonAdaptedForegroundColor, nonAdaptedBackgroundColor,
-                nonAdaptedSingleToneColor);
+        if (useAccentColor) {
+            // Use system accent color for battery tinting
+            int accentColor = Utils.getColorAccentDefaultColor(getContext());
+            updateColors(accentColor, accentColor, accentColor);
+        } else {
+            // Use default behavior
+            float intensity = DarkIconDispatcher.isInAreas(areas, this) ? darkIntensity : 0;
+            int nonAdaptedSingleToneColor = mDualToneHandler.getSingleColor(intensity);
+            int nonAdaptedForegroundColor = mDualToneHandler.getFillColor(intensity);
+            int nonAdaptedBackgroundColor = mDualToneHandler.getBackgroundColor(intensity);
+
+            updateColors(nonAdaptedForegroundColor, nonAdaptedBackgroundColor,
+                    nonAdaptedSingleToneColor);
+        }
+    }
+
+    /**
+     * Applies accent color directly to the drawable components
+     */
+    private void applyAccentColorToDrawableComponents(int accentColor) {
+        // Apply accent color directly to the drawable components
+        // This bypasses the BatteryColors system and applies tinting directly
+        if (mUnifiedBattery != null) {
+            try {
+                // Use reflection to access the individual drawable components
+                // and apply the accent color directly using setTint()
+                java.lang.reflect.Field frameField = mUnifiedBattery.getClass().getDeclaredField("frame");
+                frameField.setAccessible(true);
+                Drawable frame = (Drawable) frameField.get(mUnifiedBattery);
+                if (frame != null) {
+                    frame.setTint(accentColor);
+                }
+
+                java.lang.reflect.Field frameBgField = mUnifiedBattery.getClass().getDeclaredField("frameBg");
+                frameBgField.setAccessible(true);
+                Drawable frameBg = (Drawable) frameBgField.get(mUnifiedBattery);
+                if (frameBg != null) {
+                    // Use a semi-transparent version for background
+                    int accentColorBg = Color.argb(0x22, Color.red(accentColor), Color.green(accentColor), Color.blue(accentColor));
+                    frameBg.setTint(accentColorBg);
+                }
+
+                java.lang.reflect.Field fillField = mUnifiedBattery.getClass().getDeclaredField("fill");
+                fillField.setAccessible(true);
+                Object fill = fillField.get(mUnifiedBattery);
+                if (fill != null) {
+                    // Apply accent color to fill
+                    java.lang.reflect.Method setFillColorMethod = fill.getClass().getDeclaredMethod("setFillColor", int.class);
+                    setFillColorMethod.setAccessible(true);
+                    setFillColorMethod.invoke(fill, accentColor);
+                }
+
+                java.lang.reflect.Field textOnlyField = mUnifiedBattery.getClass().getDeclaredField("textOnly");
+                textOnlyField.setAccessible(true);
+                Drawable textOnly = (Drawable) textOnlyField.get(mUnifiedBattery);
+                if (textOnly != null) {
+                    textOnly.setTint(accentColor);
+                }
+
+                java.lang.reflect.Field spaceSharingTextField = mUnifiedBattery.getClass().getDeclaredField("spaceSharingText");
+                spaceSharingTextField.setAccessible(true);
+                Drawable spaceSharingText = (Drawable) spaceSharingTextField.get(mUnifiedBattery);
+                if (spaceSharingText != null) {
+                    spaceSharingText.setTint(accentColor);
+                }
+
+                java.lang.reflect.Field attributionField = mUnifiedBattery.getClass().getDeclaredField("attribution");
+                attributionField.setAccessible(true);
+                Drawable attribution = (Drawable) attributionField.get(mUnifiedBattery);
+                if (attribution != null) {
+                    attribution.setTint(accentColor);
+                }
+
+                // Force the drawable to update
+                mUnifiedBattery.invalidateSelf();
+            } catch (Exception e) {
+                // Fallback: just use the default colors
+                mUnifiedBattery.setColors(mUnifiedBatteryColors);
+            }
+        }
     }
 
     public void setStaticColor(boolean isStaticColor) {
