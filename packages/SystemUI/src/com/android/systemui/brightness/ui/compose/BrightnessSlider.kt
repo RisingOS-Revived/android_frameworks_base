@@ -364,8 +364,6 @@ fun BrightnessSlider(
                     ImageButton(factoryContext).apply {
                         setBackgroundResource(0)
                         scaleType = ImageView.ScaleType.CENTER_INSIDE
-                        val drawable = factoryContext.getDrawable(R.drawable.ic_qs_brightness_auto)
-                        setImageDrawable(drawable)
                     }
                 },
                 modifier = Modifier
@@ -373,12 +371,12 @@ fun BrightnessSlider(
                     .clip(CircleShape)
                     .background(autoBrightnessBackgroundColor),
                 update = { button ->
-                    val targetState = if (autoMode) {
-                        intArrayOf(android.R.attr.state_checked)
+                    if (autoMode) {
+                        button.setImageResource(R.drawable.ic_qs_brightness_auto_on)
                     } else {
-                        intArrayOf()
+                        button.setImageResource(R.drawable.ic_qs_brightness_auto_off)
                     }
-                    button.setImageState(targetState, false)
+                    
                     button.setColorFilter(autoBrightnessIconTint.toArgb(), PorterDuff.Mode.SRC_IN)
                     button.setOnClickListener {
                         coroutineScope.launch {
