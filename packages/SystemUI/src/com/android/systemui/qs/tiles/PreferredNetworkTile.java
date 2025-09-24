@@ -38,7 +38,7 @@ import androidx.annotation.Nullable;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 
-import com.android.settingslib.Utils;
+import com.android.systemui.res.R;
 import com.android.systemui.animation.Expandable;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
@@ -50,7 +50,6 @@ import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.QsEventLogger;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
-import com.android.systemui.res.R;
 
 import javax.inject.Inject;
 
@@ -81,7 +80,7 @@ public class PreferredNetworkTile extends QSTileImpl<State> {
 
     @Override
     public boolean isAvailable() {
-        return !Utils.isWifiOnly(mContext);
+        return true;
     }
 
     @Override
@@ -90,7 +89,7 @@ public class PreferredNetworkTile extends QSTileImpl<State> {
     }
 
     @Override
-    public void handleClick(@Nullable Expandable expandable) {
+    protected void handleClick(@Nullable Expandable expandable) {
         final int mode = getPreferredNetworkMode();
         final int newMode = TelephonyManagerConstants.getTargetMode(mode);
         if (newMode == -1) return;
