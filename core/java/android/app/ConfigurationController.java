@@ -29,9 +29,6 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.HardwareRenderer;
-import android.graphics.Typeface;
-import android.inputmethodservice.InputMethodService;
-import android.os.Build;
 import android.os.LocaleList;
 import android.os.Trace;
 import android.util.DisplayMetrics;
@@ -202,7 +199,6 @@ class ConfigurationController {
             final Application app = mActivityThread.getApplication();
             final Resources appResources = app.getResources();
             mResourcesManager.applyConfigurationToResources(config, compat);
-            Typeface.updateDefaultFont(appResources);
             updateLocaleListFromAppContext(app.getApplicationContext());
 
             if (mConfiguration == null) {
