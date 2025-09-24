@@ -202,12 +202,7 @@ class ConfigurationController {
             final Application app = mActivityThread.getApplication();
             final Resources appResources = app.getResources();
             mResourcesManager.applyConfigurationToResources(config, compat);
-            java.util.Set<String> SKIP_PACKAGES = new java.util.HashSet<>(java.util.Arrays.asList(
-                "com.google.android.gm"
-            ));
-            if (!SKIP_PACKAGES.contains(app.getPackageName())) {
-                Typeface.updateDefaultFont(appResources);
-            }
+            Typeface.updateDefaultFont(appResources);
             updateLocaleListFromAppContext(app.getApplicationContext());
 
             if (mConfiguration == null) {
