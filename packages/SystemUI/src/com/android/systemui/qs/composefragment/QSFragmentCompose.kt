@@ -47,6 +47,7 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement.spacedBy
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Arrangement.spacedBy
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -119,6 +120,8 @@ import com.android.systemui.Flags
 import com.android.systemui.Flags.notificationShadeBlur
 import com.android.systemui.brightness.ui.compose.BrightnessSliderContainer
 import com.android.systemui.brightness.ui.compose.ContainerColors
+import com.android.systemui.volume.ui.compose.VolumeSliderContainer
+import com.android.systemui.volume.ui.viewmodel.VolumeSliderViewModel
 import com.android.systemui.compose.modifiers.sysuiResTag
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
@@ -175,6 +178,7 @@ class QSFragmentCompose
 @Inject
 constructor(
     private val qsFragmentComposeViewModelFactory: QSFragmentComposeViewModel.Factory,
+    private val volumeSliderViewModelFactory: VolumeSliderViewModel.Factory,
     private val dumpManager: DumpManager,
     @Main private val mainHandler: Handler,
 ) : LifecycleFragment(), QS, Dumpable {
@@ -731,7 +735,27 @@ constructor(
             ) {
                 val BrightnessSlider: @Composable () -> Unit = {
                     Element(ElementKeys.BrightnessSlider, modifier = modifier) {
-                        BrightnessSlider(viewModel, layoutState)
+                        BrightnessWithVolumeSlider(viewModel, layoutState)
+                    }
+                }
+                val VolumeSlider: @Composable () -> Unit = {
+                    Element(ElementKeys.VolumeSlider, modifier = modifier) {
+                        val volumeViewModel = remember {
+                            volumeSliderViewModelFactory.create()
+                        }
+                        Box(
+                            Modifier.systemGestureExclusionInShade(
+                                enabled = { layoutState.transitionState is TransitionState.Idle }
+                            )
+                        ) {
+                            AlwaysDarkMode {
+                                VolumeSliderContainer(
+                                    viewModel = volumeViewModel,
+                                    containerColors = ContainerColors(Color.Transparent, ContainerColors.defaultContainerColor),
+                                    modifier = Modifier.fillMaxWidth(),
+                                )
+                            }
+                        }
                     }
                 }
                 val CustomControls = @Composable {
@@ -789,6 +813,7 @@ constructor(
                     ) {
                         QuickQuickSettingsLayout (
                             customControls = CustomControls,
+                            volume = VolumeSlider,
                             brightness = BrightnessSlider,
                             tiles = Tiles,
                             media = Media,
@@ -852,7 +877,27 @@ constructor(
                         )
                         val BrightnessSlider: @Composable () -> Unit = {
                             Element(ElementKeys.BrightnessSlider, modifier = modifier) {
-                                BrightnessSlider(viewModel, layoutState)
+                                BrightnessWithVolumeSlider(viewModel, layoutState)
+                            }
+                        }
+                        val VolumeSlider: @Composable () -> Unit = {
+                            Element(ElementKeys.VolumeSlider, modifier = modifier) {
+                                val volumeViewModel = remember {
+                                    volumeSliderViewModelFactory.create()
+                                }
+                                Box(
+                                    Modifier.systemGestureExclusionInShade(
+                                        enabled = { layoutState.transitionState is TransitionState.Idle }
+                                    )
+                                ) {
+                                    AlwaysDarkMode {
+                                        VolumeSliderContainer(
+                                            viewModel = volumeViewModel,
+                                            containerColors = ContainerColors(Color.Transparent, ContainerColors.defaultContainerColor),
+                                            modifier = Modifier.fillMaxWidth(),
+                                        )
+                                    }
+                                }
                             }
                         }
                         val TileGrid =
@@ -911,6 +956,7 @@ constructor(
                         ) {
                             QuickSettingsLayout(
                                 customControls = CustomControls,
+                                volume = VolumeSlider,
                                 brightness = BrightnessSlider,
                                 tiles = TileGrid,
                                 media = Media,
@@ -928,6 +974,45 @@ constructor(
                     FooterActions(
                         viewModel = viewModel.footerActionsViewModel,
                         qsVisibilityLifecycleOwner = this@QSFragmentCompose,
+                    )
+                }
+            }
+        }
+    }
+
+    @Composable
+    private fun BrightnessWithVolumeSlider(
+        viewModel: QSFragmentComposeViewModel,
+        layoutState: SceneTransitionLayoutState,
+    ) {
+        val volumeViewModel = remember {
+            volumeSliderViewModelFactory.create()
+        }
+        
+        DisposableEffect(Unit) {
+            lifecycleScope.launch { volumeViewModel.activate() }
+            onDispose { }
+        }
+        
+        Box(
+            Modifier.systemGestureExclusionInShade(
+                enabled = {
+                    layoutState.transitionState is TransitionState.Idle &&
+                        viewModel.isNotTransitioning
+                }
+            )
+        ) {
+            AlwaysDarkMode {
+                Column(verticalArrangement = spacedBy(8.dp)) {
+                    VolumeSliderContainer(
+                        viewModel = volumeViewModel,
+                        containerColors = ContainerColors(Color.Transparent, ContainerColors.defaultContainerColor),
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                    BrightnessSliderContainer(
+                        viewModel = viewModel.containerViewModel.brightnessSliderViewModel,
+                        containerColors = ContainerColors(Color.Transparent, ContainerColors.defaultContainerColor),
+                        modifier = Modifier.fillMaxWidth(),
                     )
                 }
             }
@@ -957,13 +1042,8 @@ constructor(
         ) {
             AlwaysDarkMode {
                 BrightnessSliderContainer(
-                    viewModel =
-                        viewModel.containerViewModel.brightnessSliderViewModel,
-                    containerColors =
-                        ContainerColors(
-                            Color.Transparent,
-                            ContainerColors.defaultContainerColor,
-                        ),
+                    viewModel = viewModel.containerViewModel.brightnessSliderViewModel,
+                    containerColors = ContainerColors(Color.Transparent, ContainerColors.defaultContainerColor),
                     modifier = Modifier.fillMaxWidth(),
                 )
             }
@@ -1364,6 +1444,7 @@ private fun MediaObject(
 @VisibleForTesting
 fun QuickQuickSettingsLayout(
     customControls: @Composable () -> Unit,
+    volume: @Composable () -> Unit,
     brightness: @Composable () -> Unit,
     tiles: @Composable () -> Unit,
     media: @Composable () -> Unit,
@@ -1401,6 +1482,7 @@ fun QuickQuickSettingsLayout(
 @VisibleForTesting
 fun QuickSettingsLayout(
     customControls: @Composable () -> Unit,
+    volume: @Composable () -> Unit,
     brightness: @Composable () -> Unit,
     tiles: @Composable () -> Unit,
     media: @Composable () -> Unit,

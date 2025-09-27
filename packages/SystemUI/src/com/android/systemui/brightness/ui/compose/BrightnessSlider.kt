@@ -563,7 +563,7 @@ data class ContainerColors(val idleColor: Color, val mirrorColor: Color) {
     }
 }
 
-private object Dimensions {
+object Dimensions {
     val SliderBackgroundFrameSize = DpSize(10.dp, 6.dp)
     val SliderBackgroundRoundedCorner = 24.dp
     val SliderTrackRoundedCorner = 12.dp
@@ -572,7 +572,7 @@ private object Dimensions {
     val ThumbTrackGapSize = 6.dp
 }
 
-private object AnimationSpecs {
+object AnimationSpecs {
     val IconAppearSpec = tween<Float>(durationMillis = 100, delayMillis = 33)
     val IconDisappearSpec = tween<Float>(durationMillis = 50)
 }

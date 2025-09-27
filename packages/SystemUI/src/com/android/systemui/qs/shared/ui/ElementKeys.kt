@@ -24,6 +24,7 @@ object ElementKeys {
     val QuickSettingsContent = ElementKey("QuickSettingsContent")
     val GridAnchor = ElementKey("QuickSettingsGridAnchor")
     val FooterActions = ElementKey("FooterActions")
+    val VolumeSlider = ElementKey("VolumeSlider")
     val BrightnessSlider = ElementKey("BrightnessSlider")
     val CustomControls = ElementKey("CustomControls")
 
