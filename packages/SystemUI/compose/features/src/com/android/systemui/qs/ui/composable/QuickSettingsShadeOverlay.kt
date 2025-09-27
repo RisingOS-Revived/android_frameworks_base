@@ -25,6 +25,7 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Arrangement.spacedBy
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
@@ -45,16 +46,21 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.lifecycleScope
 import com.android.compose.animation.scene.ContentScope
 import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.UserAction
 import com.android.compose.animation.scene.UserActionResult
 import com.android.compose.animation.scene.content.state.TransitionState
 import com.android.compose.modifiers.thenIf
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.systemui.brightness.ui.compose.BrightnessSliderContainer
 import com.android.systemui.brightness.ui.compose.ContainerColors
+import com.android.systemui.volume.ui.compose.VolumeSliderContainer
+import com.android.systemui.volume.ui.viewmodel.VolumeSliderViewModel
 import com.android.systemui.compose.modifiers.sysuiResTag
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.lifecycle.rememberViewModel
@@ -91,6 +97,7 @@ constructor(
     private val actionsViewModelFactory: QuickSettingsShadeOverlayActionsViewModel.Factory,
     private val contentViewModelFactory: QuickSettingsShadeOverlayContentViewModel.Factory,
     private val quickSettingsContainerViewModelFactory: QuickSettingsContainerViewModel.Factory,
+    private val volumeSliderViewModelFactory: VolumeSliderViewModel.Factory,
     private val notificationStackScrollView: Lazy<NotificationScrollView>,
     private val notificationsPlaceholderViewModelFactory: NotificationsPlaceholderViewModel.Factory,
 ) : Overlay {
@@ -150,6 +157,7 @@ constructor(
             {
                 QuickSettingsContainer(
                     viewModel = quickSettingsContainerViewModel,
+                    volumeSliderViewModelFactory = volumeSliderViewModelFactory,
                     modifier =
                         Modifier.onPlaced { coordinates ->
                             val shape =
@@ -192,6 +200,7 @@ private sealed interface ShadeBodyState {
 @Composable
 fun ContentScope.QuickSettingsContainer(
     viewModel: QuickSettingsContainerViewModel,
+    volumeSliderViewModelFactory: VolumeSliderViewModel.Factory,
     modifier: Modifier = Modifier,
 ) {
     val isEditing by viewModel.editModeViewModel.isEditing.collectAsStateWithLifecycle()
@@ -223,6 +232,7 @@ fun ContentScope.QuickSettingsContainer(
             ShadeBodyState.Default -> {
                 QuickSettingsLayout(
                     viewModel = viewModel,
+                    volumeSliderViewModelFactory = volumeSliderViewModelFactory,
                     modifier = modifier.sysuiResTag("quick_settings_panel"),
                 )
             }
@@ -234,6 +244,7 @@ fun ContentScope.QuickSettingsContainer(
 @Composable
 fun ContentScope.QuickSettingsLayout(
     viewModel: QuickSettingsContainerViewModel,
+    volumeSliderViewModelFactory: VolumeSliderViewModel.Factory,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -276,15 +287,36 @@ fun ContentScope.QuickSettingsLayout(
                     enabled = { layoutState.transitionState is TransitionState.Idle }
                 )
             ) {
-                BrightnessSliderContainer(
-                    viewModel = viewModel.brightnessSliderViewModel,
-                    containerColors =
-                        ContainerColors(
+                val volumeViewModel = rememberViewModel("VolumeSliderOverlay") {
+                    volumeSliderViewModelFactory.create()
+                }
+                
+                val lifecycleOwner = LocalLifecycleOwner.current
+                DisposableEffect(Unit) {
+                    val job = lifecycleOwner.lifecycleScope.launch {
+                        volumeViewModel.activate()
+                    }
+                    onDispose { job.cancel() }
+                }
+                
+                Column(verticalArrangement = spacedBy(8.dp)) {
+                    VolumeSliderContainer(
+                        viewModel = volumeViewModel,
+                        containerColors = ContainerColors(
                             idleColor = Color.Transparent,
                             mirrorColor = OverlayShade.Colors.PanelBackground,
                         ),
-                    modifier = Modifier.fillMaxWidth(),
-                )
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                    BrightnessSliderContainer(
+                        viewModel = viewModel.brightnessSliderViewModel,
+                        containerColors = ContainerColors(
+                            idleColor = Color.Transparent,
+                            mirrorColor = OverlayShade.Colors.PanelBackground,
+                        ),
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                }
             }
 
             Box {
