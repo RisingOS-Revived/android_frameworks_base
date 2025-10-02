@@ -57,12 +57,18 @@ class NTForbiddenSwipeDownQSController private constructor(
 
     private fun updateSettings() {
         enableSwipeDownQS = Settings.Secure.getIntForUser(context.contentResolver, KEY_ENABLE_SWIPE_DOWN_QS, ENABLE, UserHandle.USER_CURRENT)
-        if (enableSwipeDownQS == DISABLE && !listening) {
-            ScrimUtils.get().addListener(this)
-            listening = true
-        } else if (enableSwipeDownQS == ENABLE && listening) {
-            ScrimUtils.get().removeListener(this)
-            listening = false
+        try{
+            if (enableSwipeDownQS == DISABLE && !listening) {
+                ScrimUtils.get().addListener(this)
+                listening = true
+            } else if (enableSwipeDownQS == ENABLE && listening) {
+                ScrimUtils.get().removeListener(this)
+                listening = false
+            }
+        } catch (e: Exception) {
+            // Handle the case where ScrimUtils is not properly initialized
+            // This can happen during dirty flash scenarios
+            android.util.Log.w(TAG, "ScrimUtils not available during initialization", e)
         }
         updateForbiddenSwipeDownState()
     }
