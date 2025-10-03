@@ -165,7 +165,13 @@ constructor(
             traceName = "qqsHeaderHeight",
             initialValue = 0,
             source =
-                configurationInteractor.dimensionPixelSize(R.dimen.qqs_status_bar_height),
+                configurationInteractor.onAnyConfigurationChange.map {
+                    if (LargeScreenUtils.shouldUseLargeScreenShadeHeader(resources)) {
+                        0
+                    } else {
+                        largeScreenHeaderHelper.getLargeScreenHeaderHeight()
+                    }
+                },
         )
 
     val qqsBottomPadding by
