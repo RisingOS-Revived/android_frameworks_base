@@ -579,7 +579,7 @@ private class AnimatedDialog(
     private var decorViewLayoutListener: View.OnLayoutChangeListener? = null
 
     private var hasInstrumentedJank = false
-    private val blurUtils = BlurUtils(dialog.context.resources)
+    private val blurUtils = BlurUtils(dialog.context.resources, dialog.context.contentResolver)
 
     fun start() {
         val cuj = controller.cuj
