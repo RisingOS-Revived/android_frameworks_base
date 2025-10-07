@@ -167,6 +167,9 @@ constructor(
         internal val QS_HEADER_CLOCK_STYLE =
             "system:" + "qs_header_clock_style"
 
+        internal val NETWORK_TRAFFIC_ENABLED =
+            "system:" + Settings.System.NETWORK_TRAFFIC_ENABLED
+
         private fun Int.stateToString() =
             when (this) {
                 QQS_HEADER_CONSTRAINT -> "QQS Header"
@@ -499,6 +502,7 @@ constructor(
         tunerService.addTunable(this, STATUS_BAR_BATTERY_STYLE)
         tunerService.addTunable(this, QS_SHOW_BATTERY_PERCENT)
         tunerService.addTunable(this, QS_HEADER_CLOCK_STYLE)
+        tunerService.addTunable(this, NETWORK_TRAFFIC_ENABLED)
     }
 
     override fun onViewDetached() {
@@ -534,6 +538,11 @@ constructor(
             QS_HEADER_CLOCK_STYLE -> {
                 qsClockStyle = TunerService.parseInteger(value, 0)
                 updateQsHeaderClockDateVisibility()
+            }
+
+            NETWORK_TRAFFIC_ENABLED -> {
+                if (TunerService.parseIntegerSwitch(value, false))
+                    updateIconManagerColors()
             }
 
             else -> return
