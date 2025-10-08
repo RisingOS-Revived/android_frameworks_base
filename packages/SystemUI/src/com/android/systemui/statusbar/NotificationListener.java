@@ -37,6 +37,7 @@ import com.android.systemui.statusbar.notification.collection.PipelineDumpable;
 import com.android.systemui.statusbar.notification.collection.PipelineDumper;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.NotificationListenerWithPlugins;
+import com.android.systemui.util.ScrimUtils;
 import com.android.systemui.util.time.SystemClock;
 
 import java.util.ArrayList;
@@ -148,6 +149,7 @@ public class NotificationListener extends NotificationListenerWithPlugins implem
                 for (NotificationHandler handler : mNotificationHandlers) {
                     handler.onNotificationPosted(sbn, rankingMap);
                 }
+                ScrimUtils.get().onNotificationPosted(sbn);
             });
         }
     }

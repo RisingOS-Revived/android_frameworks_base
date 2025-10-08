@@ -19,6 +19,7 @@ import static com.android.systemui.statusbar.StatusBarState.KEYGUARD;
 
 import android.content.Context;
 import android.os.Handler;
+import android.service.notification.StatusBarNotification;
 
 import com.android.keyguard.NowBarController;
 import com.android.systemui.Dependency;
@@ -40,6 +41,7 @@ public class ScrimUtils {
         default void onExpandedFractionChanged(float expandedFraction) {}
         default void onBarStateChanged(int state) {}
         default void onQsVisibilityChanged(boolean visible) {}
+        default void onNotificationPosted(StatusBarNotification sbn) {}
     }
 
     public enum ExpansionState {
@@ -137,6 +139,10 @@ public class ScrimUtils {
 
     private void notifyListeners(Consumer<ScrimEventListener> callback) {
         listeners.notifyConsumer(callback);
+    }
+
+    public void onNotificationPosted(StatusBarNotification sbn) {
+        notifyListeners(listener -> listener.onNotificationPosted(sbn));
     }
 
     public void setViewAlpha(float subjectAlpha) {
