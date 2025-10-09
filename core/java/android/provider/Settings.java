@@ -7480,6 +7480,12 @@ public final class Settings {
         public static final String GESTURE_NAVBAR_LENGTH_MODE = "gesture_navbar_length_mode";
 
         /**
+         * Use dynamic color based on battery level
+         * @hide
+         */
+        public static final String WIRELESS_CHARGING_DYNAMIC_COLOR = "wireless_charging_dynamic_color";
+
+        /**
          * Whether edge light is enabled.
          * Default 0
          * @hide
