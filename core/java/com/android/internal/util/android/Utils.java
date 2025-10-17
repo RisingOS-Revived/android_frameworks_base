@@ -17,6 +17,7 @@
 package com.android.internal.util.android;
 
 import android.app.ActivityManager;
+import android.app.ActivityThread;
 import android.app.IActivityManager;
 import android.app.role.RoleManager;
 import android.content.Context;
@@ -35,6 +36,7 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.util.Log;
 
 import com.android.internal.util.CollectionUtils;
@@ -227,6 +229,22 @@ public class Utils {
                 // do nothing.
             }
             return null;
+        }
+    }
+
+    public static boolean ambientAod() {
+        try {
+            Context ctx = ActivityThread.currentApplication() != null
+                    ? ActivityThread.currentApplication().getApplicationContext()
+                    : null;
+            if (ctx == null) return false;
+            return Settings.Secure.getIntForUser(ctx.getContentResolver(),
+                Settings.Secure.DOZE_ALWAYS_ON_WALLPAPER_ENABLED,
+                ctx.getResources().getBoolean(
+                    com.android.internal.R.bool.config_dozeSupportsAodWallpaper) ? 1 : 0,
+                UserHandle.USER_CURRENT) == 1;
+        } catch (Throwable t) {
+            return false;
         }
     }
 }
