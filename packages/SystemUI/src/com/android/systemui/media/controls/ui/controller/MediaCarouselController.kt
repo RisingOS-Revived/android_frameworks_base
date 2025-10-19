@@ -422,7 +422,11 @@ constructor(
         bgExecutor.execute {
             globalSettings.registerContentObserverSync(
                 Settings.Global.getUriFor(Settings.Global.ANIMATOR_DURATION_SCALE),
-                animationScaleObserver,
+                animationScaleObserver
+            )
+            secureSettings.registerContentObserverSync(
+                Settings.Secure.getUriFor(Settings.Secure.SHOW_MEDIA_SQUIGGLE_ANIMATION),
+                animationScaleObserver
             )
         }
     }
