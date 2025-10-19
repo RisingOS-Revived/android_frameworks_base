@@ -55,6 +55,25 @@ class VolumeInteractor @Inject constructor(
         }
     }
 
+    fun getRingerModeFlow(): Flow<Int> = callbackFlow {
+        val receiver = object : BroadcastReceiver() {
+            override fun onReceive(context: Context?, intent: Intent?) {
+                if (intent?.action == AudioManager.RINGER_MODE_CHANGED_ACTION) {
+                    trySend(audioManager.ringerMode)
+                }
+            }
+        }
+        
+        val filter = IntentFilter(AudioManager.RINGER_MODE_CHANGED_ACTION)
+        context.registerReceiver(receiver, filter)
+        
+        trySend(audioManager.ringerMode)
+        
+        awaitClose {
+            context.unregisterReceiver(receiver)
+        }
+    }
+
     fun getMaxVolume(streamType: Int): Int = audioManager.getStreamMaxVolume(streamType)
 
     fun setTemporaryVolume(streamType: Int, volume: Int) {
@@ -72,6 +91,29 @@ class VolumeInteractor @Inject constructor(
             audioManager.setStreamVolume(streamType, defaultVolume, 0)
         } else {
             audioManager.setStreamVolume(streamType, 0, 0)
+        }
+    }
+
+    fun getRingerMode(): Int = audioManager.ringerMode
+
+    fun setRingerMode(mode: Int) {
+        audioManager.ringerMode = mode
+    }
+
+    fun toggleRingerMode() {
+        val currentMode = audioManager.ringerMode
+        val nextMode = when (currentMode) {
+            AudioManager.RINGER_MODE_NORMAL -> AudioManager.RINGER_MODE_VIBRATE
+            AudioManager.RINGER_MODE_VIBRATE -> AudioManager.RINGER_MODE_SILENT
+            AudioManager.RINGER_MODE_SILENT -> AudioManager.RINGER_MODE_NORMAL
+            else -> AudioManager.RINGER_MODE_NORMAL
+        }
+
+        try {
+            val method = audioManager.javaClass.getMethod("setRingerModeInternal", Int::class.javaPrimitiveType)
+            method.invoke(audioManager, nextMode)
+        } catch (e: Exception) {
+            audioManager.ringerMode = nextMode
         }
     }
 }
