@@ -51,6 +51,12 @@ constructor(
         volumeInteractor.getVolumeFlow(streamType)
     )
 
+    val currentRingerMode by hydrator.hydratedStateOf(
+        "currentRingerMode",
+        AudioManager.RINGER_MODE_NORMAL,
+        volumeInteractor.getRingerModeFlow()
+    )
+
     val maxVolume = volumeInteractor.getMaxVolume(streamType)
     val minVolume = 0
 
@@ -75,6 +81,10 @@ constructor(
 
     fun onIconClick() {
         volumeInteractor.toggleMute(streamType)
+    }
+
+    fun onRingerToggle() {
+        volumeInteractor.toggleRingerMode()
     }
 
     override suspend fun onActivated(): Nothing {

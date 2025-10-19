@@ -16,21 +16,31 @@
 package com.android.systemui.volume.ui.compose
 
 import android.content.Context
+import android.graphics.PorterDuff
+import android.media.AudioManager
 import android.os.UserHandle
 import android.provider.Settings
 import android.view.MotionEvent
+import android.widget.ImageButton
+import android.widget.ImageView
 import androidx.annotation.VisibleForTesting
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.VectorConverter
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.CornerSize
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
@@ -43,11 +53,12 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.CornerRadius
@@ -61,11 +72,13 @@ import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.graphics.painter.ColorPainter
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidView
 import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.compose.modifiers.padding
 import com.android.compose.theme.LocalAndroidColorScheme
@@ -79,6 +92,7 @@ import com.android.systemui.haptics.slider.SliderHapticFeedbackConfig
 import com.android.systemui.haptics.slider.compose.ui.SliderHapticsViewModel
 import com.android.systemui.lifecycle.rememberViewModel
 import com.android.systemui.qs.ui.compose.borderOnFocus
+import com.android.systemui.res.R
 import com.android.systemui.volume.ui.viewmodel.VolumeDrag
 import com.android.systemui.volume.ui.viewmodel.VolumeSliderViewModel
 import platform.test.motion.compose.values.MotionTestValueKey
@@ -91,11 +105,13 @@ fun VolumeSlider(
     volumeValue: Int,
     valueRange: IntRange,
     isMuted: Boolean,
+    ringerMode: Int,
     iconResProvider: (Float, Boolean) -> Int,
     imageLoader: suspend (Int, Context) -> com.android.systemui.common.shared.model.Icon.Loaded,
     onDrag: (Int) -> Unit,
     onStop: (Int) -> Unit,
     onIconClick: suspend () -> Unit,
+    onRingerToggle: () -> Unit,
     modifier: Modifier = Modifier,
     hapticsViewModelFactory: SliderHapticsViewModel.Factory,
 ) {
@@ -106,6 +122,11 @@ fun VolumeSlider(
         2 -> 12.dp
         3 -> 0.dp
         else -> Dimensions.SliderTrackRoundedCorner
+    }
+    val autoIconShape = when (shapeMode) {
+        2 -> RoundedCornerShape(12.dp)
+        3 -> RoundedCornerShape(0.dp)
+        else -> CircleShape
     }
 
     var value by remember(volumeValue) { mutableIntStateOf(volumeValue) }
@@ -139,7 +160,7 @@ fun VolumeSlider(
         }
     }
 
-    val painter: Painter by produceState<Painter>(
+    val painter: Painter by androidx.compose.runtime.produceState<Painter>(
         initialValue = ColorPainter(Color.Transparent),
         key1 = iconRes,
         key2 = context,
@@ -161,7 +182,10 @@ fun VolumeSlider(
         }
     }
 
-    Row(modifier = modifier) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = modifier
+    ) {
         Slider(
             value = animatedValue,
             valueRange = floatValueRange,
@@ -175,7 +199,7 @@ fun VolumeSlider(
                 hapticsViewModel?.onValueChangeEnded()
                 onStop(value)
             },
-            modifier = modifier
+            modifier = Modifier
                 .weight(1f)
                 .sysuiResTag("volume_slider"),
             interactionSource = interactionSource,
@@ -240,6 +264,48 @@ fun VolumeSlider(
                 )
             }
         )
+
+        Spacer(modifier = Modifier.width(8.dp))
+
+        val coroutineScope = rememberCoroutineScope()
+        val ringerBackgroundColor by animateColorAsState(
+            targetValue = when (ringerMode) {
+                AudioManager.RINGER_MODE_NORMAL -> MaterialTheme.colorScheme.primary
+                else -> LocalAndroidColorScheme.current.surfaceEffect2
+            }
+        )
+        val ringerIconTint by animateColorAsState(
+            targetValue = when (ringerMode) {
+                AudioManager.RINGER_MODE_NORMAL -> MaterialTheme.colorScheme.onPrimary
+                else -> MaterialTheme.colorScheme.onSurface
+            }
+        )
+
+        AndroidView(
+            factory = { factoryContext ->
+                ImageButton(factoryContext).apply {
+                    setBackgroundResource(0)
+                    scaleType = ImageView.ScaleType.CENTER_INSIDE
+                }
+            },
+            modifier = Modifier
+                .size(52.dp)
+                .clip(autoIconShape)
+                .background(ringerBackgroundColor),
+            update = { button ->
+                val iconRes = when (ringerMode) {
+                    AudioManager.RINGER_MODE_SILENT -> R.drawable.ic_volume_ringer_mute
+                    AudioManager.RINGER_MODE_VIBRATE -> R.drawable.ic_volume_ringer_vibrate
+                    else -> R.drawable.ic_volume_ringer
+                }
+                
+                button.setImageResource(iconRes)
+                button.setColorFilter(ringerIconTint.toArgb(), PorterDuff.Mode.SRC_IN)
+                button.setOnClickListener {
+                    onRingerToggle()
+                }
+            }
+        )
     }
 }
 
@@ -261,6 +327,7 @@ fun VolumeSliderContainer(
     containerColors: com.android.systemui.brightness.ui.compose.ContainerColors,
 ) {
     val volume = viewModel.currentVolume
+    val ringerMode = viewModel.currentRingerMode
     val isMuted = volume == 0
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
@@ -294,6 +361,7 @@ fun VolumeSliderContainer(
             volumeValue = volume,
             valueRange = viewModel.minVolume..viewModel.maxVolume,
             isMuted = isMuted,
+            ringerMode = ringerMode,
             iconResProvider = VolumeSliderViewModel::getIconForPercentage,
             imageLoader = viewModel::loadImage,
             onDrag = {
@@ -305,6 +373,7 @@ fun VolumeSliderContainer(
                 coroutineScope.launch { viewModel.onDrag(VolumeDrag.Stopped(it)) }
             },
             onIconClick = { viewModel.onIconClick() },
+            onRingerToggle = { viewModel.onRingerToggle() },
             modifier = Modifier
                 .borderOnFocus(
                     color = MaterialTheme.colorScheme.secondary,
