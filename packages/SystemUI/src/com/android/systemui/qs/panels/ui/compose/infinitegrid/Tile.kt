@@ -28,6 +28,7 @@ import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.Arrangement
@@ -145,6 +146,7 @@ fun Tile(
     modifier: Modifier = Modifier,
     isVisible: () -> Boolean = { true },
     detailsViewModel: DetailsViewModel?,
+    isFirstRow: Boolean = false,
 ) {
     trace(tile.traceName) {
         val currentBounceableInfo by rememberUpdatedState(bounceableInfo)
@@ -171,11 +173,20 @@ fun Tile(
                 tileHapticsViewModelFactoryProvider.getHapticsViewModelFactory()?.create(tile)
             }
 
-        // TODO(b/361789146): Draw the shapes instead of clipping
-        val tileShape by TileDefaults.animateTileShapeAsState(uiState.state)
+        // Determine tile shape based on row position
+        val tileShape = if (isFirstRow) {
+            RoundedCornerShape(100.dp)
+        } else {
+            TileDefaults.animateTileShapeAsState(uiState.state).value
+        }
+        
         val animatedColor by animateColorAsState(colors.background, label = "QSTileBackgroundColor")
         val animatedAlpha by animateFloatAsState(colors.alpha, label = "QSTileAlpha")
         val tileHeight = tileHeight()
+
+        val borderWidth = 5.dp
+        val borderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
+        val focusBorderColor = MaterialTheme.colorScheme.secondary
 
         TileExpandable(
             color = { animatedColor },
@@ -184,7 +195,7 @@ fun Tile(
             hapticsViewModel = hapticsViewModel,
             modifier =
                 modifier
-                    .borderOnFocus(color = MaterialTheme.colorScheme.secondary, tileShape.topEnd)
+                    .borderOnFocus(color = focusBorderColor, tileShape.topEnd)
                     .then(
                         if (iconOnly)
                             Modifier.width { tileHeight.roundToPx() }
@@ -197,6 +208,11 @@ fun Tile(
                         nextBounceable = currentBounceableInfo.nextTile,
                         orientation = Orientation.Horizontal,
                         bounceEnd = currentBounceableInfo.bounceEnd,
+                    )
+                    .border(
+                        width = borderWidth,
+                        color = borderColor,
+                        shape = tileShape
                     )
                     .graphicsLayer { alpha = animatedAlpha },
         ) { expandable ->
