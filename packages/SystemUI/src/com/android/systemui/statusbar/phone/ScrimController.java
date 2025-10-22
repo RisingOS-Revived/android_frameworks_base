@@ -1693,13 +1693,12 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
     }
 
     private void onThemeChanged() {
-        if (!mViewsAttached) {
-            Log.w(TAG, "Views not attached, deferring theme change");
-            return;
-        }
+        cancelAnimator(ViewState.getChildTag(mScrimBehind, TAG_KEY_ANIM));
+        cancelAnimator(ViewState.getChildTag(mNotificationsScrim, TAG_KEY_ANIM));
+        cancelAnimator(ViewState.getChildTag(mScrimInFront, TAG_KEY_ANIM));
         updateThemeColors();
-        scheduleUpdate();
-        updateScrimsAndDispatch();
+        mState.prepare(mState);
+        applyAndDispatchState();
     }
 
     @Override
