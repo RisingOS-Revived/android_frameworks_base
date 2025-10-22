@@ -37,9 +37,7 @@ import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.text.TextUtils;
-import android.util.DisplayMetrics;
 import android.util.Log;
-import android.view.WindowManager;
 
 import com.android.internal.R;
 import com.android.internal.util.android.KeyProviderManager;
@@ -73,11 +71,11 @@ public final class PixelPropsUtils {
     private static final String PACKAGE_SI = "com.google.android.settings.intelligence";
 
     private static final String PROP_HOOKS = "persist.sys.pihooks_";
-    private static final String SPOOF_QSB = "persist.sys.pixelprops.qsb";
-    private static final String SPOOF_PIXEL_PROPS = "persist.sys.pixelprops";
-    private static final String SPOOF_PIXEL_GAMES = "persist.sys.pixelprops.games";
-    private static final String SPOOF_PIXEL_GMS_CERT_CHAIN = "persist.sys.pixelprops.gmscertchain";
-    public static final String SPOOF_PIXEL_GMS = "persist.sys.pixelprops.gms";
+    private static final String SPOOF_QSB = "persist.sys.pp.qsb";
+    private static final String SPOOF_PP = "persist.sys.pp";
+    private static final String SPOOF_GAMES = "persist.sys.pp.games";
+    private static final String SPOOF_GMS_CERT_CHAIN = "persist.sys.pp.gmscertchain";
+    public static final String SPOOF_GMS = "persist.sys.pp.gms";
 
     private static final String TAG = PixelPropsUtils.class.getSimpleName();
     private static final boolean DEBUG = false;
@@ -376,7 +374,7 @@ public final class PixelPropsUtils {
     }
 
     public static void spoofBuildGms() {
-        if (!SystemProperties.getBoolean(SPOOF_PIXEL_GMS, true))
+        if (!SystemProperties.getBoolean(SPOOF_GMS, true))
             return;
         for (String key : GMS_SPOOF_KEYS) {
             setPropValue(key, SystemProperties.get(PROP_HOOKS + key));
@@ -387,9 +385,6 @@ public final class PixelPropsUtils {
         final String packageName = context.getPackageName();
         final String processName = Application.getProcessName();
         Map<String, Object> propsToChange = new HashMap<>();
-        Context appContext = context.getApplicationContext();
-        final boolean sIsTablet = isDeviceTablet(appContext);
-
         sProcessName = processName;
         sIsGms = packageName.equals(PACKAGE_GMS) && processName.equals(PROCESS_GMS_UNSTABLE);
         sIsExcluded = isGoogleCameraPackage(packageName);
@@ -397,10 +392,8 @@ public final class PixelPropsUtils {
         String model = SystemProperties.get("ro.product.model");
         boolean isPixelDevice = SystemProperties.get("ro.soc.manufacturer").equalsIgnoreCase("Google");
         boolean isMainlineDevice = isPixelDevice && model.matches("Pixel (8|9|10)[a-zA-Z ]*");
-        boolean isTensorDevice = isPixelDevice && model.matches("Pixel (6|7|8|9|10)[a-zA-Z ]*");
-        boolean isPixelGmsEnabled = SystemProperties.getBoolean(SPOOF_PIXEL_GMS, true);
+        boolean isPixelGmsEnabled = SystemProperties.getBoolean(SPOOF_GMS, true);
         boolean isExcludedProcess = processName != null && (processName.toLowerCase().contains("unstable"));
-
         propsToChangeGeneric.forEach((k, v) -> setPropValue(k, v));
 
         if (packageName == null || processName == null || packageName.isEmpty()) {
@@ -437,7 +430,7 @@ public final class PixelPropsUtils {
         };
 
         if (Arrays.asList(packagesToSpoofAsMainlineDevice).contains(packageName) && !isExcludedProcess) {
-            if (SystemProperties.getBoolean(SPOOF_PIXEL_PROPS, true)) {
+            if (SystemProperties.getBoolean(SPOOF_PP, true)) {
                 if (!isMainlineDevice) {
                     propsToChange.putAll(propsToChangeRecentPixel);
                 }
@@ -445,14 +438,14 @@ public final class PixelPropsUtils {
         }
 
         if (Arrays.asList(packagesToChangeRecentPixel).contains(packageName)) {
-            if (isMainlineDevice || !SystemProperties.getBoolean(SPOOF_PIXEL_PROPS, true)) {
+            if (isMainlineDevice || !SystemProperties.getBoolean(SPOOF_PP, true)) {
                 return;
             } else if (packageName.equals(PACKAGE_QSB)) {
                 if (!SystemProperties.getBoolean(SPOOF_QSB, false)) {
                     return;
                 }
-            } else if (SystemProperties.getBoolean(SPOOF_PIXEL_PROPS, true)) {
-                if (sIsTablet) {
+            } else if (SystemProperties.getBoolean(SPOOF_PP, true)) {
+                if (isDeviceTablet(context.getApplicationContext())) {
                     propsToChange.putAll(propsToChangePixelTablet);
                 } else {
                     propsToChange.putAll(propsToChangeRecentPixel);
@@ -461,7 +454,7 @@ public final class PixelPropsUtils {
         }
 
         if (packageName.equals("com.google.android.apps.photos")) {
-            if (SystemProperties.getBoolean(SPOOF_PIXEL_PROPS, true)) {
+            if (SystemProperties.getBoolean(SPOOF_PP, true)) {
                 propsToChange.putAll(propsToChangeRecentPixel);
             }
         }
@@ -505,7 +498,7 @@ public final class PixelPropsUtils {
             }
         }
 
-        if (!SystemProperties.getBoolean(SPOOF_PIXEL_GAMES, true))
+        if (!SystemProperties.getBoolean(SPOOF_GAMES, true))
             return;
 
         if (Arrays.asList(packagesToChangeROG6).contains(packageName)) {
@@ -627,7 +620,7 @@ public final class PixelPropsUtils {
         };
 
         if (Arrays.asList(packagesToSpoofAsMainlineDevice).contains(packageName) && !isExcludedProcess) {
-            if (SystemProperties.getBoolean(SPOOF_PIXEL_PROPS, true)) {
+            if (SystemProperties.getBoolean(SPOOF_PP, true)) {
                 if (!isMainlineDevice) {
                     propsToChange.putAll(propsToChangeRecentPixel);
                 }
@@ -635,7 +628,7 @@ public final class PixelPropsUtils {
         }
 
         if (packageName.equals("com.google.android.apps.photos")) {
-            if (SystemProperties.getBoolean(SPOOF_PIXEL_PROPS, true)) {
+            if (SystemProperties.getBoolean(SPOOF_PP, true)) {
                 propsToChange.putAll(propsToChangeRecentPixel);
             }
         }
@@ -650,7 +643,7 @@ public final class PixelPropsUtils {
         }
 
         if (packageName.equals("com.google.android.gms")) {
-            if (SystemProperties.getBoolean(SPOOF_PIXEL_GMS, true)) {
+            if (SystemProperties.getBoolean(SPOOF_GMS, true)) {
                 if (shouldTryToCertifyDevice()) {
                     return;
                 }
@@ -672,17 +665,9 @@ public final class PixelPropsUtils {
         if (context == null) {
             return false;
         }
-        Configuration configuration = context.getResources().getConfiguration();
-        DisplayMetrics displayMetrics = new DisplayMetrics();
-        WindowManager windowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
-        if (windowManager != null) {
-            windowManager.getDefaultDisplay().getMetrics(displayMetrics);
-        }
-        return (configuration.screenLayout & Configuration.SCREENLAYOUT_SIZE_MASK)
-                >= Configuration.SCREENLAYOUT_SIZE_LARGE
-                || displayMetrics.densityDpi == DisplayMetrics.DENSITY_XHIGH
-                || displayMetrics.densityDpi == DisplayMetrics.DENSITY_XXHIGH
-                || displayMetrics.densityDpi == DisplayMetrics.DENSITY_XXXHIGH;
+        Configuration config = context.getResources().getConfiguration();
+        boolean isTablet = (config.smallestScreenWidthDp >= 600);
+        return isTablet;
     }
 
     private static void setPropValue(String key, Object value) {
@@ -916,17 +901,21 @@ public final class PixelPropsUtils {
     }
 
     public static void onEngineGetCertificateChain() {
+        boolean isPixelGmsEnabled = SystemProperties.getBoolean(SPOOF_GMS, true);
+        if (!isPixelGmsEnabled)
+            dlog("onEngineGetCertificateChain disabled by setting");
+            return;
+        }
+
         // If a keybox is found, don't block key attestation
-        if (SystemProperties.getBoolean(SPOOF_PIXEL_GMS_CERT_CHAIN, false)
+        if (SystemProperties.getBoolean(SPOOF_GMS_CERT_CHAIN, false)
                 && KeyProviderManager.isKeyboxAvailable()) {
             dlog("Key attestation blocking is disabled because a keybox is defined to spoof");
             return;
         }
-        boolean isPixelGmsEnabled = SystemProperties.getBoolean(SPOOF_PIXEL_GMS, true);
-        if (!isPixelGmsEnabled)
-            return;
-        // Check stack for SafetyNet or Play Integrity
-        if (isCallerSafetyNet() && !sIsExcluded) {
+
+        // Check stack for Play Integrity
+        if (isCallerSafetyNet()) {
             dlog("Blocked key attestation");
             throw new UnsupportedOperationException();
         }

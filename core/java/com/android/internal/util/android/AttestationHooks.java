@@ -41,20 +41,11 @@ public final class AttestationHooks {
     private static final String TAG = "AttestationHooks";
     private static final boolean DEBUG = false;
 
-    private static final String PACKAGE_GPHOTOS = "com.google.android.apps.photos";
+    private static final String PACKAGE_PHOTOS = "com.google.android.apps.photos";
     private static final String PACKAGE_SNAPCHAT = "com.snapchat.android";
 
-    private static final String SPOOF_PIXEL_GPHOTOS = "persist.sys.pixelprops.gphotos";
-    private static final String SPOOF_PIXEL_SNAPCHAT = "persist.sys.pixelprops.snap";
-
-    private static final Map<String, Object> sMainlineProps = Map.of(
-        "BRAND", "google",
-        "MANUFACTURER", "Google",
-        "DEVICE", "mustang",
-        "PRODUCT", "mustang",
-        "MODEL", "Pixel 10 Pro XL",
-        "FINGERPRINT", "google/mustang/mustang:16/BD3A.251005.003.W3/14147046:user/release-keys"
-    );
+    private static final String SPOOF_PHOTOS = "persist.sys.pp.photos";
+    private static final String SPOOF_SNAPCHAT = "persist.sys.pp.snapchat";
 
     private static final Map<String, Object> sPixelXLProps = Map.of(
         "BRAND", "google",
@@ -80,10 +71,10 @@ public final class AttestationHooks {
         sProcessName = processName;
 
         String model = SystemProperties.get("ro.product.model");
-        boolean isGPhotosSpoofEnabled = SystemProperties.getBoolean(SPOOF_PIXEL_GPHOTOS, true);
+        boolean isPhotosSpoofEnabled = SystemProperties.getBoolean(SPOOF_PHOTOS, true);
 
-        if (packageName.equals(PACKAGE_GPHOTOS)) {
-            if (!isGPhotosSpoofEnabled) {
+        if (packageName.equals(PACKAGE_PHOTOS)) {
+            if (!isPhotosSpoofEnabled) {
                 return;
             } else {
                 sPixelXLProps.forEach(AttestationHooks::setPropValue);
@@ -91,7 +82,7 @@ public final class AttestationHooks {
         }
 
         if (packageName.equals(PACKAGE_SNAPCHAT)) {
-            if (SystemProperties.getBoolean(SPOOF_PIXEL_SNAPCHAT, false)) {
+            if (SystemProperties.getBoolean(SPOOF_SNAPCHAT, false)) {
                 sPixelXLProps.forEach(AttestationHooks::setPropValue);
             }
         }

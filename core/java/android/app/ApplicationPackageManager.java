@@ -917,27 +917,27 @@ public class ApplicationPackageManager extends PackageManager {
         }
 
         String packageName = ActivityThread.currentPackageName();
-        boolean isGPhotosSpoofEnabled = SystemProperties.getBoolean("persist.sys.pixelprops.gphotos", true);
+        boolean isPhotosSpoofEnabled = SystemProperties.getBoolean("persist.sys.pp.photos", true);
         if (packageName != null
                 && (packageName.equals("com.google.android.googlequicksearchbox")
                 || packageName.equals("com.google.android.apps.pixel.agent")
                 || packageName.equals("com.google.android.apps.pixel.creativeassistant")
                 || packageName.equals("com.google.android.dialer")
                 || (packageName.equals("com.google.android.apps.photos")
-                && !isGPhotosSpoofEnabled))) {
+                && !isPhotosSpoofEnabled))) {
             if (Arrays.asList(featuresPixel).contains(name)) return true;
             if (Arrays.asList(featuresPixelOthers).contains(name)) return true;
             if (Arrays.asList(featuresTensor).contains(name)) return true;
             if (Arrays.asList(featuresNexus).contains(name)) return true;
         }
         if (packageName != null
-                && packageName.equals("com.google.android.apps.photos") && isGPhotosSpoofEnabled) {
+                && packageName.equals("com.google.android.apps.photos") && isPhotosSpoofEnabled) {
             if (Arrays.asList(featuresPixel).contains(name)) return false;
             if (Arrays.asList(featuresPixelOthers).contains(name)) return true;
             if (Arrays.asList(featuresTensor).contains(name)) return false;
             if (Arrays.asList(featuresNexus).contains(name)) return true;
         }
-        boolean enableTensorFeaturesOnNonTensor = SystemProperties.getBoolean("persist.sys.features.tensor", false);
+        boolean enableTensorFeaturesOnNonTensor = SystemProperties.getBoolean("persist.sys.pp.tensor", false);
         boolean isTensorDevice = SystemProperties.get("ro.product.model").matches("Pixel (6|7|8|9|10)[a-zA-Z ]*");
         if (packageName != null && packageName.equals("com.google.android.as")) {
             if (isTensorDevice && Arrays.asList(featuresTensor).contains(name)) {

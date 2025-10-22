@@ -25,7 +25,6 @@ import android.hardware.security.keymint.HardwareAuthenticatorType;
 import android.hardware.security.keymint.KeyParameter;
 import android.hardware.security.keymint.SecurityLevel;
 import android.os.StrictMode;
-import android.os.SystemProperties;
 import android.security.Flags;
 import android.security.GateKeeper;
 import android.security.KeyStore2;
@@ -183,10 +182,7 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
 
     @Override
     public Certificate[] engineGetCertificateChain(String alias) {
-        boolean isPixelGmsEnabled = SystemProperties.getBoolean(SPOOF_PIXEL_GMS, true);
-        if (isPixelGmsEnabled) {
-            PixelPropsUtils.onEngineGetCertificateChain();
-        }
+        PixelPropsUtils.onEngineGetCertificateChain();
 
         KeyEntryResponse response = getKeyMetadata(alias);
 
