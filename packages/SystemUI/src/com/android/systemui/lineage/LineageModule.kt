@@ -39,6 +39,7 @@ import com.android.systemui.qs.tiles.PreferredNetworkTile
 import com.android.systemui.qs.tiles.ProfilesTile
 import com.android.systemui.qs.tiles.ReadingModeTile
 import com.android.systemui.qs.tiles.RefreshRateTile
+import com.android.systemui.qs.tiles.RingerModeTile
 import com.android.systemui.qs.tiles.ScreenshotTile
 import com.android.systemui.qs.tiles.SoundTile
 import com.android.systemui.qs.tiles.SyncTile
@@ -193,6 +194,12 @@ interface LineageModule {
     @IntoMap
     @StringKey(VolumeQSTile.TILE_SPEC)
     fun bindVolumeQSTile(volumeQSTile: VolumeQSTile): QSTileImpl<*>
+
+    /** Inject RingerModeTile into tileMap in QSModule */
+    @Binds
+    @IntoMap
+    @StringKey(RingerModeTile.TILE_SPEC)
+    fun bindRingerModeTile(ringerModeTile: RingerModeTile): QSTileImpl<*>
 
     /** Inject VolumeTile into tileMap in QSModule */
     @Binds
