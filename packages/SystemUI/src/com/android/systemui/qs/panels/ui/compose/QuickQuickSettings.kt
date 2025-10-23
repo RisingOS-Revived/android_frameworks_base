@@ -85,6 +85,7 @@ fun ContentScope.QuickQuickSettings(
                         // There should be no QuickQuickSettings when the details view is enabled.
                         detailsViewModel = null,
                         isVisible = listening,
+                        volumeInteractor = viewModel.volumeInteractor,
                     )
                 }
             }
