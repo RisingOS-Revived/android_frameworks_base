@@ -53,7 +53,8 @@ constructor(
         "heads_up" to CustomTileConfig(R.drawable.ic_qs_heads_up, TileCategory.DISPLAY),
         "reading_mode" to CustomTileConfig(R.drawable.ic_qs_reader, TileCategory.DISPLAY),
         "dns" to CustomTileConfig(R.drawable.ic_settings_dns, TileCategory.CONNECTIVITY),
-        "volume" to CustomTileConfig(R.drawable.ic_volume_media, TileCategory.UTILITIES)
+        "volume" to CustomTileConfig(R.drawable.ic_volume_media, TileCategory.UTILITIES),
+        "ringer" to CustomTileConfig(R.drawable.ic_volume_ringer, TileCategory.UTILITIES)
     )
 
     private data class CustomTileConfig(

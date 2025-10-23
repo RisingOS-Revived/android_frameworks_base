@@ -210,4 +210,10 @@
     <string name="quick_settings_volume_label">Volume</string>
     <string name="qs_volume_dialog_title">Volume Control</string>
     <string name="qs_volume_dialog_mute">Mute</string>
+
+    <!-- Ringer Mode QS Tile -->
+    <string name="quick_settings_ringer_label">Ringer</string>
+    <string name="quick_settings_ringer_ring">Ring</string>
+    <string name="quick_settings_ringer_vibrate">Vibrate</string>
+    <string name="quick_settings_ringer_silent">Silent</string>
 </resources>

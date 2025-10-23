@@ -27,6 +27,7 @@ import com.android.systemui.qs.panels.shared.model.SizedTileImpl
 import com.android.systemui.qs.panels.shared.model.splitInRowsSequence
 import com.android.systemui.qs.pipeline.domain.interactor.CurrentTilesInteractor
 import com.android.systemui.qs.pipeline.shared.TileSpec
+import com.android.systemui.volume.domain.interactor.VolumeInteractor
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.awaitCancellation
@@ -43,6 +44,7 @@ constructor(
     val squishinessViewModel: TileSquishinessViewModel,
     iconTilesViewModel: IconTilesViewModel,
     val tileHapticsViewModelFactoryProvider: TileHapticsViewModelFactoryProvider,
+    val volumeInteractor: VolumeInteractor,
 ) : ExclusiveActivatable() {
 
     private val hydrator = Hydrator("QuickQuickSettingsViewModel")

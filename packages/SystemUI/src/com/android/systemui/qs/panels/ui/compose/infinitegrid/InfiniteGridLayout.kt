@@ -48,6 +48,7 @@ import com.android.systemui.qs.panels.ui.viewmodel.TileViewModel
 import com.android.systemui.qs.pipeline.shared.TileSpec
 import com.android.systemui.qs.shared.ui.ElementKeys.toElementKey
 import com.android.systemui.res.R
+import com.android.systemui.volume.domain.interactor.VolumeInteractor
 import javax.inject.Inject
 
 @SysUISingleton
@@ -58,6 +59,7 @@ constructor(
     private val iconTilesViewModel: IconTilesViewModel,
     private val viewModelFactory: InfiniteGridViewModel.Factory,
     private val tileHapticsViewModelFactoryProvider: TileHapticsViewModelFactoryProvider,
+    private val volumeInteractor: VolumeInteractor,
 ) : PaginatableGridLayout {
 
     @Composable
@@ -122,6 +124,7 @@ constructor(
                             ),
                         detailsViewModel = detailsViewModel,
                         isVisible = listening,
+                        volumeInteractor = volumeInteractor,
                     )
                 }
             }

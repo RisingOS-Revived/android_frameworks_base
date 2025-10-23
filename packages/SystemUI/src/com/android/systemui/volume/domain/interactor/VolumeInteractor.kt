@@ -15,6 +15,7 @@
  */
 package com.android.systemui.volume.domain.interactor
 
+import android.app.NotificationManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -32,6 +33,7 @@ class VolumeInteractor @Inject constructor(
     @Application private val context: Context
 ) {
     private val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+    private val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
     
     fun getVolumeFlow(streamType: Int): Flow<Int> = callbackFlow {
         val receiver = object : BroadcastReceiver() {
@@ -97,7 +99,19 @@ class VolumeInteractor @Inject constructor(
     fun getRingerMode(): Int = audioManager.ringerMode
 
     fun setRingerMode(mode: Int) {
-        audioManager.ringerMode = mode
+        try {
+            if (notificationManager.isNotificationPolicyAccessGranted) {
+                notificationManager.setInterruptionFilter(NotificationManager.INTERRUPTION_FILTER_ALL)
+            }
+        } catch (e: Exception) {
+        }
+        
+        try {
+            val method = audioManager.javaClass.getMethod("setRingerModeInternal", Int::class.javaPrimitiveType)
+            method.invoke(audioManager, mode)
+        } catch (e: Exception) {
+            audioManager.ringerMode = mode
+        }
     }
 
     fun toggleRingerMode() {
@@ -109,11 +123,6 @@ class VolumeInteractor @Inject constructor(
             else -> AudioManager.RINGER_MODE_NORMAL
         }
 
-        try {
-            val method = audioManager.javaClass.getMethod("setRingerModeInternal", Int::class.javaPrimitiveType)
-            method.invoke(audioManager, nextMode)
-        } catch (e: Exception) {
-            audioManager.ringerMode = nextMode
-        }
+        setRingerMode(nextMode)
     }
 }

@@ -20,6 +20,7 @@ package com.android.systemui.qs.panels.ui.compose.infinitegrid
 
 import android.content.Context
 import android.content.res.Resources
+import android.media.AudioManager
 import android.os.Trace
 import android.service.quicksettings.Tile.STATE_ACTIVE
 import android.service.quicksettings.Tile.STATE_INACTIVE
@@ -29,32 +30,43 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Arrangement.spacedBy
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyGridScope
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.State
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -63,7 +75,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalResources
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.role
@@ -108,6 +122,7 @@ import com.android.systemui.qs.tileimpl.QSTileImpl
 import com.android.systemui.qs.ui.compose.borderOnFocus
 import com.android.systemui.util.CustomAndroidColorScheme
 import com.android.systemui.res.R
+import com.android.systemui.volume.domain.interactor.VolumeInteractor
 import kotlinx.coroutines.CoroutineScope
 
 private const val TEST_TAG_SMALL = "qs_tile_small"
@@ -136,6 +151,111 @@ private val TileViewModel.traceName
     get() = spec.toString().takeLast(Trace.MAX_SECTION_NAME_LEN)
 
 @Composable
+fun RingerTileWithIconToggle(
+    volumeInteractor: VolumeInteractor,
+    modifier: Modifier = Modifier,
+) {
+    val currentMode by volumeInteractor.getRingerModeFlow()
+        .collectAsState(initial = volumeInteractor.getRingerMode())
+
+    val backgroundColor = CustomAndroidColorScheme.current.shadeTileColor
+    val contentColor = MaterialTheme.colorScheme.onSurface
+    val activeColor = MaterialTheme.colorScheme.primary
+    
+    Box(
+        modifier = modifier
+            .height(tileHeight())
+            .clip(RoundedCornerShape(ActiveCornerRadius))
+            .background(backgroundColor)
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceEvenly,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            RingerModeIconButton(
+                isSelected = currentMode == AudioManager.RINGER_MODE_SILENT,
+                iconRes = R.drawable.ic_volume_ringer_mute,
+                contentDescription = "Silent",
+                inactiveColor = contentColor,
+                activeColor = activeColor,
+                onClick = {
+                    volumeInteractor.setRingerMode(AudioManager.RINGER_MODE_SILENT)
+                }
+            )
+
+            RingerModeIconButton(
+                isSelected = currentMode == AudioManager.RINGER_MODE_VIBRATE,
+                iconRes = R.drawable.ic_volume_ringer_vibrate,
+                contentDescription = "Vibrate",
+                inactiveColor = contentColor,
+                activeColor = activeColor,
+                onClick = {
+                    volumeInteractor.setRingerMode(AudioManager.RINGER_MODE_VIBRATE)
+                }
+            )
+            
+            RingerModeIconButton(
+                isSelected = currentMode == AudioManager.RINGER_MODE_NORMAL,
+                iconRes = R.drawable.ic_volume_ringer,
+                contentDescription = "Ring",
+                inactiveColor = contentColor,
+                activeColor = activeColor,
+                onClick = {
+                    volumeInteractor.setRingerMode(AudioManager.RINGER_MODE_NORMAL)
+                }
+            )
+        }
+    }
+}
+
+@Composable
+private fun RingerModeIconButton(
+    isSelected: Boolean,
+    iconRes: Int,
+    contentDescription: String,
+    inactiveColor: Color,
+    activeColor: Color,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = modifier
+            .size(56.dp)
+            .clip(CircleShape)
+            .clickable(onClick = onClick)
+            .background(
+                if (isSelected) {
+                    activeColor
+                } else {
+                    Color.Transparent
+                }
+            ),
+        contentAlignment = Alignment.Center
+    ) {
+        if (isSelected) {
+            Icon(
+                painter = painterResource(id = iconRes),
+                contentDescription = contentDescription,
+                tint = MaterialTheme.colorScheme.onPrimary,
+                modifier = Modifier.size(24.dp)
+            )
+        } else {
+            Box(
+                modifier = Modifier
+                    .size(8.dp)
+                    .background(
+                        color = inactiveColor.copy(alpha = 0.5f),
+                        shape = CircleShape
+                    )
+            )
+        }
+    }
+}
+
+@Composable
 fun Tile(
     tile: TileViewModel,
     iconOnly: Boolean,
@@ -147,10 +267,19 @@ fun Tile(
     isVisible: () -> Boolean = { true },
     detailsViewModel: DetailsViewModel?,
     isFirstRow: Boolean = false,
+    volumeInteractor: VolumeInteractor,
 ) {
     trace(tile.traceName) {
         val currentBounceableInfo by rememberUpdatedState(bounceableInfo)
         val resources = resources()
+
+        if (tile.spec.spec == "ringer" && !iconOnly) {
+            RingerTileWithIconToggle(
+                volumeInteractor = volumeInteractor,
+                modifier = modifier.fillMaxWidth()
+            )
+            return@trace
+        }
 
         /*
          * Use produce state because [QSTile.State] doesn't have well defined equals (due to
