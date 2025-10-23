@@ -14085,6 +14085,20 @@ public final class Settings {
         public static final String HIDE_APPLIST = "hide_applist";
 
         /**
+         * Store vboot key.
+         * @hide
+         */
+        @Readable
+        public static final String VBOOT_KEY = "vboot_key";
+
+        /**
+         * Store vboot hash.
+         * @hide
+         */
+        @Readable
+        public static final String VBOOT_HASH = "vboot_hash";
+
+        /**
          * Whether to pulse ambient on new music tracks
          * @hide
          */
