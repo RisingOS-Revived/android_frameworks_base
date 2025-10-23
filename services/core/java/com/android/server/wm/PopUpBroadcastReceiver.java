@@ -52,7 +52,8 @@ public class PopUpBroadcastReceiver extends BroadcastReceiver {
             filter.addAction(ACTION_START_MINI_WINDOW);
             filter.addAction(ACTION_START_PINNED_WINDOW);
             filter.addAction(ACTION_PIN_CURRENT_APP);
-            context.registerReceiverForAllUsers(this, filter, null, handler);
+            context.registerReceiverForAllUsers(this, filter, null, handler,
+                Context.RECEIVER_NOT_EXPORTED);
         }
 
         mBootCompleted = true;
