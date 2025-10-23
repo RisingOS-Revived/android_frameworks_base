@@ -162,10 +162,19 @@ fun RingerTileWithIconToggle(
     val contentColor = MaterialTheme.colorScheme.onSurface
     val activeColor = MaterialTheme.colorScheme.primary
     
+    val borderWidth = 5.dp
+    val borderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
+    val tileShape = RoundedCornerShape(ActiveCornerRadius)
+    
     Box(
         modifier = modifier
             .height(tileHeight())
-            .clip(RoundedCornerShape(ActiveCornerRadius))
+            .border(
+                width = borderWidth,
+                color = borderColor,
+                shape = tileShape
+            )
+            .clip(tileShape)
             .background(backgroundColor)
             .padding(horizontal = 16.dp, vertical = 12.dp),
         contentAlignment = Alignment.Center
