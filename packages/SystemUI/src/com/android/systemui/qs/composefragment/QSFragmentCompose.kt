@@ -91,6 +91,14 @@ import androidx.compose.ui.semantics.customActions
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
+//-----------------teste---------------------------
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.runtime.derivedStateOf
+// ---------------------------------------------------
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.round
 import androidx.compose.ui.util.fastRoundToInt
@@ -130,6 +138,9 @@ import com.android.systemui.keyboard.shortcut.ui.composable.ProvideShortcutHelpe
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.lifecycle.setSnapshotBinding
 import com.android.systemui.media.controls.ui.view.MediaHost
+import com.android.systemui.media.ui.compose.MiniPlayerCompact
+import com.android.systemui.media.ui.viewmodel.MiniPlayerViewModel
+import com.android.systemui.lifecycle.rememberViewModel
 import com.android.systemui.plugins.qs.QS
 import com.android.systemui.plugins.qs.QSContainerController
 import com.android.systemui.qs.composefragment.SceneKeys.QuickQuickSettings
@@ -179,6 +190,7 @@ class QSFragmentCompose
 constructor(
     private val qsFragmentComposeViewModelFactory: QSFragmentComposeViewModel.Factory,
     private val volumeSliderViewModelFactory: VolumeSliderViewModel.Factory,
+    private val miniPlayerViewModelFactory: MiniPlayerViewModel.Factory,
     private val dumpManager: DumpManager,
     @Main private val mainHandler: Handler,
 ) : LifecycleFragment(), QS, Dumpable {
@@ -787,18 +799,18 @@ constructor(
                             },
                         )
                     }
-                val Media =
-                    @Composable {
-                        if (viewModel.qqsMediaVisible) {
-                            MediaObject(
-                                // In order to have stable constraints passed to the AndroidView
-                                // during expansion (available height changing due to squishiness),
-                                // We always allow the media here to be as tall as it wants.
-                                // (b/383085298)
-                                modifier = Modifier.requiredHeightIn(max = Dp.Infinity),
-                                mediaHost = viewModel.qqsMediaHost,
-                            )
+                    val Media = @Composable {
+                        val miniPlayerViewModel = rememberViewModel("MiniPlayerQQS") {
+                            miniPlayerViewModelFactory.create()
                         }
+                        val expansionProgress by remember {
+                            derivedStateOf { viewModel.expansionState.progress }
+                        }
+                        MiniPlayerCompact(
+                            viewModel = miniPlayerViewModel,
+                            compact = true,
+                            expansionProgress = expansionProgress
+                        )
                     }
 
                 if (viewModel.isQsEnabled) {
@@ -923,14 +935,18 @@ constructor(
                                     )
                                 }
                             }
-                        val Media =
-                            @Composable {
-                                if (viewModel.qsMediaVisible) {
-                                    MediaObject(
-                                        mediaHost = viewModel.qsMediaHost,
-                                        update = { translationY = viewModel.qsMediaTranslationY },
-                                    )
+                            val Media = @Composable {
+                                val miniPlayerViewModel = rememberViewModel("MiniPlayerQS") {
+                                    miniPlayerViewModelFactory.create()
                                 }
+                                val expansionProgress by remember {
+                                    derivedStateOf { viewModel.expansionState.progress }
+                                }
+                                MiniPlayerCompact(
+                                    viewModel = miniPlayerViewModel,
+                                    compact = false,
+                                    expansionProgress = expansionProgress
+                                )
                             }
 
                         val CustomControls = @Composable {
@@ -1444,13 +1460,13 @@ private fun MediaObject(
 @VisibleForTesting
 fun QuickQuickSettingsLayout(
     customControls: @Composable () -> Unit,
-    volume: @Composable () -> Unit,
-    brightness: @Composable () -> Unit,
-    tiles: @Composable () -> Unit,
-    media: @Composable () -> Unit,
-    mediaInRow: Boolean,
-    showSlider: Int,
-    sliderAtTop: Boolean,
+                             volume: @Composable () -> Unit,
+                             brightness: @Composable () -> Unit,
+                             tiles: @Composable () -> Unit,
+                             media: @Composable () -> Unit,
+                             mediaInRow: Boolean,
+                             showSlider: Int,
+                             sliderAtTop: Boolean,
 ) {
     Column(verticalArrangement = spacedBy(dimensionResource(R.dimen.qs_tile_margin_vertical))) {
         customControls()
@@ -1469,7 +1485,14 @@ fun QuickQuickSettingsLayout(
             }
         } else {
             tiles()
-            media()
+            // Animação apenas quando NÃO está em Row
+            AnimatedVisibility(
+                visible = true,
+                enter = fadeIn(tween(300)) + slideInVertically(tween(300)) { -it / 2 },
+                               exit = fadeOut(tween(200)) + slideOutVertically(tween(200)) { it / 2 }
+            ) {
+                media()
+            }
         }
 
         if (showSlider == 2 && !sliderAtTop) {
@@ -1482,17 +1505,17 @@ fun QuickQuickSettingsLayout(
 @VisibleForTesting
 fun QuickSettingsLayout(
     customControls: @Composable () -> Unit,
-    volume: @Composable () -> Unit,
-    brightness: @Composable () -> Unit,
-    tiles: @Composable () -> Unit,
-    media: @Composable () -> Unit,
-    mediaInRow: Boolean,
-    showSlider: Int,
-    sliderAtTop: Boolean,
+                        volume: @Composable () -> Unit,
+                        brightness: @Composable () -> Unit,
+                        tiles: @Composable () -> Unit,
+                        media: @Composable () -> Unit,
+                        mediaInRow: Boolean,
+                        showSlider: Int,
+                        sliderAtTop: Boolean,
 ) {
     Column(
         verticalArrangement = spacedBy(dimensionResource(R.dimen.qs_tile_margin_vertical)),
-        horizontalAlignment = Alignment.CenterHorizontally
+           horizontalAlignment = Alignment.CenterHorizontally
     ) {
         customControls()
 
@@ -1513,10 +1536,18 @@ fun QuickSettingsLayout(
             if (showSlider != 0 && !sliderAtTop) {
                 brightness()
             }
-            media()
+            // Animação apenas quando NÃO está em Row
+            AnimatedVisibility(
+                visible = true,
+                enter = fadeIn(tween(300)) + slideInVertically(tween(300)) { -it / 2 },
+                               exit = fadeOut(tween(200)) + slideOutVertically(tween(200)) { it / 2 }
+            ) {
+                media()
+            }
         }
     }
 }
+
 
 private object ResIdTags {
     const val quickSettingsPanel = "quick_settings_panel"
