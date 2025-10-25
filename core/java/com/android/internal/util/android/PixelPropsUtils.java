@@ -666,7 +666,9 @@ public final class PixelPropsUtils {
             }
         }
 
-        spoofProvider();
+        if (!KeyProviderManager.isKeyboxAvailable()) {
+            spoofProvider();
+        }
     }
 
     private static boolean isDeviceTablet(Context context) {
