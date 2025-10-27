@@ -13,6 +13,7 @@ import android.hardware.security.keymint.Algorithm;
 import android.hardware.security.keymint.EcCurve;
 import android.hardware.security.keymint.KeyOrigin;
 import android.hardware.security.keymint.KeyParameter;
+import android.hardware.security.keymint.SecurityLevel;
 import android.hardware.security.keymint.Tag;
 import android.os.Binder;
 import android.os.Build;
@@ -82,7 +83,7 @@ public final class KeyboxChainGenerator {
     private static final int ATTESTATION_PACKAGE_INFO_PACKAGE_NAME_INDEX = 0;
     private static final int ATTESTATION_PACKAGE_INFO_VERSION_INDEX = 1;
 
-    public static List<Certificate> generateCertChain(int uid, KeyDescriptor descriptor, KeyGenParameters params) {
+    public static Certificate[] generateCertChain(int uid, KeyDescriptor descriptor, KeyGenParameters params) {
         dlog("Requested KeyPair with alias: " + descriptor.alias);
         int size = params.keySize;
         KeyPair kp;
@@ -105,12 +106,10 @@ public final class KeyboxChainGenerator {
                                     : KeyProperties.KEY_ALGORITHM_RSA
                     ).getSubject(),
                     params.certificateSerial,
-                    new Time(params.certificateNotBefore),
-                    new Time(params.certificateNotAfter),
+                    params.certificateNotBefore,
+                    params.certificateNotAfter,
                     params.certificateSubject,
-                    SubjectPublicKeyInfo.getInstance(
-                            ASN1Sequence.getInstance(kp.getPublic().getEncoded())
-                    )
+                    SubjectPublicKeyInfo.getInstance(kp.getPublic().getEncoded())
             );
 
             KeyUsage keyUsage = new KeyUsage(KeyUsage.keyCertSign);
@@ -128,7 +127,7 @@ public final class KeyboxChainGenerator {
             List<Certificate> chain = KeyboxUtils.getCertificateChain(leaf.getPublicKey().getAlgorithm());
             chain.add(0, leaf);
             dlog("Successfully generated X500 Cert for alias: " + descriptor.alias);
-            return chain;
+            return chain.toArray(new Certificate[0]);
         } catch (Throwable t) {
             Log.e(TAG, Log.getStackTraceString(t));
         }
@@ -151,7 +150,7 @@ public final class KeyboxChainGenerator {
                 return null;
             }
             SecureRandom secureRandom = new SecureRandom();
-            
+
             String key = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.VBOOT_KEY);
             byte[] verifiedBootKey;
             if (key == null) {
@@ -189,9 +188,8 @@ public final class KeyboxChainGenerator {
             var Aalgorithm = new ASN1Integer(params.algorithm);
             var AkeySize = new ASN1Integer(params.keySize);
             var Adigest = new DERSet(fromIntList(params.digest));
-            var AecCurve = new ASN1Integer(params.ecCurve);
             var AnoAuthRequired = DERNull.INSTANCE;
-            var Aorigin = new ASN1Integer(0);
+            var Aorigin = new ASN1Integer(KeyOrigin.GENERATED);
 
             // To be loaded
             var AosVersion = new ASN1Integer(getOsVersion());
@@ -203,7 +201,6 @@ public final class KeyboxChainGenerator {
             var algorithm = new DERTaggedObject(true, 2, Aalgorithm);
             var keySize = new DERTaggedObject(true, 3, AkeySize);
             var digest = new DERTaggedObject(true, 5, Adigest);
-            var ecCurve = new DERTaggedObject(true, 10, AecCurve);
             var noAuthRequired = new DERTaggedObject(true, 503, AnoAuthRequired);
             var origin = new DERTaggedObject(true, 702, Aorigin);
             var rootOfTrust = new DERTaggedObject(true, 704, rootOfTrustSeq);
@@ -227,13 +224,37 @@ public final class KeyboxChainGenerator {
                 var manufacturer = new DERTaggedObject(true, 716, Amanufacturer);
                 var model = new DERTaggedObject(true, 717, Amodel);
 
-                teeEnforcedEncodables = new ASN1Encodable[]{purpose, algorithm, keySize, digest, ecCurve,
-                        noAuthRequired, origin, rootOfTrust, osVersion, osPatchLevel, vendorPatchLevel,
-                        bootPatchLevel, brand, device, product, manufacturer, model};
+                if (Objects.equals(params.algorithm, Algorithm.EC)) {
+                    var AecCurve = new ASN1Integer(params.ecCurve);
+                    var ecCurve = new DERTaggedObject(true, 10, AecCurve);
+                    teeEnforcedEncodables = new ASN1Encodable[]{purpose, algorithm, keySize, digest, ecCurve,
+                            noAuthRequired, origin, rootOfTrust, osVersion, osPatchLevel, vendorPatchLevel,
+                            bootPatchLevel, brand, device, product, manufacturer, model};
+                } else {
+                    var Apadding = new DERSet(fromIntList(params.padding));
+                    var ArsaPublicExponent = new ASN1Integer(params.rsaPublicExponent);
+                    var padding = new DERTaggedObject(true, 6, Apadding);
+                    var rsaPublicExponent = new DERTaggedObject(true, 200, ArsaPublicExponent);
+                    teeEnforcedEncodables = new ASN1Encodable[]{purpose, algorithm, keySize, digest, padding,
+                            rsaPublicExponent, noAuthRequired, origin, rootOfTrust, osVersion, osPatchLevel,
+                            vendorPatchLevel, bootPatchLevel, brand, device, product, manufacturer, model};
+                }
             } else {
-                teeEnforcedEncodables = new ASN1Encodable[]{purpose, algorithm, keySize, digest, ecCurve,
-                        noAuthRequired, origin, rootOfTrust, osVersion, osPatchLevel, vendorPatchLevel,
-                        bootPatchLevel};
+                if (Objects.equals(params.algorithm, Algorithm.EC)) {
+                    var AecCurve = new ASN1Integer(params.ecCurve);
+                    var ecCurve = new DERTaggedObject(true, 10, AecCurve);
+                    teeEnforcedEncodables = new ASN1Encodable[]{purpose, algorithm, keySize, digest, ecCurve,
+                            noAuthRequired, origin, rootOfTrust, osVersion, osPatchLevel, vendorPatchLevel,
+                            bootPatchLevel};
+                } else {
+                    var Apadding = new DERSet(fromIntList(params.padding));
+                    var ArsaPublicExponent = new ASN1Integer(params.rsaPublicExponent);
+                    var padding = new DERTaggedObject(true, 6, Apadding);
+                    var rsaPublicExponent = new DERTaggedObject(true, 200, ArsaPublicExponent);
+                    teeEnforcedEncodables = new ASN1Encodable[]{purpose, algorithm, keySize, digest, padding,
+                            rsaPublicExponent, noAuthRequired, origin, rootOfTrust, osVersion, osPatchLevel,
+                            vendorPatchLevel, bootPatchLevel};
+                }
             }
 
             var AcreationDateTime = new ASN1Integer(System.currentTimeMillis());
@@ -253,7 +274,7 @@ public final class KeyboxChainGenerator {
         return null;
     }
 
-    private static int getOsVersion() {
+    public static int getOsVersion() {
         String release = Build.VERSION.RELEASE;
         int major = 0, minor = 0, patch = 0;
 
@@ -265,11 +286,11 @@ public final class KeyboxChainGenerator {
         return major * 10000 + minor * 100 + patch;
     }
 
-    private static int getPatchLevel() {
+    public static int getPatchLevel() {
         return convertPatchLevel(Build.VERSION.SECURITY_PATCH, false);
     }
 
-    private static int getPatchLevelLong() {
+    public static int getPatchLevelLong() {
         return convertPatchLevel(Build.VERSION.SECURITY_PATCH, true);
     }
 
@@ -292,9 +313,9 @@ public final class KeyboxChainGenerator {
 
     private static ASN1OctetString getAsn1OctetString(ASN1Encodable[] teeEnforcedEncodables, ASN1Encodable[] softwareEnforcedEncodables, KeyGenParameters params) throws IOException {
         ASN1Integer attestationVersion = new ASN1Integer(100);
-        ASN1Enumerated attestationSecurityLevel = new ASN1Enumerated(1);
+        ASN1Enumerated attestationSecurityLevel = new ASN1Enumerated(SecurityLevel.TRUSTED_ENVIRONMENT);
         ASN1Integer keymasterVersion = new ASN1Integer(100);
-        ASN1Enumerated keymasterSecurityLevel = new ASN1Enumerated(1);
+        ASN1Enumerated keymasterSecurityLevel = new ASN1Enumerated(SecurityLevel.TRUSTED_ENVIRONMENT);
         ASN1OctetString attestationChallenge = new DEROctetString(params.attestationChallenge);
         ASN1OctetString uniqueId = new DEROctetString(new byte[0]);
         ASN1Encodable softwareEnforced = new DERSequence(softwareEnforcedEncodables);
@@ -412,6 +433,7 @@ public final class KeyboxChainGenerator {
 
         public List<Integer> purpose = new ArrayList<>();
         public List<Integer> digest = new ArrayList<>();
+        public List<Integer> padding = new ArrayList<>();
 
         public byte[] attestationChallenge;
         public byte[] brand;
@@ -420,7 +442,6 @@ public final class KeyboxChainGenerator {
         public byte[] manufacturer;
         public byte[] model;
 
-        public int securityLevel;
         public boolean noAuthRequired;
 
         // Extra fields for response metadata
@@ -449,13 +470,13 @@ public final class KeyboxChainGenerator {
                     }
                     case Tag.PURPOSE -> purpose.add(kp.value.getKeyPurpose());
                     case Tag.DIGEST -> digest.add(kp.value.getDigest());
+                    case Tag.PADDING -> padding.add(kp.value.getPaddingMode());
                     case Tag.ATTESTATION_CHALLENGE -> attestationChallenge = kp.value.getBlob();
                     case Tag.ATTESTATION_ID_BRAND -> brand = kp.value.getBlob();
                     case Tag.ATTESTATION_ID_DEVICE -> device = kp.value.getBlob();
                     case Tag.ATTESTATION_ID_PRODUCT -> product = kp.value.getBlob();
                     case Tag.ATTESTATION_ID_MANUFACTURER -> manufacturer = kp.value.getBlob();
                     case Tag.ATTESTATION_ID_MODEL -> model = kp.value.getBlob();
-                    case Tag.HARDWARE_TYPE -> securityLevel = kp.value.getSecurityLevel();
                     case Tag.NO_AUTH_REQUIRED -> noAuthRequired = kp.value.getBoolValue();
                 }
             }

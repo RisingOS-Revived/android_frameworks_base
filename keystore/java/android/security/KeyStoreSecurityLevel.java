@@ -150,17 +150,17 @@ public class KeyStoreSecurityLevel {
         StrictMode.noteDiskWrite();
 
         KeyboxUtils.remove(Binder.getCallingUid(), descriptor.alias);
-        if (attestationKey == null) {
-            KeyMetadata metadata = KeyboxImitationHooks.generateKey(mSecurityLevel,
-                    descriptor, args);
-            if (metadata != null) {
-                return metadata;
-            }
-        }
-
-        return handleExceptions(() -> mSecurityLevel.generateKey(
+        
+        KeyMetadata real = handleExceptions(() -> mSecurityLevel.generateKey(
                 descriptor, attestationKey, args.toArray(new KeyParameter[args.size()]),
                 flags, entropy));
+        
+        KeyMetadata spoofed = null;
+        if (attestationKey == null) {
+            spoofed = KeyboxImitationHooks.generateKey(mSecurityLevel, descriptor, args);
+        }
+
+        return spoofed != null ? spoofed : real;
     }
 
     /**
