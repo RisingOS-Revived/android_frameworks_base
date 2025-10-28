@@ -91,14 +91,12 @@ import androidx.compose.ui.semantics.customActions
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
-//-----------------teste---------------------------
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.runtime.derivedStateOf
-// ---------------------------------------------------
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.round
 import androidx.compose.ui.util.fastRoundToInt
@@ -183,6 +181,10 @@ import kotlin.math.roundToInt
 import kotlin.math.abs
 
 import lineageos.providers.LineageSettings
+
+private object MiniPlayerElementKey {
+    val MiniPlayer = ElementKey("MiniPlayer")
+}
 
 @SuppressLint("ValidFragment")
 class QSFragmentCompose
@@ -800,17 +802,20 @@ constructor(
                         )
                     }
                     val Media = @Composable {
-                        val miniPlayerViewModel = rememberViewModel("MiniPlayerQQS") {
-                            miniPlayerViewModelFactory.create()
+                        Element(MiniPlayerElementKey.MiniPlayer, modifier = Modifier.fillMaxWidth()) {
+                            val miniPlayerViewModel = rememberViewModel("MiniPlayerQQS") {
+                                miniPlayerViewModelFactory.create()
+                            }
+                            val expansionProgress by remember {
+                                derivedStateOf { viewModel.expansionState.progress }
+                            }
+                            MiniPlayerCompact(
+                                viewModel = miniPlayerViewModel,
+                                compact = true,
+                                expansionProgress = expansionProgress,
+                                modifier = Modifier.fillMaxWidth()
+                            )
                         }
-                        val expansionProgress by remember {
-                            derivedStateOf { viewModel.expansionState.progress }
-                        }
-                        MiniPlayerCompact(
-                            viewModel = miniPlayerViewModel,
-                            compact = true,
-                            expansionProgress = expansionProgress
-                        )
                     }
 
                 if (viewModel.isQsEnabled) {
@@ -936,17 +941,20 @@ constructor(
                                 }
                             }
                             val Media = @Composable {
-                                val miniPlayerViewModel = rememberViewModel("MiniPlayerQS") {
-                                    miniPlayerViewModelFactory.create()
+                                Element(MiniPlayerElementKey.MiniPlayer, modifier = Modifier.fillMaxWidth()) {
+                                    val miniPlayerViewModel = rememberViewModel("MiniPlayerQS") {
+                                        miniPlayerViewModelFactory.create()
+                                    }
+                                    val expansionProgress by remember {
+                                        derivedStateOf { viewModel.expansionState.progress }
+                                    }
+                                    MiniPlayerCompact(
+                                        viewModel = miniPlayerViewModel,
+                                        compact = false,
+                                        expansionProgress = expansionProgress,
+                                        modifier = Modifier.fillMaxWidth()
+                                    )
                                 }
-                                val expansionProgress by remember {
-                                    derivedStateOf { viewModel.expansionState.progress }
-                                }
-                                MiniPlayerCompact(
-                                    viewModel = miniPlayerViewModel,
-                                    compact = false,
-                                    expansionProgress = expansionProgress
-                                )
                             }
 
                         val CustomControls = @Composable {
@@ -1485,14 +1493,7 @@ fun QuickQuickSettingsLayout(
             }
         } else {
             tiles()
-            // Animação apenas quando NÃO está em Row
-            AnimatedVisibility(
-                visible = true,
-                enter = fadeIn(tween(300)) + slideInVertically(tween(300)) { -it / 2 },
-                               exit = fadeOut(tween(200)) + slideOutVertically(tween(200)) { it / 2 }
-            ) {
-                media()
-            }
+            media()
         }
 
         if (showSlider == 2 && !sliderAtTop) {
@@ -1536,18 +1537,10 @@ fun QuickSettingsLayout(
             if (showSlider != 0 && !sliderAtTop) {
                 brightness()
             }
-            // Animação apenas quando NÃO está em Row
-            AnimatedVisibility(
-                visible = true,
-                enter = fadeIn(tween(300)) + slideInVertically(tween(300)) { -it / 2 },
-                               exit = fadeOut(tween(200)) + slideOutVertically(tween(200)) { it / 2 }
-            ) {
-                media()
-            }
+            media()
         }
     }
 }
-
 
 private object ResIdTags {
     const val quickSettingsPanel = "quick_settings_panel"
