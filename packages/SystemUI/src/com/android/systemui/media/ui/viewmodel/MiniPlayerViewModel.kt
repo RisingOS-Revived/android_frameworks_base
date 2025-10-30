@@ -23,6 +23,7 @@ import android.media.session.PlaybackState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.res.R
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -30,8 +31,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 data class MediaState(
-    val title: String = "Open player",
-    val artist: String = "No active media",
+    val title: String = "",
+    val artist: String = "",
     val isPlaying: Boolean = false,
     val hasActiveMedia: Boolean = false,
     val packageName: String? = null
@@ -68,7 +69,10 @@ class MiniPlayerViewModel @AssistedInject constructor(
             val controllers = mediaSessionManager.getActiveSessions(null)
             updateActiveController(controllers)
         } catch (e: SecurityException) {
-            _mediaState.value = MediaState()
+            _mediaState.value = MediaState(
+                title = context.getString(R.string.media_default_title),
+                artist = context.getString(R.string.media_default_artist)
+            )
         }
 
         try {
@@ -95,15 +99,18 @@ class MiniPlayerViewModel @AssistedInject constructor(
 
             _mediaState.value = MediaState(
                 title = metadata?.getString(android.media.MediaMetadata.METADATA_KEY_TITLE)
-                    ?: "Unknown Track",
+                    ?: context.getString(R.string.media_unknown_track),
                 artist = metadata?.getString(android.media.MediaMetadata.METADATA_KEY_ARTIST)
-                    ?: "Unknown Artist",
+                    ?: context.getString(R.string.media_unknown_artist),
                 isPlaying = playbackState?.state == PlaybackState.STATE_PLAYING,
                 hasActiveMedia = true,
                 packageName = controller.packageName
             )
         } else {
-            _mediaState.value = MediaState()
+            _mediaState.value = MediaState(
+                title = context.getString(R.string.media_default_title),
+                artist = context.getString(R.string.media_default_artist)
+            )
         }
     }
 
