@@ -66,8 +66,8 @@
 
      val alpha by animateFloatAsState(
          targetValue = when {
-             compact && expansionProgress < 0.35f -> 1f - (expansionProgress)
-             !compact && expansionProgress > 0.75f -> (expansionProgress - 0.75f)
+             compact && expansionProgress < 0.35f -> 1f - (expansionProgress / 0.35f)
+             !compact && expansionProgress > 0.75f -> (expansionProgress - 0.75f) / 0.35f
              compact && expansionProgress >= 0.35f -> 0f
              !compact && expansionProgress <= 0.75f -> 0f
              else -> 1f
