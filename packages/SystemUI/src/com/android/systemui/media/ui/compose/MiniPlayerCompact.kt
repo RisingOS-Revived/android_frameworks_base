@@ -56,7 +56,7 @@
      val mediaState by viewModel.mediaState.collectAsStateWithLifecycle()
 
      val animatedHeight by animateDpAsState(
-         targetValue = if (compact) 70.dp else 85.dp,
+         targetValue = 70.dp,
                                             animationSpec = tween(
                                                 durationMillis = 300,
                                                 delayMillis = 0
@@ -134,7 +134,7 @@
                      )
                      .padding(
                          horizontal = 16.dp,
-                         vertical = if (compact) 12.dp else 14.dp
+                         vertical = 12.dp
                      )
                  ) {
                      Row(
@@ -151,7 +151,7 @@
                                  text = mediaState.title,
                                   color = textColor,
                                   style = MaterialTheme.typography.bodyLarge.copy(
-                                      fontSize = if (compact) 14.sp else 16.sp
+                                      fontSize = 14.sp
                                   ),
                                   maxLines = 1,
                                   overflow = TextOverflow.Ellipsis
@@ -178,13 +178,13 @@
                              IconButton(
                                  enabled = mediaState.hasActiveMedia,
                                  onClick = { viewModel.skipToPrevious() },
-                                        modifier = Modifier.size(if (compact) 44.dp else 48.dp)
+                                        modifier = Modifier.size(44.dp)
                              ) {
                                  Icon(
                                      Icons.Default.SkipPrevious,
                                       contentDescription = "Previous",
                                       tint = iconTint,
-                                      modifier = Modifier.size(if (compact) 24.dp else 28.dp)
+                                      modifier = Modifier.size(24.dp)
                                  )
                              }
 
@@ -196,7 +196,7 @@
                                          launchDefaultPlayer(context)
                                      }
                                  },
-                                 modifier = Modifier.size(if (compact) 44.dp else 48.dp),
+                                 modifier = Modifier.size(44.dp),
                                                    colors = IconButtonDefaults.filledTonalIconButtonColors(
                                                        containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(
                                                            alpha = 1f
@@ -211,20 +211,20 @@
                                      },
                                       contentDescription = "Play/Pause",
                                       tint = MaterialTheme.colorScheme.onSecondaryContainer,
-                                      modifier = Modifier.size(if (compact) 24.dp else 28.dp)
+                                      modifier = Modifier.size(24.dp)
                                  )
                              }
 
                              IconButton(
                                  enabled = mediaState.hasActiveMedia,
                                  onClick = { viewModel.skipToNext() },
-                                        modifier = Modifier.size(if (compact) 44.dp else 48.dp)
+                                        modifier = Modifier.size(44.dp)
                              ) {
                                  Icon(
                                      Icons.Default.SkipNext,
                                       contentDescription = "Next",
                                       tint = iconTint,
-                                      modifier = Modifier.size(if (compact) 24.dp else 28.dp)
+                                      modifier = Modifier.size(24.dp)
                                  )
                              }
                          }
