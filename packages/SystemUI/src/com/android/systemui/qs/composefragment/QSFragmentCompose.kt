@@ -809,6 +809,8 @@ constructor(
                             val expansionProgress by remember {
                                 derivedStateOf { viewModel.expansionState.progress }
                             }
+                            val shouldShow by miniPlayerViewModel.shouldShowPlayer.collectAsStateWithLifecycle()
+                            if (shouldShow) {
                             MiniPlayerCompact(
                                 viewModel = miniPlayerViewModel,
                                 compact = true,
@@ -816,6 +818,7 @@ constructor(
                                 modifier = Modifier.fillMaxWidth()
                             )
                         }
+                    }
                     }
 
                 if (viewModel.isQsEnabled) {
@@ -948,6 +951,8 @@ constructor(
                                     val expansionProgress by remember {
                                         derivedStateOf { viewModel.expansionState.progress }
                                     }
+                                    val shouldShow by miniPlayerViewModel.shouldShowPlayer.collectAsStateWithLifecycle()
+                                    if (shouldShow) {
                                     MiniPlayerCompact(
                                         viewModel = miniPlayerViewModel,
                                         compact = false,
@@ -955,6 +960,7 @@ constructor(
                                         modifier = Modifier.fillMaxWidth()
                                     )
                                 }
+                            }
                             }
 
                         val CustomControls = @Composable {

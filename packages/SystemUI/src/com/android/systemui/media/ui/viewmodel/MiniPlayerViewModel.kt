@@ -16,10 +16,15 @@
 
 package com.android.systemui.media.ui.viewmodel
 
+import android.content.ContentResolver
 import android.content.Context
+import android.database.ContentObserver
 import android.media.session.MediaController
 import android.media.session.MediaSessionManager
 import android.media.session.PlaybackState
+import android.os.Handler
+import android.os.Looper
+import android.provider.Settings
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.android.systemui.dagger.SysUISingleton
@@ -46,7 +51,17 @@ class MiniPlayerViewModel @AssistedInject constructor(
     private val _mediaState = MutableStateFlow(MediaState())
     val mediaState: StateFlow<MediaState> = _mediaState.asStateFlow()
 
+    private val _shouldShowPlayer = MutableStateFlow(true)
+    val shouldShowPlayer: StateFlow<Boolean> = _shouldShowPlayer.asStateFlow()
+
     private var activeController: MediaController? = null
+    private val contentResolver: ContentResolver = context.contentResolver
+
+    private val settingsObserver = object : ContentObserver(Handler(Looper.getMainLooper())) {
+        override fun onChange(selfChange: Boolean) {
+            updatePlayerVisibility()
+        }
+    }
 
     private val controllerCallback = object : MediaController.Callback() {
         override fun onPlaybackStateChanged(state: PlaybackState?) {
@@ -65,6 +80,12 @@ class MiniPlayerViewModel @AssistedInject constructor(
     }
 
     init {
+        contentResolver.registerContentObserver(
+            Settings.Secure.getUriFor("qs_media_always_show"),
+            false,
+            settingsObserver
+        )
+
         try {
             val controllers = mediaSessionManager.getActiveSessions(null)
             updateActiveController(controllers)
@@ -79,6 +100,17 @@ class MiniPlayerViewModel @AssistedInject constructor(
             mediaSessionManager.addOnActiveSessionsChangedListener(sessionListener, null)
         } catch (e: SecurityException) {
         }
+    }
+
+    private fun updatePlayerVisibility() {
+       val alwaysShow = Settings.Secure.getInt(
+       contentResolver,
+       "qs_media_always_show",
+       1
+       ) == 1
+
+        val hasMedia = _mediaState.value.hasActiveMedia
+        _shouldShowPlayer.value = alwaysShow || hasMedia
     }
 
     private fun updateActiveController(controllers: MutableList<MediaController>?) {
@@ -112,6 +144,7 @@ class MiniPlayerViewModel @AssistedInject constructor(
                 artist = context.getString(R.string.media_default_artist)
             )
         }
+     updatePlayerVisibility()
     }
 
     fun playPause() {
@@ -135,6 +168,7 @@ class MiniPlayerViewModel @AssistedInject constructor(
 
     override fun onCleared() {
         super.onCleared()
+        contentResolver.unregisterContentObserver(settingsObserver)
         activeController?.unregisterCallback(controllerCallback)
         try {
             mediaSessionManager.removeOnActiveSessionsChangedListener(sessionListener)
